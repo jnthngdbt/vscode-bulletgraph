@@ -10,14 +10,14 @@
 		"Other"
 	],
 	"activationEvents": [
-		"onCommand:vscode-bulletgraph.helloWorld"
+		"onCommand:vscode-bulletgraph.generateDotFile"
 	],
 	"main": "./out/extension.js",
 	"contributes": {
 		"commands": [
 			{
-				"command": "vscode-bulletgraph.helloWorld",
-				"title": "Hello World"
+				"command": "vscode-bulletgraph.generateDotFile",
+				"title": "Bullet Graph: Generate Dot File"
 			}
 		]
 	},
