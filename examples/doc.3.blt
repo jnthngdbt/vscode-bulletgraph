@@ -1,0 +1,177 @@
+// This is a comment
+//[*] id_Sqldatabases, id_UdpateJenkinsData, id_MoldDataRepo, id_MoldDataCloneJenkins
+
+
+- information technology (IT)
+    - digital innovation team
+        - members
+            - Eric Vandermeeren
+            - Jonathan Godbout
+            - Marc Julien
+            - Martin Vezina
+        - projects
+            - 3d-scan-app
+                - overview
+                    - use case
+                        > sales consultant goes at client's house 
+                        > uses bpro for sale process
+                        > from bpro, launches 3d-scan-app
+                        > 3d scan the tub
+                            > mold recognition engine finds matching mold
+                        > from matching mold, suggests possible products
+                    - 3d-scan-app ios app
+                        - ios app used by sales consultants
+                        - mold recognition engine
+                    - 3d scanner
+                        - Occipital Structure
+                            - technology
+                                - infrared pattern projection
+                                - infrared camera capture projected pattern distorted by 3d object
+                                    - computes 3d from captured pattern
+                                - iPad camera used for slam
+                            - bracket that fits iPads
+                            - iOS SDK
+                - processes
+                    - new mold integration
+                        > new mold creation
+                        > enter mold specifications in database(s) // >id_Sqldatabases
+                        > high resolution 3D scan
+                        > put scan mesh on file server // >id_MoldScansProdServer
+            - DYOB 3.0 viewer
+                - CAD files
+                    - Lionel
+                    - Manufacturers
+                
+    - systems 
+        - developer computer
+            - windows
+                - Unreal Engine
+                - git
+                    - git client
+                - microsoft visual studio
+                - visual studio code
+                - mold data clone
+                - bfmeasurement
+            - mac
+        - jenkins
+            - jobs
+                - daily
+                    - update auto specs
+                        > checkout latest release deployed in prod // <id_CredsBitbucket <id_3dscanappRepo 
+                            > checkout 3d-scan-app release branch
+                            > fetch release tags (e.g. 2.0.23, 2.1.1)
+                            > get latest (biggest) release tag
+                            > checkout latest release
+                                > this checks out corresponding bfmeasurement submodule version // >id_BFMeasurementCloneJenkins
+                        > build bfmeasurement (contains auto specs code) // <id_BFMeasurementCloneJenkins
+                        > compute auto specs on molds // >id_ExportMoldFeatures
+                        > compute auto specs on scans // >id_ExportScanFeatures
+                        > run python script that generates CSV files // >id_AutospecsPythonScript
+                        > copy auto-specs CSV files on prod file server // >id_AutospecsCSVFiles
+                    - update catalog
+                    - update historical data
+                    - update brandfolder manifest
+                    - process bfi scans
+                    - udpate jenkins data // id_UdpateJenkinsData <id_MoldDataRepo >id_MoldDataCloneJenkins
+                        > runs git pull from mold data repo
+                - BFMeasurement multibranch pipeline
+                    - jenkinsfile (runs when pushing on branches)
+                        - main pipeline
+                            > checkout BFMeasurement from branch // <id_BfmeasurementRepo <id_CredsBitbucket
+                            > cmake
+                            > build
+                            > memory leak test // >id_TestMemoryLeak
+                            > test 'perfect fit' test set // >id_JenkinsfileTestSet
+                            > test 'good fit' test set // >id_JenkinsfileTestSet
+                            > test 'length deformation' test set // >id_JenkinsfileTestSet
+                            > test 'collision' test set // >id_JenkinsfileTestSet
+                        - methods
+                            > test set with scan atttribute // id_JenkinsfileTestSet >id_TestSets
+            - configuration
+                - credentials
+                    - bitbucket // id_CredsBitbucket
+                    - mac computer // id_CredsMacComputer
+                        - jenkins user account // id_JenkinsUserAccount
+                        - keychain access // id_KeychainAccess
+            - server (\\bfse-devmig)
+                - shared folders
+                    - test
+                        - test sets scans
+                        - mold scans
+                - mold data clone // id_MoldDataCloneJenkins
+                - workspace
+                    - branch
+                        - BFMeasurement clone // id_BFMeasurementCloneJenkins
+            - agents
+                - windows (\\bfse-devmig)
+                    - mold-data-clone
+                        - config
+                            - auto-specs csv files
+                            - historical data csv file
+                            - catalog csv file
+                    - branch workspace
+                        - bfmeasurement clone
+                    - Unreal Engine
+                - mac
+                    - 3d-scan-app clone
+                        - bfmeasurement clone
+                    - pcl-precompiled clone
+                    - Unreal Engine
+        - file server 3d (\\bfse-3dapp1)
+            - prod
+                - mold data repo // id_MoldDataRepo
+                    - mold scans // id_MoldScansProdServer
+                    - config 
+                        - auto-specs CSV files // id_AutospecsCSVFiles
+                            - MoldsFeatures.csv
+                            - FeatureTolerances.csv
+                        - mold catalog (TubCatalog.csv)
+                        - historical data CSV file (MoldStats.csv)
+                - scan-uploads
+                    - bfi
+                    - bpro
+                    - standalone
+            - test
+                - mold-data-repo
+                - scan-uploads
+                    - bfi
+                    - bpro
+                    - standalone
+        - bitbucket
+            - bfmeasurement repo // id_BfmeasurementRepo >id_BfmeasurementSubmodule
+                - tests
+                    - export mold features // id_ExportMoldFeatures
+                    - export scan features // id_ExportScanFeatures
+                    - test sets // id_TestSets
+                    - process bfi scans
+                    - test memory leak // id_TestMemoryLeak
+                - auto-specs python script // id_AutospecsPythonScript
+                    > compute tolerances
+                    > generate clean mold features CSV file
+                - recognition engine
+                    - algorithm
+                        > load catalog
+                        > load parameters
+                            ? if parameters file exists 
+                                > load-xml
+                            ? else
+                                > use-defaults
+                        > load-scan-mesh
+                        > preprocessing
+                        > short-list
+                            > compute scan auto specs
+                            > match molds auto specs
+                                > keep mold if within tolerances
+                        > score with icp
+                        ? if bfu known
+                            > weighted score from historical data
+            - 3d-scan-app repo // id_3dscanappRepo
+                - release tags
+                - bfmeasurement submodule // id_BfmeasurementSubmodule
+        - sql-databases // id_Sqldatabases
+            - sedev-sql2005-0-sql2k12
+                - test-result
+                - test
+                - scan-attribute
+                - mold
+                - 3d-scan-task

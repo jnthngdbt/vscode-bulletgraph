@@ -1,0 +1,18 @@
+- config
+    - help
+        - theme (specifies the color palette)
+            - dark (light font on dark background)
+            - light (dark font on light background)
+        - splines (specifies how the lines between nodes are rendered)
+            - ortho
+            - lines
+    - theme
+        > dark
+    - splines
+        > ortho
+    - showNodeStructure
+        > true
+    - showConfig
+        > true
+    - includes
+    - excludes

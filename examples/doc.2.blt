@@ -1,0 +1,52 @@
+- vscode extension
+    - description
+        - commands
+            - generate graphviz dot file
+                > parse editor text document
+                    > parse each line
+            - insert node id from line content
+    - work planning
+        - what is done
+            - vs-code extension
+            - conversion to dot file
+            - coarse styles
+            - write to dot file // <<id_SupportMarkdown >>id_OpenDebugInstance 
+            - improve nested visuals using hidden edges
+            - order children by type (subgraphs first), but not for flows
+            - implement links from commented ids 
+                - for now only space separated
+            - support input/output/dependency edges
+            - support label containing "guillemets"
+            - support spaces and/or tabs mixed
+            - subgraph label size proportional to number of dependencies
+            - auto line breaks
+                - number of chars threshold
+        - what to do
+            - support condition flow (if, else) displayed with triangle
+            - support comments
+                - graphviz is like c++  
+                    - but used for ids
+            - support a marker to specify nodes to show
+            - write generated.dot file in hidden app data and preview it auto
+            - syntax highlighting // <id_OpenDebugInstance >>>id_SupportMarkdown
+            - detect duplicate id
+                - add message
+            - support markdown // id_SupportMarkdown
+    - doc graph typical flow
+        > edit vscode-idealog code
+        > run debug
+            > open debug instance // id_OpenDebugInstance
+            > open file
+            > generate graphviz command
+            > open generated dot file
+            > render using other extension
+        > do it again
+    - potential names
+        - first product thought
+            - thinkntag: thinktag.co.in/
+            - reflectidea
+            - reflectag
+            - ideanote: ideanote.io/ (idea innovation management platform)
+            - idealog: idealog.co.nz/ (venture)
+            - docnotes: www.doc-notes.com/ (medical)
+            - doctag: www.aec.cz/en/doctag
