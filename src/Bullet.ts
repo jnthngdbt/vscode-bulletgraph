@@ -53,6 +53,46 @@ export class Node {
     setRandomId(): void {
         this.id = generateRandomId();
     }
+
+    parse(line: string, links: LinksMap) {
+        line = line.trim();
+
+        this.bullet = line[0] as EBullet;
+
+        if (this.bullet === EBullet.eFlow) {
+            this.type = ENode.eProcess;
+        } else {
+            this.type = ENode.eDefault;
+        }
+    
+        // Get node label.
+        const withoutBullet = line.substr(1).trim()
+        const labelAndId = withoutBullet.split(LABEL_ID_SEP)
+        this.label = labelAndId[0].trim()
+    
+        // Get node ID. Create one if necessary.
+        this.setRandomId() // initialize to random id
+        if (labelAndId.length > 1) {
+            // The string to parse is something like
+            //     id_CurrentNode
+            //     id_CurrentNode <id_Input1 <id_Input2 >id_Output
+            //     <id_Input1 <id_Input2 >id_Output
+            const idAndLinks = labelAndId[1].trim().split(' ')
+            
+            idAndLinks.forEach( linkId => {
+                let type = linkId[0] as ELink; // first char is the link type (if any)
+                linkId = Strings.removeSpecialCharacters(linkId);
+                
+                if (type === ELink.eOut) {
+                    links.addEdge(this.id, linkId, EEdge.eLink)
+                } else if (type === ELink.eIn) {
+                    links.addEdge(linkId, this.id, EEdge.eLink)
+                } else { // no link type char, or no at all
+                    this.id = linkId // assume it is the current node id
+                }
+            })
+        }
+    }
 }
 
 export class Edge {
@@ -68,6 +108,34 @@ export class Links {
     inputs: Array<Edge> = [];
     outputs: Array<Edge> = [];
     constructor() { }
+}
+
+export class LinksMap {
+    map: { [key:string]:Links; } = {};
+
+    addEdge(idSrc: Id, idDst: Id, type: EEdge) {
+        if (!idSrc || !idDst)
+            return
+
+        if (!this.map[idSrc]) {
+            this.map[idSrc] = new Links();
+        }
+
+        if (!this.map[idDst]) {
+            this.map[idDst] = new Links();
+        }
+    
+        this.map[idSrc].outputs.push(new Edge(idDst, type));
+        this.map[idDst].inputs.push(new Edge(idSrc, type));
+    }
+
+    getNodeIds(): string[] {
+        return Object.keys(this.map);
+    }
+
+    getNodeLinks(nodeId: Id): Links {
+        return this.map[nodeId];
+    }
 }
 
 export class Focus { // could use a built-in set
@@ -94,11 +162,9 @@ export class Focus { // could use a built-in set
     }
 }
 
-export type LinksMap = { [key:string]:Links; };
-
 export class Bullet {
     hierarchy: Node = new Node();
-    links: LinksMap = {};
+    links: LinksMap = new LinksMap();
     focus: Focus = new Focus();
     
     // Parse the textual hierarchy into nested objects.
@@ -136,11 +202,12 @@ export class Bullet {
                     if (lineWithoutIndent.startsWith(FOCUS)) {
                         this.focus.parse(lineWithoutIndent);
                     } else {
-                        let node = this.parseNodeEntryLine(lineWithoutIndent);
+                        let node = new Node();
+                        node.parse(lineWithoutIndent, this.links);
         
                         // Create flow edges, if applicable
                         if (lastNode.id && (lastNode.bullet === EBullet.eFlow) && (node.bullet === EBullet.eFlow)) {
-                            this.addEdge(lastNode.id, node.id, EEdge.eFlow);
+                            this.links.addEdge(lastNode.id, node.id, EEdge.eFlow);
                         }
         
                         // Force subgraph type of parent node, since now have child.
@@ -164,66 +231,6 @@ export class Bullet {
         this.computeDependencySize(this.hierarchy);
     }
 
-    parseNodeEntryLine(line: string): Node {
-        line = line.trim();
-
-        let node = new Node();
-
-        node.bullet = line[0] as EBullet;
-
-        if (node.bullet === EBullet.eFlow) {
-            node.type = ENode.eProcess;
-        } else {
-            node.type = ENode.eDefault;
-        }
-    
-        // Get node label.
-        const withoutBullet = line.substr(1).trim()
-        const labelAndId = withoutBullet.split(LABEL_ID_SEP)
-        node.label = labelAndId[0].trim()
-    
-        // Get node ID. Create one if necessary.
-        node.setRandomId() // initialize to random id
-        if (labelAndId.length > 1) {
-            // The string to parse is something like
-            //     id_CurrentNode
-            //     id_CurrentNode <id_Input1 <id_Input2 >id_Output
-            //     <id_Input1 <id_Input2 >id_Output
-            const idAndLinks = labelAndId[1].trim().split(' ')
-            
-            idAndLinks.forEach( linkId => {
-                let type = linkId[0] as ELink; // first char is the link type (if any)
-                linkId = Strings.removeSpecialCharacters(linkId);
-                
-                if (type === ELink.eOut) {
-                    this.addEdge(node.id, linkId, EEdge.eLink)
-                } else if (type === ELink.eIn) {
-                    this.addEdge(linkId, node.id, EEdge.eLink)
-                } else { // no link type char, or no at all
-                    node.id = linkId // assume it is the current node id
-                }
-            })
-        }
-    
-        return node
-    }
-
-    addEdge(idSrc: Id, idDst: Id, type: EEdge) {
-        if (!idSrc || !idDst)
-            return
-
-        if (!this.links[idSrc]) {
-            this.links[idSrc] = new Links();
-        }
-
-        if (!this.links[idDst]) {
-            this.links[idDst] = new Links();
-        }
-    
-        this.links[idSrc].outputs.push(new Edge(idDst, type));
-        this.links[idDst].inputs.push(new Edge(idSrc, type));
-    }
-
     createHierarchyEdges(node: Node) {
         if (node.children.length <= 0) return;
     
@@ -244,15 +251,15 @@ export class Bullet {
         node.children.forEach( child => {
             if (child.bullet === EBullet.eFlow) {
                 if (!aFlowChildWasLinked && (node.bullet !== EBullet.eFlow)) {
-                    this.addEdge(node.id, child.id, EEdge.eHierarchy);
+                    this.links.addEdge(node.id, child.id, EEdge.eHierarchy);
                     aFlowChildWasLinked = true;
                 }
             } else {
                 // Create edge.
                 if (!atLeastOneLeafLinked) { // only link parent node to first leaf node
-                    this.addEdge(node.id, child.id, EEdge.eHierarchy);
+                    this.links.addEdge(node.id, child.id, EEdge.eHierarchy);
                 } else if (lastLeafNode.isValid()) { // link all leaf nodes together, in chain
-                    this.addEdge(lastLeafNode.id, child.id, EEdge.eHierarchy);
+                    this.links.addEdge(lastLeafNode.id, child.id, EEdge.eHierarchy);
                 }
             }
     

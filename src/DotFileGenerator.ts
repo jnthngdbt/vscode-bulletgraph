@@ -107,10 +107,10 @@ export class DotFileGenerator {
         return str
     }
     
-    printEdges(indent: string, edges: LinksMap, focus: Focus, type: EEdge) {
+    printEdges(indent: string, links: LinksMap, focus: Focus, type: EEdge) {
         let str = "";
-        for (var id of Object.keys(edges)) {
-            let nodeOutEdges = edges[id].outputs;
+        for (var id of links.getNodeIds()) {
+            let nodeOutEdges = links.getNodeLinks(id).outputs;
             nodeOutEdges.forEach( edge => {
                 const isFocus = focus.isFocus(id) && focus.isFocus(edge.id);
                 if ((edge.type === type) && isFocus) {
