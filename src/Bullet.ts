@@ -6,7 +6,6 @@ import { Strings } from './utils'
 
 const COMMENT = "//"
 const LABEL_ID_SEP = "//"
-const FOCUS = "[*]"
 const FLOOR = "[_]"
 
 export enum ENode { eDefault, eProcess, eSubgraph, eSubgraphProcess }
@@ -169,17 +168,11 @@ export class IdSet {
     }
 }
 
-export class Focus extends IdSet {
-    isFocus(id: Id): boolean {
-        return this.isEmpty() || this.has(id);
-    }
-}
-
 export class DepthManager {
     nodeRerouteMap: { [key:string]:Id; } = {};
     bullet = new Bullet();
 
-    rerouteNodes(nodeIn: Node, focus: Focus, floorNodeIds: IdSet, nodeOut: Node, isFloorReached = false, floorNodeId = "") {
+    rerouteNodes(nodeIn: Node, floorNodeIds: IdSet, nodeOut: Node, isFloorReached = false, floorNodeId = "") {
         nodeIn.children.forEach( childIn => {
             let childOut = new Node();
             let isFloorReachedForNext = isFloorReached || floorNodeIds.has(childIn.id);
@@ -189,7 +182,6 @@ export class DepthManager {
                 this.nodeRerouteMap[childIn.id] = floorNodeId;
             } else {
                 this.nodeRerouteMap[childIn.id] = childIn.id; // reroute to itself (no effect)
-                focus.add(childIn.id); // show this node
 
                 // Copy child.
                 childOut.bullet = childIn.bullet;
@@ -204,7 +196,7 @@ export class DepthManager {
 
                 nodeOut.children.push(childOut); // add it to ouput hierarchy
             }
-            this.rerouteNodes(childIn, focus, floorNodeIds, childOut, isFloorReachedForNext, floorNodeIdForNext);
+            this.rerouteNodes(childIn, floorNodeIds, childOut, isFloorReachedForNext, floorNodeIdForNext);
         });
     }
 
@@ -230,7 +222,7 @@ export class DepthManager {
 
     pruneAndReorganize(bulletIn: Bullet): Bullet {
         this.bullet.clear();
-        this.rerouteNodes(bulletIn.hierarchy, bulletIn.focus, bulletIn.floorNodeIds, this.bullet.hierarchy);
+        this.rerouteNodes(bulletIn.hierarchy, bulletIn.floorNodeIds, this.bullet.hierarchy);
         this.rerouteLinks(bulletIn.links);
         this.bullet.createHierarchyEdges(this.bullet.hierarchy);
         
@@ -241,13 +233,12 @@ export class DepthManager {
 export class Bullet {
     hierarchy = new Node();
     links = new LinksMap();
-    focus = new Focus();
     floorNodeIds = new IdSet();
 
     clear() {
         this.hierarchy = new Node();
         this.links = new LinksMap();
-        this.focus = new Focus();
+        this.floorNodeIds = new IdSet();
     }
     
     // Parse the textual hierarchy into nested objects.
@@ -282,9 +273,7 @@ export class Bullet {
                 const depth = line.length - lineWithoutIndent.length;
     
                 if (!lineWithoutIndent.startsWith(COMMENT)) {
-                    if (lineWithoutIndent.startsWith(FOCUS)) {
-                        this.focus.parse(lineWithoutIndent, FOCUS);
-                    } else if (lineWithoutIndent.startsWith(FLOOR)) {
+                    if (lineWithoutIndent.startsWith(FLOOR)) {
                         this.floorNodeIds.parse(lineWithoutIndent, FLOOR);
                     } else {
                         let node = new Node();
@@ -365,9 +354,7 @@ export class Bullet {
         
         node.dependencySize = 0
         node.children.forEach( child => {
-            if (this.focus.isFocus(child.id)) {
-                node.dependencySize += this.computeDependencySize(child) + 1 // +1 to count the child itself
-            }
+            node.dependencySize += this.computeDependencySize(child) + 1 // +1 to count the child itself
         })
     
         return node.dependencySize
