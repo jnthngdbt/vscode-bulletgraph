@@ -1,6 +1,6 @@
 // This is a comment
-//[*] id_Sqldatabases, id_UdpateJenkinsData, id_MoldDataRepo, id_MoldDataCloneJenkins
-
+//[*] id_Sqldatabases, id_UdpateJenkinsData, id_MoldDataRepo, id_MoldDataCloneJenkins, 
+[_] id_Jenkins, id_JenkinsJobs, id_JenkinsConfiguration, id_FileServer3d, id_BfmeasurementRepo, id_JenkinsAgents, id_3dscanapp
 
 - information technology (IT)
     - digital innovation team
@@ -10,7 +10,7 @@
             - Marc Julien
             - Martin Vezina
         - projects
-            - 3d-scan-app
+            - 3d-scan-app // id_3dscanapp
                 - overview
                     - use case
                         > sales consultant goes at client's house 
@@ -53,8 +53,8 @@
                 - mold data clone
                 - bfmeasurement
             - mac
-        - jenkins
-            - jobs
+        - jenkins // id_Jenkins
+            - jobs // id_JenkinsJobs
                 - daily
                     - update auto specs
                         > checkout latest release deployed in prod // <id_CredsBitbucket <id_3dscanappRepo 
@@ -87,7 +87,7 @@
                             > test 'collision' test set // >id_JenkinsfileTestSet
                         - methods
                             > test set with scan atttribute // id_JenkinsfileTestSet >id_TestSets
-            - configuration
+            - configuration // id_JenkinsConfiguration
                 - credentials
                     - bitbucket // id_CredsBitbucket
                     - mac computer // id_CredsMacComputer
@@ -102,7 +102,7 @@
                 - workspace
                     - branch
                         - BFMeasurement clone // id_BFMeasurementCloneJenkins
-            - agents
+            - agents // id_JenkinsAgents
                 - windows (\\bfse-devmig)
                     - mold-data-clone
                         - config
@@ -117,7 +117,7 @@
                         - bfmeasurement clone
                     - pcl-precompiled clone
                     - Unreal Engine
-        - file server 3d (\\bfse-3dapp1)
+        - file server 3d (\\bfse-3dapp1) // id_FileServer3d
             - prod
                 - mold data repo // id_MoldDataRepo
                     - mold scans // id_MoldScansProdServer

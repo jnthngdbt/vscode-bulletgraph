@@ -112,9 +112,9 @@ export class DotFileGenerator {
         for (var id of links.getNodeIds()) {
             let nodeOutEdges = links.getNodeLinks(id).outputs;
             nodeOutEdges.forEach( edge => {
-                const isFocus = focus.isFocus(id) && focus.isFocus(edge.id);
+                const isFocus = focus.isFocus(edge.idSrc) && focus.isFocus(edge.idDst);
                 if ((edge.type === type) && isFocus) {
-                    str += indent + id + " -> " + edge.id + "\n";
+                    str += indent + edge.idSrc + " -> " + edge.idDst + "\n";
                 }
             })
         }

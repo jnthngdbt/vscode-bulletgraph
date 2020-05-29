@@ -7,6 +7,7 @@ import { Strings } from './utils'
 const COMMENT = "//"
 const LABEL_ID_SEP = "//"
 const FOCUS = "[*]"
+const FLOOR = "[_]"
 
 export enum ENode { eDefault, eProcess, eSubgraph, eSubgraphProcess }
 export enum EEdge { eHierarchy, eFlow, eLink }
@@ -39,6 +40,10 @@ export class Node {
 
     isLeaf() {
         return (this.type === ENode.eDefault) || (this.type === ENode.eProcess);
+    }
+
+    isProcess() {
+        return (this.type === ENode.eProcess) || (this.type === ENode.eSubgraphProcess);
     }
 
     clear() {
@@ -96,10 +101,12 @@ export class Node {
 }
 
 export class Edge {
-    id: Id;
+    idSrc: Id;
+    idDst: Id;
     type: EEdge;
-    constructor(id: Id, type: EEdge) {
-        this.id = id;
+    constructor(idSrc: Id, idDst: Id, type: EEdge) {
+        this.idSrc = idSrc;
+        this.idDst = idDst;
         this.type = type;
     }
 }
@@ -125,8 +132,8 @@ export class LinksMap {
             this.map[idDst] = new Links();
         }
     
-        this.map[idSrc].outputs.push(new Edge(idDst, type));
-        this.map[idDst].inputs.push(new Edge(idSrc, type));
+        this.map[idSrc].outputs.push(new Edge(idSrc, idDst, type));
+        this.map[idDst].inputs.push(new Edge(idDst, idSrc, type));
     }
 
     getNodeIds(): string[] {
@@ -168,10 +175,80 @@ export class Focus extends IdSet {
     }
 }
 
+export class DepthManager {
+    nodeRerouteMap: { [key:string]:Id; } = {};
+    bullet = new Bullet();
+
+    rerouteNodes(nodeIn: Node, focus: Focus, floorNodeIds: IdSet, nodeOut: Node, isFloorReached = false, floorNodeId = "") {
+        nodeIn.children.forEach( childIn => {
+            let childOut = new Node();
+            let isFloorReachedForNext = isFloorReached || floorNodeIds.has(childIn.id);
+            let floorNodeIdForNext = (!isFloorReached && isFloorReachedForNext) ? childIn.id : floorNodeId;
+            
+            if (isFloorReached) {
+                this.nodeRerouteMap[childIn.id] = floorNodeId;
+            } else {
+                this.nodeRerouteMap[childIn.id] = childIn.id; // reroute to itself (no effect)
+                focus.add(childIn.id); // show this node
+
+                // Copy child.
+                childOut.bullet = childIn.bullet;
+                childOut.dependencySize = childIn.dependencySize;
+                childOut.id = childIn.id;
+                childOut.label = childIn.label;
+                childOut.type = childIn.type;
+
+                if (isFloorReachedForNext) {
+                    childOut.type = childOut.isProcess() ? ENode.eProcess : ENode.eDefault;
+                }
+
+                nodeOut.children.push(childOut); // add it to ouput hierarchy
+            }
+            this.rerouteNodes(childIn, focus, floorNodeIds, childOut, isFloorReachedForNext, floorNodeIdForNext);
+        });
+    }
+
+    rerouteLinks(links: LinksMap) {
+        for (var id of links.getNodeIds()) {
+            const nodeId = this.nodeRerouteMap[id];
+            links.getNodeLinks(id).outputs.forEach( edge => {
+                if (edge.type !== EEdge.eHierarchy) {
+                    const idDst = this.nodeRerouteMap[edge.idDst];
+                    if (idDst !== nodeId)
+                        this.bullet.links.addEdge(nodeId, idDst, edge.type);
+                }
+            })
+            links.getNodeLinks(id).inputs.forEach( edge => {
+                if (edge.type !== EEdge.eHierarchy) {
+                    const idSrc = this.nodeRerouteMap[edge.idSrc];
+                    if (idSrc !== nodeId)
+                        this.bullet.links.addEdge(idSrc, nodeId, edge.type);
+                }
+            })
+        }
+    }
+
+    pruneAndReorganize(bulletIn: Bullet): Bullet {
+        this.bullet.clear();
+        this.rerouteNodes(bulletIn.hierarchy, bulletIn.focus, bulletIn.floorNodeIds, this.bullet.hierarchy);
+        this.rerouteLinks(bulletIn.links);
+        this.bullet.createHierarchyEdges(this.bullet.hierarchy);
+        
+        return this.bullet;
+    }
+}
+
 export class Bullet {
-    hierarchy: Node = new Node();
-    links: LinksMap = new LinksMap();
-    focus: Focus = new Focus();
+    hierarchy = new Node();
+    links = new LinksMap();
+    focus = new Focus();
+    floorNodeIds = new IdSet();
+
+    clear() {
+        this.hierarchy = new Node();
+        this.links = new LinksMap();
+        this.focus = new Focus();
+    }
     
     // Parse the textual hierarchy into nested objects.
     parseEditorFile() {
@@ -183,7 +260,7 @@ export class Bullet {
 
         text = Strings.convertTabsToSpaces(text);
         
-        this.hierarchy.clear();
+        this.clear();
     
         let lastNode = this.hierarchy;
         let currentParentForIndent: { [key:number]:Node; } = {};
@@ -207,6 +284,8 @@ export class Bullet {
                 if (!lineWithoutIndent.startsWith(COMMENT)) {
                     if (lineWithoutIndent.startsWith(FOCUS)) {
                         this.focus.parse(lineWithoutIndent, FOCUS);
+                    } else if (lineWithoutIndent.startsWith(FLOOR)) {
+                        this.floorNodeIds.parse(lineWithoutIndent, FLOOR);
                     } else {
                         let node = new Node();
         
@@ -234,7 +313,6 @@ export class Bullet {
             }
         })
 
-        this.createHierarchyEdges(this.hierarchy);
         this.computeDependencySize(this.hierarchy);
     }
 

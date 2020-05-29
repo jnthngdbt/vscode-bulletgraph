@@ -1,6 +1,6 @@
 import * as vscode from 'vscode';
 
-import { Bullet } from './Bullet'
+import { Bullet, DepthManager } from './Bullet'
 import { DotFileGenerator } from './DotFileGenerator'
 import { insertNodeIdStringFromLineContent } from './NodeIdGenerator'
 
@@ -11,8 +11,12 @@ export function activate(context: vscode.ExtensionContext) {
             bullet.parseEditorFile();
             console.log(bullet);
 
+            let depthManager = new DepthManager();
+            let depthBullet = depthManager.pruneAndReorganize(bullet);
+            console.log(depthManager);
+
             let dotFileGenerator = new DotFileGenerator();
-            dotFileGenerator.generate(bullet);
+            dotFileGenerator.generate(depthBullet);
         })
     );
 
