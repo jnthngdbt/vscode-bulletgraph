@@ -138,27 +138,33 @@ export class LinksMap {
     }
 }
 
-export class Focus { // could use a built-in set
-    ids: Array<Id> = [];
+export class IdSet {
+    array: Array<Id> = [];
 
     add(id: Id): void {
         if (!this.has(id))
-            this.ids.push(id);
+            this.array.push(id);
     }
     has(id: Id): boolean {
-        return this.ids.includes(id);
+        return this.array.includes(id);
     }
-    isFocus(id: Id): boolean {
-        return (this.ids.length <= 0) || this.has(id);
+    isEmpty() {
+        return this.array.length <= 0;
     }
-    parse(line: string): void {
-        if (line.startsWith(FOCUS)) {
-            line = line.substr(FOCUS.length).trim();
+    parse(line: string, token: string): void {
+        if (line.startsWith(token)) {
+            line = line.substr(token.length).trim();
             const ids = line.split(',');
             ids.forEach( id => {
                 this.add(id.trim());
             })
         }
+    }
+}
+
+export class Focus extends IdSet {
+    isFocus(id: Id): boolean {
+        return this.isEmpty() || this.has(id);
     }
 }
 
@@ -196,13 +202,14 @@ export class Bullet {
     
                 // Get indentation by counting tabs.
                 const lineWithoutIndent = Strings.ltrim(line);
-                const nbTabs = line.length - lineWithoutIndent.length;
+                const depth = line.length - lineWithoutIndent.length;
     
                 if (!lineWithoutIndent.startsWith(COMMENT)) {
                     if (lineWithoutIndent.startsWith(FOCUS)) {
-                        this.focus.parse(lineWithoutIndent);
+                        this.focus.parse(lineWithoutIndent, FOCUS);
                     } else {
                         let node = new Node();
+        
                         node.parse(lineWithoutIndent, this.links);
         
                         // Create flow edges, if applicable
@@ -211,15 +218,15 @@ export class Bullet {
                         }
         
                         // Force subgraph type of parent node, since now have child.
-                        if (currentParentForIndent[nbTabs].bullet === EBullet.eFlow) {
-                            currentParentForIndent[nbTabs].type = ENode.eSubgraphProcess;
+                        if (currentParentForIndent[depth].bullet === EBullet.eFlow) {
+                            currentParentForIndent[depth].type = ENode.eSubgraphProcess;
                         } else {
-                            currentParentForIndent[nbTabs].type = ENode.eSubgraph;
+                            currentParentForIndent[depth].type = ENode.eSubgraph;
                         }
         
                         // Fill hierarchy.
-                        currentParentForIndent[nbTabs].children.push(node)
-                        currentParentForIndent[nbTabs + 1] = node
+                        currentParentForIndent[depth].children.push(node)
+                        currentParentForIndent[depth + 1] = node
         
                         lastNode = node
                     }
