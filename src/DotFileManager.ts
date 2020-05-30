@@ -7,7 +7,7 @@ import { Strings } from './utils'
 
 const TAB = "\t"
 
-export class DotFileGenerator {
+export class DotFileManager {
     constructor() {}
 
     generate(bullet: Bullet): string {	

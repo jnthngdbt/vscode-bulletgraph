@@ -1,7 +1,7 @@
 import * as vscode from 'vscode';
 
 import { Bullet, DepthManager } from './Bullet'
-import { DotFileGenerator } from './DotFileGenerator'
+import { DotFileManager } from './DotFileManager'
 import { insertNodeIdStringFromLineContent } from './NodeIdGenerator'
 
 export function activate(context: vscode.ExtensionContext) {
@@ -16,8 +16,8 @@ export function activate(context: vscode.ExtensionContext) {
             let depthBullet = depthManager.pruneAndReorganize(bullet);
 
             // Render a Graphviz dot file.
-            let dotFileGenerator = new DotFileGenerator();
-            dotFileGenerator.render(depthBullet);
+            let dotFileManager = new DotFileManager();
+            dotFileManager.render(depthBullet);
         })
     );
 
