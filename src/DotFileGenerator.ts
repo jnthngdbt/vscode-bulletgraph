@@ -1,5 +1,6 @@
 import * as vscode from 'vscode';
-import { writeFile } from 'fs';
+
+const fsPromises = require('fs').promises
 
 import { Bullet, Node, ENode, EEdge, LinksMap } from './Bullet'
 import { Strings } from './utils'
@@ -9,7 +10,7 @@ const TAB = "\t"
 export class DotFileGenerator {
     constructor() {}
 
-    generate(bullet: Bullet): void {	
+    generate(bullet: Bullet): string {	
         let str  = "";
         str += "digraph G { \n";
         str += "\n";
@@ -75,12 +76,7 @@ export class DotFileGenerator {
     
         str += "} \n";
     
-        // Write to file.
-        const filepath = vscode.workspace.rootPath // could be: path.dirname(vscode.window.activeTextEditor.document.fileName)
-        const fullname = filepath + "/generated.dot"
-        writeFile(fullname, str, function (err) {
-            if (err) return console.log(err);
-        });
+        return str;
     }
     
     // Recursively write IDs of either leaves or subgraphs.
@@ -145,5 +141,17 @@ export class DotFileGenerator {
         })
     
         return str
+    }
+
+    render(bullet: Bullet) {
+        const content = this.generate(bullet);
+        const fullname = vscode.window.activeTextEditor?.document.fileName + ".dot";
+
+        fsPromises.writeFile(fullname, content).then( () => {
+            vscode.workspace.openTextDocument(fullname).then( (document) => {
+                let args = { document, content, callback: undefined }; // TODO: use click callback
+                vscode.commands.executeCommand("graphviz-interactive-preview.preview.beside", args);
+            });
+        })
     }
 }

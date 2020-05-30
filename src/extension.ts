@@ -7,16 +7,17 @@ import { insertNodeIdStringFromLineContent } from './NodeIdGenerator'
 export function activate(context: vscode.ExtensionContext) {
     context.subscriptions.push(
         vscode.commands.registerCommand('vscode-bulletgraph.generateDotFile', () => {
+            // Parsing the editor file to get the bullet graph structure.
             let bullet = new Bullet();
             bullet.parseEditorFile();
-            console.log(bullet);
 
+            // Simplify the graph, if necessary, by having a maximum depth.
             let depthManager = new DepthManager();
             let depthBullet = depthManager.pruneAndReorganize(bullet);
-            console.log(depthManager);
 
+            // Render a Graphviz dot file.
             let dotFileGenerator = new DotFileGenerator();
-            dotFileGenerator.generate(depthBullet);
+            dotFileGenerator.render(depthBullet);
         })
     );
 

@@ -26,6 +26,9 @@
 			}
 		]
 	},
+	"extensionDependencies": [
+		"tintinweb.graphviz-interactive-preview"
+	],
 	"scripts": {
 		"vscode:prepublish": "npm run compile",
 		"compile": "tsc -p ./",
