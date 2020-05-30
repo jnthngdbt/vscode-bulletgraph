@@ -10,15 +10,15 @@
 		"Other"
 	],
 	"activationEvents": [
-		"onCommand:vscode-bulletgraph.generateDotFile",
+		"onCommand:vscode-bulletgraph.renderPreview",
 		"onCommand:vscode-bulletgraph.insertId"
 	],
 	"main": "./out/extension.js",
 	"contributes": {
 		"commands": [
 			{
-				"command": "vscode-bulletgraph.generateDotFile",
-				"title": "Bullet Graph: Generate Dot File"
+				"command": "vscode-bulletgraph.renderPreview",
+				"title": "Bullet Graph: Render Preview Beside"
 			},
 			{
 				"command": "vscode-bulletgraph.insertId",

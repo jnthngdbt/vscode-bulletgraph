@@ -6,7 +6,7 @@ import { insertNodeIdStringFromLineContent } from './NodeIdGenerator'
 
 export function activate(context: vscode.ExtensionContext) {
     context.subscriptions.push(
-        vscode.commands.registerCommand('vscode-bulletgraph.generateDotFile', () => {
+        vscode.commands.registerCommand('vscode-bulletgraph.renderPreview', () => {
             // Parsing the editor file to get the bullet graph structure.
             let bullet = new Bullet();
             bullet.parseEditorFile();
