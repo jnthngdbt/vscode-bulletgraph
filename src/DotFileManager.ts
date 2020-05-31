@@ -146,12 +146,33 @@ export class DotFileManager {
     render(bullet: Bullet) {
         const content = this.generate(bullet);
         const fullname = vscode.window.activeTextEditor?.document.fileName + ".dot";
+        fsPromises.writeFile(fullname, content).then( () => this.writeCompletionHandler(fullname, content) );
+    }
 
-        fsPromises.writeFile(fullname, content).then( () => {
-            vscode.workspace.openTextDocument(fullname).then( (document) => {
-                let args = { document, content, callback: undefined }; // TODO: use click callback
-                vscode.commands.executeCommand("graphviz-interactive-preview.preview.beside", args);
-            });
-        })
+    writeCompletionHandler(fullname: string, content: string) {
+        let callback = (webpanel: any) => this.interactivePreviewWebpanelCallback(webpanel);
+        vscode.workspace.openTextDocument(fullname).then( (document) => {
+            let args = { document, content, callback };
+            vscode.commands.executeCommand("graphviz-interactive-preview.preview.beside", args);
+        });
+    }
+
+    interactivePreviewWebpanelCallback(webpanel: any) {
+        let handler = (message: any) => { this.interactivePreviewMessageHandler(message); }
+        webpanel.handleMessage = handler;
+    }
+
+    interactivePreviewMessageHandler(message: any) {
+        console.log(JSON.stringify(message));
+        switch(message.command){
+            case 'onClick':
+                console.log("click");
+                break;
+            case 'onDblClick':
+                console.log("double-click");
+                break;
+            default:
+                console.warn('Unexpected command: ' + message.command);
+        }
     }
 }
