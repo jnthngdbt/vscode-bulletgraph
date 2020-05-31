@@ -163,13 +163,17 @@ export class DotFileManager {
     }
 
     interactivePreviewMessageHandler(message: any) {
+        // Click events are corretly catched here, but the message.value.node is,
+        // always "this", which seems to be an issue. Could post something on
+        // https://github.com/tintinweb/vscode-interactive-graphviz/issues.
         console.log(JSON.stringify(message));
+
         switch(message.command){
             case 'onClick':
-                console.log("click");
+                console.log("Bullet Graph: onClick");
                 break;
             case 'onDblClick':
-                console.log("double-click");
+                console.log("Bullet Graph: onDblClick");
                 break;
             default:
                 console.warn('Unexpected command: ' + message.command);
