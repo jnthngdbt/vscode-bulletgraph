@@ -7,6 +7,7 @@ import { Strings } from './utils'
 const COMMENT = "//"
 const LABEL_ID_SEP = "//"
 const FLOOR = "[_]"
+const NOTHING = "[]"
 
 export enum ENode { eDefault, eProcess, eSubgraph, eSubgraphProcess }
 export enum EEdge { eHierarchy, eFlow, eLink }
@@ -90,6 +91,8 @@ export class Node {
 
                 if (linkId.startsWith(FLOOR)) {
                     isFloor = true;
+                } else if (linkId.startsWith(NOTHING)) {
+                    // do nothing
                 } else if (linkId) {
                     let type = linkId[0] as ELink; // first char is the link type (if any)
                     linkId = Strings.removeSpecialCharacters(linkId);
