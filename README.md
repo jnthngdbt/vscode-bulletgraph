@@ -41,6 +41,6 @@ Initial release of ...
 
 ## Notes
 
-If the preview does not work at first render, change this setting from 10 to 100
+If the preview does not work at first render, should deactivate render lock timeout:
 
-    "graphviz-interactive-preview.guardInterval": 100
+    "graphviz-interactive-preview.renderLockAdditionalTimeout": -1

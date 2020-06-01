@@ -58,7 +58,7 @@ export class Node {
         this.id = generateRandomId();
     }
 
-    parse(line: string, links: LinksMap) {
+    parse(line: string, links: LinksMap, floorNodeIds: IdSet) {
         line = line.trim();
 
         this.bullet = line[0] as EBullet;
@@ -83,18 +83,31 @@ export class Node {
             //     <id_Input1 <id_Input2 >id_Output
             const idAndLinks = labelAndId[1].trim().split(' ')
             
-            idAndLinks.forEach( linkId => {
-                let type = linkId[0] as ELink; // first char is the link type (if any)
-                linkId = Strings.removeSpecialCharacters(linkId);
-                
-                if (type === ELink.eOut) {
-                    links.addEdge(this.id, linkId, EEdge.eLink)
-                } else if (type === ELink.eIn) {
-                    links.addEdge(linkId, this.id, EEdge.eLink)
-                } else { // no link type char, or no at all
-                    this.id = linkId // assume it is the current node id
+            let isFloor = false;
+
+            idAndLinks.forEach( (linkId: string) => {
+                linkId = linkId.trim();
+
+                if (linkId.startsWith(FLOOR)) {
+                    isFloor = true;
+                } else if (linkId) {
+                    let type = linkId[0] as ELink; // first char is the link type (if any)
+                    linkId = Strings.removeSpecialCharacters(linkId);
+                    
+                    if (type === ELink.eOut) {
+                        links.addEdge(this.id, linkId, EEdge.eLink)
+                    } else if (type === ELink.eIn) {
+                        links.addEdge(linkId, this.id, EEdge.eLink)
+                    } else { // no link type char, or no at all
+                        this.id = linkId // assume it is the current node id
+                    }
                 }
             })
+
+            // At this point, the node id is know, so we can add it to the floor node, 
+            // if applicable.
+            if (isFloor)
+                floorNodeIds.add(this.id);
         }
     }
 }
@@ -278,7 +291,7 @@ export class Bullet {
                     } else {
                         let node = new Node();
         
-                        node.parse(lineWithoutIndent, this.links);
+                        node.parse(lineWithoutIndent, this.links, this.floorNodeIds);
         
                         // Create flow edges, if applicable
                         if (lastNode.id && (lastNode.bullet === EBullet.eFlow) && (node.bullet === EBullet.eFlow)) {
