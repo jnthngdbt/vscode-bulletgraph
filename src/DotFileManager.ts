@@ -1,6 +1,5 @@
 import * as vscode from 'vscode';
-
-const fsPromises = require('fs').promises
+import * as fs from 'fs';
 
 import { Bullet, Node, ENode, EEdge, LinksMap } from './Bullet'
 import { Strings } from './utils'
@@ -44,12 +43,12 @@ export class DotFileManager {
         str += "\n";
     
         str += indent + "// Node style for type PROCESS. \n";
-        str += indent + "node [color=grey30, fontcolor=\"#8888bb\", fontsize=14, style=rounded, shape=box] \n";
+        str += indent + "node [color=\"#555588\", fontcolor=\"#8888bb\", fontsize=14, style=rounded, shape=box] \n";
         str += this.printNodes(root.children, indent, ENode.eProcess);
         str += "\n";
     
         str += indent + "// Edge style for type FLOW. \n";
-        str += indent + "edge [color=grey50, style=straight] \n";
+        str += indent + "edge [color=\"#555588\", style=straight] \n";
         str += this.printEdges(indent, bullet.links, EEdge.eFlow);
         str += "\n";
     
@@ -59,7 +58,7 @@ export class DotFileManager {
         str += "\n";
     
         str += indent + "// Edge style for type LINK. \n";
-        str += indent + "edge [color=\"#aa5555\", style=straight, arrowtail=inv, arrowhead=normal] \n"; // known random bug with dir=both when splines=ortho
+        str += indent + "edge [color=\"#bb55bb\", style=straight, arrowtail=inv, arrowhead=normal, penwidth=1] \n"; // known random bug with dir=both when splines=ortho
         str += this.printEdges(indent, bullet.links, EEdge.eLink);
         str += "\n";
         
@@ -124,7 +123,7 @@ export class DotFileManager {
             if (node.children.length >= 1) {
                 let style = "";
                 if (node.type === ENode.eSubgraphProcess) {
-                    style = "color = gray30; style = rounded";
+                    style = "color = \"#555588\"; style = rounded";
                 } else if (node.type === ENode.eSubgraph) {
                     style = "color = gray30; style = none";
                 }
@@ -146,7 +145,7 @@ export class DotFileManager {
     render(bullet: Bullet) {
         const content = this.generate(bullet);
         const fullname = vscode.window.activeTextEditor?.document.fileName + ".dot";
-        fsPromises.writeFile(fullname, content).then( () => this.writeCompletionHandler(fullname, content) );
+        fs.writeFile(fullname, content, () => this.writeCompletionHandler(fullname, content));
     }
 
     writeCompletionHandler(fullname: string, content: string) {
@@ -158,7 +157,7 @@ export class DotFileManager {
     }
 
     interactivePreviewWebpanelCallback(webpanel: any) {
-        let handler = (message: any) => { this.interactivePreviewMessageHandler(message); }
+        let handler = (message: any) => { return this.interactivePreviewMessageHandler(message); }
         webpanel.handleMessage = handler;
     }
 
