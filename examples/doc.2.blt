@@ -22,6 +22,16 @@
             - auto line breaks
                 - number of chars threshold
         - what to do
+            - generalize bullet: skip hierarchy, hide subgraph, floor, limit depth
+            - font size multiple of depth (inversely; leaves are 120)
+                - potential big images in size, but may be easily compressed (may)
+            - render centered on node where the cursor is at
+                - with the webpanel, maybe possible directly
+            - update render at each cursor line change
+                - only update center position of webpanel
+                    - does not seem possible
+                - make node and links bold red
+            - group leaves together in same node
             - support condition flow (if, else) displayed with triangle
             - support comments
                 - graphviz is like c++  

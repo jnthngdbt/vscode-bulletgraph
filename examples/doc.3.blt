@@ -1,15 +1,15 @@
 // This is a comment
-// [_] id_Jenkins, id_JenkinsJobs, id_JenkinsConfiguration, id_FileServer3d, id_BfmeasurementRepo, id_JenkinsAgents, id_3dscanapp
+// [] id_Jenkins, id_JenkinsJobs, id_JenkinsConfiguration, id_FileServer3d, id_BfmeasurementRepo, id_JenkinsAgents, id_3dscanapp
 
 - information technology (IT)
     - digital innovation team
-        - members // [_]
+        - members // []
             - Eric Vandermeeren
             - Jonathan Godbout
             - Marc Julien
             - Martin Vezina
         - projects
-            - 3d-scan-app // [_] id_3dscanapp
+            - 3d-scan-app // [] id_3dscanapp
                 - overview
                     - use case
                         > sales consultant goes at client's house 
@@ -36,13 +36,13 @@
                         > enter mold specifications in database(s) // >id_Sqldatabases
                         > high resolution 3D scan
                         > put scan mesh on file server // >id_MoldScansProdServer
-            - DYOB 3.0 viewer // [_]
+            - DYOB 3.0 viewer // []
                 - CAD files
                     - Lionel
                     - Manufacturers
                 
-    - systems // 
-        - developer computer // [_]
+    - systems //
+        - developer computer // []
             - windows
                 - Unreal Engine
                 - git
@@ -53,7 +53,7 @@
                 - bfmeasurement
             - mac
         - jenkins // id_Jenkins
-            - jobs // [_] id_JenkinsJobs
+            - jobs // [] id_JenkinsJobs
                 - daily
                     - update auto specs
                         > checkout latest release deployed in prod // <id_CredsBitbucket <id_3dscanappRepo 
@@ -86,13 +86,13 @@
                             > test 'collision' test set // >id_JenkinsfileTestSet
                         - methods
                             > test set with scan atttribute // id_JenkinsfileTestSet >id_TestSets
-            - configuration // [_] id_JenkinsConfiguration
+            - configuration // [] id_JenkinsConfiguration
                 - credentials
                     - bitbucket // id_CredsBitbucket
                     - mac computer // id_CredsMacComputer
                         - jenkins user account // id_JenkinsUserAccount
                         - keychain access // id_KeychainAccess
-            - server (\\bfse-devmig) // [_]
+            - server (\\bfse-devmig) // []
                 - shared folders
                     - test
                         - test sets scans
@@ -102,7 +102,7 @@
                     - branch
                         - BFMeasurement clone // id_BFMeasurementCloneJenkins
             - agents // id_JenkinsAgents
-                - windows (\\bfse-devmig) // [_]
+                - windows (\\bfse-devmig) // []
                     - mold-data-clone
                         - config
                             - auto-specs csv files
@@ -111,12 +111,12 @@
                     - branch workspace
                         - bfmeasurement clone
                     - Unreal Engine
-                - mac // [_]
+                - mac // []
                     - 3d-scan-app clone
                         - bfmeasurement clone
                     - pcl-precompiled clone
                     - Unreal Engine
-        - file server 3d (\\bfse-3dapp1) // [_] id_FileServer3d
+        - file server 3d (\\bfse-3dapp1) // [] id_FileServer3d
             - prod
                 - mold data repo // id_MoldDataRepo
                     - mold scans // id_MoldScansProdServer
@@ -137,7 +137,7 @@
                     - bpro
                     - standalone
         - bitbucket
-            - bfmeasurement repo // [_] id_BfmeasurementRepo >id_BfmeasurementSubmodule
+            - bfmeasurement repo // [] id_BfmeasurementRepo >id_BfmeasurementSubmodule
                 - tests
                     - export mold features // id_ExportMoldFeatures
                     - export scan features // id_ExportScanFeatures
@@ -164,11 +164,11 @@
                         > score with icp
                         ? if bfu known
                             > weighted score from historical data
-            - 3d-scan-app repo // [_] id_3dscanappRepo
+            - 3d-scan-app repo // [] id_3dscanappRepo
                 - release tags
                 - bfmeasurement submodule // id_BfmeasurementSubmodule
         - sql-databases // id_Sqldatabases
-            - sedev-sql2005-0-sql2k12 // [_]
+            - sedev-sql2005-0-sql2k12 // []
                 - test-result
                 - test
                 - scan-attribute

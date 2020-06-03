@@ -1,50 +1,30 @@
-- information technology (IT)
-    - digital innovation team
-        - projects
-            - 3d-scan-app
-                - processes
-                    - new mold integration
-                        > new mold creation
-                        > enter mold specifications in database(s) // >id_Sqldatabases
-                        > high resolution 3D scan
-                        > put scan mesh on file server // >id_MoldScansProdServer
-    - systems 
-        - jenkins
-            - jobs
-                - daily
-                    - update auto specs
-                        > checkout 3d-scan-app release branch
-                        > fetch release tags (e.g. 2.0.23, 2.1.1)
-                        > get latest (biggest) release tag
-                        > checkout latest release
-                            > this checks out corresponding bfmeasurement submodule version
-                        > build bfmeasurement (contains auto specs code)
-                        > compute auto specs on molds // >id_ExportMoldFeatures
-                        > compute auto specs on scans // >id_ExportScanFeatures
-                        > run python script that generates CSV files // >id_AutospecsPythonScript
-                        > copy auto-specs CSV files on prod file server // >id_AutospecsCSVFiles
-                    - udpate jenkins data // id_UdpateJenkinsData <id_MoldDataRepo >id_MoldDataCloneJenkins
-                        > runs git pull from mold data repo
-            - server (\\bfse-devmig)
-                - mold data clone // id_MoldDataCloneJenkins
-        - file server 3d (\\bfse-3dapp1)
-            - prod
-                - mold data repo // id_MoldDataRepo
-                    - mold scans // id_MoldScansProdServer
-                    - config 
-                        - auto-specs CSV files // id_AutospecsCSVFiles
-                            - MoldsFeatures.csv
-                            - FeatureTolerances.csv
-        - bitbucket
-            - bfmeasurement repo // >id_BfmeasurementSubmodule
-                - tests
-                    - export mold features // id_ExportMoldFeatures
-                    - export scan features // id_ExportScanFeatures
-                - auto-specs python script // id_AutospecsPythonScript
-                    > compute tolerances
-                    > generate clean mold features CSV file
-            - 3d-scan-app repo
-                - release tags
-                - bfmeasurement submodule // id_BfmeasurementSubmodule
-        - sql-databases // id_Sqldatabases
-            - sedev-sql2005-0-sql2k12
+- unreal engine 4
+    - datasmith // [] datasmith
+        * importer of cad files from various cad design tools
+        - import options
+            - elements to import (geometry, materials, lights, animations)
+            - maximum edge length
+            - normals
+            - chord (max distance between triangles and parametric surface)
+    - dataprep // []
+        > create dataprep asset
+            > content browser > add new > dataprep > dataprep asset
+            > set file or folder to import top-right
+            > click import in toolbar
+                > does a default datasmith import // <datasmith
+                > can visualize current state in viewer
+            > define import workflow with available nodes bottom-left
+                > click run in toolbar to see results
+            > when satisfied with workflow, click copy to project in toolbar // >projectContentDataprep
+    - project // []
+        - content
+            - dataprep // projectContentDataprep
+                - dataprep asset
+                    * the dataprep pipeline, kind of blueprint
+                - dataprep scene // projectContentDataprepScene
+                    * the generated imported asset, that can be added to maps
+                - dataprep map
+                    * not clear why it creates a map
+            - maps // projectMaps
+            - blueprints
+        > add dataprep generated asset to map // <projectContentDataprepScene >projectMaps
