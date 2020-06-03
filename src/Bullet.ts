@@ -4,10 +4,8 @@ import { ok } from 'assert';
 import { generateRandomId } from './NodeIdGenerator'
 import { Strings } from './utils'
 
-const COMMENT = "//"
-const LABEL_ID_SEP = "//"
-const FLOOR = "[_]"
-const NOTHING = "[]"
+const COMMENT = "//";
+const LABEL_ID_SEP = "//";
 
 export enum ENode { eDefault, eProcess, eSubgraph, eSubgraphProcess }
 export enum EEdge { eHierarchy, eFlow, eLink }
@@ -21,6 +19,11 @@ export enum EBullet {
     eDefault = '-',
     eFlow = '>'
 }
+
+export enum EVisibility {
+    eNormal = "[]",
+    eFloor = "[_]",
+};
 
 export type Id = string;
 
@@ -89,9 +92,9 @@ export class Node {
             idAndLinks.forEach( (linkId: string) => {
                 linkId = linkId.trim();
 
-                if (linkId.startsWith(FLOOR)) {
+                if (linkId.startsWith(EVisibility.eFloor)) {
                     isFloor = true;
-                } else if (linkId.startsWith(NOTHING)) {
+                } else if (linkId.startsWith(EVisibility.eNormal)) {
                     // do nothing
                 } else if (linkId) {
                     let type = linkId[0] as ELink; // first char is the link type (if any)
@@ -289,8 +292,8 @@ export class Bullet {
                 const depth = line.length - lineWithoutIndent.length;
     
                 if (!lineWithoutIndent.startsWith(COMMENT)) {
-                    if (lineWithoutIndent.startsWith(FLOOR)) {
-                        this.floorNodeIds.parse(lineWithoutIndent, FLOOR);
+                    if (lineWithoutIndent.startsWith(EVisibility.eFloor)) {
+                        this.floorNodeIds.parse(lineWithoutIndent, EVisibility.eFloor);
                     } else {
                         let node = new Node();
         
