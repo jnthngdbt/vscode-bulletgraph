@@ -1,6 +1,8 @@
 import * as vscode from 'vscode';
 
 export namespace Strings {
+    export const TAB = "\t";
+
     // Trim leading (left) spaces/tabs.
     export function ltrim(str: string): string {
         if (!str) return str;

@@ -4,8 +4,8 @@ import { ok } from 'assert';
 import { generateRandomId } from './NodeIdGenerator'
 import { Strings } from './utils'
 
-const COMMENT = "//";
-const LABEL_ID_SEP = "//";
+export const COMMENT = "//";
+export const LABEL_ID_SEP = "//";
 
 export enum ENode { eDefault, eProcess, eSubgraph, eSubgraphProcess }
 export enum EEdge { eHierarchy, eFlow, eLink }
@@ -26,6 +26,66 @@ export enum EVisibility {
 };
 
 export type Id = string;
+
+export class LineManager {
+    isComment = false;
+    depth = -1;
+    bullet = "";
+    label = "";
+    visibility = "";
+    components: Array<string> = [];
+
+    clear() {
+        this.isComment = false;
+        this.depth = -1;
+        this.bullet = "";
+        this.label = "";
+        this.visibility = "";
+        this.components = [];
+    }
+
+    parse(lineIn: string) {
+        this.clear();
+
+        if (lineIn.length <= 0) return;
+        if (lineIn.trim().length <= 0) return; // skip empty line, or only containing tabs/spaces
+
+        lineIn = Strings.convertTabsToSpaces(lineIn);
+        lineIn = lineIn.split('"').join("'"); // replace " with '
+
+        // Get indentation by counting tabs.
+        let line = Strings.ltrim(lineIn);
+        this.depth = lineIn.length - line.length;
+    
+        this.isComment = line.startsWith(COMMENT);
+
+        if (!this.isComment) {
+            line = line.trim();
+
+            this.bullet = line[0];
+            line = line.substr(1).trim() // remove bullet
+        
+            const split = line.split(LABEL_ID_SEP)
+            this.label = split[0].trim()
+        
+            if (split.length > 1) {
+                this.components = split[1].trim().split(' ')
+
+                let manageVisibilityComponent = (i: number) => {
+                    this.visibility = this.components[i];
+                    this.components.splice(i, 1); // remove 
+                }
+
+                for (let i = 0; i < this.components.length; ++i) {
+                    switch (this.components[i] as EVisibility) {
+                        case EVisibility.eNormal: manageVisibilityComponent(i); break;
+                        case EVisibility.eFloor: manageVisibilityComponent(i); break;
+                    }
+                }
+            }
+        }
+    }
+}
 
 export class Node {
     bullet: EBullet = EBullet.eDefault;
@@ -62,10 +122,8 @@ export class Node {
         this.id = generateRandomId();
     }
 
-    parse(line: string, links: LinksMap, floorNodeIds: IdSet) {
-        line = line.trim();
-
-        this.bullet = line[0] as EBullet;
+    fill(line: LineManager, links: LinksMap, floorNodeIds: IdSet) {
+        this.bullet = line.bullet as EBullet;
 
         if (this.bullet === EBullet.eFlow) {
             this.type = ENode.eProcess;
@@ -73,30 +131,14 @@ export class Node {
             this.type = ENode.eDefault;
         }
     
-        // Get node label.
-        const withoutBullet = line.substr(1).trim()
-        const labelAndId = withoutBullet.split(LABEL_ID_SEP)
-        this.label = labelAndId[0].trim()
+        this.label = line.label;
     
         // Get node ID. Create one if necessary.
         this.setRandomId() // initialize to random id
-        if (labelAndId.length > 1) {
-            // The string to parse is something like
-            //     id_CurrentNode
-            //     id_CurrentNode <id_Input1 <id_Input2 >id_Output
-            //     <id_Input1 <id_Input2 >id_Output
-            const idAndLinks = labelAndId[1].trim().split(' ')
-            
-            let isFloor = false;
-
-            idAndLinks.forEach( (linkId: string) => {
+        if (line.components.length > 0) {
+            line.components.forEach( (linkId: string) => {
                 linkId = linkId.trim();
-
-                if (linkId.startsWith(EVisibility.eFloor)) {
-                    isFloor = true;
-                } else if (linkId.startsWith(EVisibility.eNormal)) {
-                    // do nothing
-                } else if (linkId) {
+                if (linkId) {
                     let type = linkId[0] as ELink; // first char is the link type (if any)
                     linkId = Strings.removeSpecialCharacters(linkId);
                     
@@ -109,12 +151,10 @@ export class Node {
                     }
                 }
             })
-
-            // At this point, the node id is know, so we can add it to the floor node, 
-            // if applicable.
-            if (isFloor)
-                floorNodeIds.add(this.id);
         }
+
+        if (line.visibility === EVisibility.eFloor)
+            floorNodeIds.add(this.id);
     }
 }
 
@@ -250,6 +290,7 @@ export class DepthManager {
 }
 
 export class Bullet {
+    line = new LineManager();
     hierarchy = new Node();
     links = new LinksMap();
     floorNodeIds = new IdSet();
@@ -267,8 +308,6 @@ export class Bullet {
         if (!text) {
             vscode.window.showErrorMessage('Bullet Graph: No editor is active.');
         }
-
-        text = Strings.convertTabsToSpaces(text);
         
         this.clear();
     
@@ -284,39 +323,32 @@ export class Bullet {
     
         lines.forEach( line => {
             if (line.trim().length > 0) { // skip empty line, or only containing tabs/spaces
-                // Replace " with '.
-                line = line.split('"').join("'"); // or line.replace(/"/g, "'")
+                this.line.clear();
+                this.line.parse(line);
     
-                // Get indentation by counting tabs.
-                const lineWithoutIndent = Strings.ltrim(line);
-                const depth = line.length - lineWithoutIndent.length;
+                if (!this.line.isComment) {
+                    let node = new Node();
     
-                if (!lineWithoutIndent.startsWith(COMMENT)) {
-                    if (lineWithoutIndent.startsWith(EVisibility.eFloor)) {
-                        this.floorNodeIds.parse(lineWithoutIndent, EVisibility.eFloor);
-                    } else {
-                        let node = new Node();
-        
-                        node.parse(lineWithoutIndent, this.links, this.floorNodeIds);
-        
-                        // Create flow edges, if applicable
-                        if (lastNode.id && (lastNode.bullet === EBullet.eFlow) && (node.bullet === EBullet.eFlow)) {
-                            this.links.addEdge(lastNode.id, node.id, EEdge.eFlow);
-                        }
-        
-                        // Force subgraph type of parent node, since now have child.
-                        if (currentParentForIndent[depth].bullet === EBullet.eFlow) {
-                            currentParentForIndent[depth].type = ENode.eSubgraphProcess;
-                        } else {
-                            currentParentForIndent[depth].type = ENode.eSubgraph;
-                        }
-        
-                        // Fill hierarchy.
-                        currentParentForIndent[depth].children.push(node)
-                        currentParentForIndent[depth + 1] = node
-        
-                        lastNode = node
+                    node.fill(this.line, this.links, this.floorNodeIds);
+    
+                    // Create flow edges, if applicable
+                    if (lastNode.id && (lastNode.bullet === EBullet.eFlow) && (node.bullet === EBullet.eFlow)) {
+                        this.links.addEdge(lastNode.id, node.id, EEdge.eFlow);
                     }
+    
+                    // Force subgraph type of parent node, since now have child.
+                    const depth = this.line.depth;
+                    if (currentParentForIndent[depth].bullet === EBullet.eFlow) {
+                        currentParentForIndent[depth].type = ENode.eSubgraphProcess;
+                    } else {
+                        currentParentForIndent[depth].type = ENode.eSubgraph;
+                    }
+    
+                    // Fill hierarchy.
+                    currentParentForIndent[depth].children.push(node)
+                    currentParentForIndent[depth + 1] = node
+    
+                    lastNode = node
                 }
             }
         })

@@ -4,8 +4,6 @@ import * as fs from 'fs';
 import { Bullet, Node, ENode, EEdge, LinksMap } from './Bullet'
 import { Strings } from './utils'
 
-const TAB = "\t"
-
 export class DotFileManager {
     constructor() {}
 
@@ -14,7 +12,7 @@ export class DotFileManager {
         str += "digraph G { \n";
         str += "\n";
     
-        let indent = TAB;
+        let indent = Strings.TAB;
 
         const root = bullet.hierarchy;
     
@@ -68,7 +66,7 @@ export class DotFileManager {
     
         str += indent + "// Subgraph node hierarchy. \n";
         str += indent + "subgraph clusterRoot { \n";
-        indent += TAB;
+        indent += Strings.TAB;
         str += this.printNodesHierarchy(root.children, indent);
         indent = indent.slice(0, -1);
         str += indent + "} \n";
@@ -130,9 +128,9 @@ export class DotFileManager {
     
                 str += "\n";
                 str += indent + "subgraph cluster" + node.id + " {\n";
-                str += indent + TAB + style + "\n";
-                str += indent + TAB + node.id + " [label=\"" + Strings.wordWrap(node.label) + "\"] // subgraph name \n";
-                str += this.printNodesHierarchy(node.children, indent + TAB);
+                str += indent + Strings.TAB + style + "\n";
+                str += indent + Strings.TAB + node.id + " [label=\"" + Strings.wordWrap(node.label) + "\"] // subgraph name \n";
+                str += this.printNodesHierarchy(node.children, indent + Strings.TAB);
                 str += indent + "} \n";
             } else {
                 str += indent + node.id + " [label=\"" + Strings.wordWrap(node.label) + "\"]\n";
