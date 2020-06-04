@@ -11,7 +11,9 @@
 	],
 	"activationEvents": [
 		"onCommand:vscode-bulletgraph.renderPreview",
-		"onCommand:vscode-bulletgraph.insertId"
+		"onCommand:vscode-bulletgraph.insertId",
+		"onCommand:vscode-bulletgraph.foldLine",
+		"onCommand:vscode-bulletgraph.unfoldLine"
 	],
 	"main": "./out/extension.js",
 	"contributes": {
@@ -23,6 +25,14 @@
 			{
 				"command": "vscode-bulletgraph.insertId",
 				"title": "Bullet Graph: Insert ID Generated From Line Content"
+			},
+			{
+				"command": "vscode-bulletgraph.foldLine",
+				"title": "Bullet Graph: Fold Line"
+			},
+			{
+				"command": "vscode-bulletgraph.unfoldLine",
+				"title": "Bullet Graph: Unfold Line"
 			}
 		]
 	},

@@ -1,91 +1,12 @@
 import * as vscode from 'vscode';
 import { ok } from 'assert';
 
+import { COMMENT, LABEL_ID_SEP, EBullet, EEdge, ELink, ENode, EVisibility } from './constants'
+import { LineManager } from './LineManager'
 import { generateRandomId } from './NodeIdGenerator'
 import { Strings } from './utils'
 
-export const COMMENT = "//";
-export const LABEL_ID_SEP = "//";
-
-export enum ENode { eDefault, eProcess, eSubgraph, eSubgraphProcess }
-export enum EEdge { eHierarchy, eFlow, eLink }
-
-export enum ELink { 
-    eIn = '<', 
-    eOut = '>',
-}
-
-export enum EBullet {
-    eDefault = '-',
-    eFlow = '>'
-}
-
-export enum EVisibility {
-    eNormal = "[]",
-    eFloor = "[_]",
-};
-
 export type Id = string;
-
-export class LineManager {
-    isComment = false;
-    depth = -1;
-    bullet = "";
-    label = "";
-    visibility = "";
-    components: Array<string> = [];
-
-    clear() {
-        this.isComment = false;
-        this.depth = -1;
-        this.bullet = "";
-        this.label = "";
-        this.visibility = "";
-        this.components = [];
-    }
-
-    parse(lineIn: string) {
-        this.clear();
-
-        if (lineIn.length <= 0) return;
-        if (lineIn.trim().length <= 0) return; // skip empty line, or only containing tabs/spaces
-
-        lineIn = Strings.convertTabsToSpaces(lineIn);
-        lineIn = lineIn.split('"').join("'"); // replace " with '
-
-        // Get indentation by counting tabs.
-        let line = Strings.ltrim(lineIn);
-        this.depth = lineIn.length - line.length;
-    
-        this.isComment = line.startsWith(COMMENT);
-
-        if (!this.isComment) {
-            line = line.trim();
-
-            this.bullet = line[0];
-            line = line.substr(1).trim() // remove bullet
-        
-            const split = line.split(LABEL_ID_SEP)
-            this.label = split[0].trim()
-        
-            if (split.length > 1) {
-                this.components = split[1].trim().split(' ')
-
-                let manageVisibilityComponent = (i: number) => {
-                    this.visibility = this.components[i];
-                    this.components.splice(i, 1); // remove 
-                }
-
-                for (let i = 0; i < this.components.length; ++i) {
-                    switch (this.components[i] as EVisibility) {
-                        case EVisibility.eNormal: manageVisibilityComponent(i); break;
-                        case EVisibility.eFloor: manageVisibilityComponent(i); break;
-                    }
-                }
-            }
-        }
-    }
-}
 
 export class Node {
     bullet: EBullet = EBullet.eDefault;
@@ -123,7 +44,7 @@ export class Node {
     }
 
     fill(line: LineManager, links: LinksMap, floorNodeIds: IdSet) {
-        this.bullet = line.bullet as EBullet;
+        this.bullet = line.bullet;
 
         if (this.bullet === EBullet.eFlow) {
             this.type = ENode.eProcess;

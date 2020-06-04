@@ -1,7 +1,8 @@
 import * as vscode from 'vscode';
 import * as fs from 'fs';
 
-import { Bullet, Node, ENode, EEdge, LinksMap } from './Bullet'
+import { Bullet, Node, LinksMap } from './Bullet'
+import { ENode, EEdge } from './constants'
 import { Strings } from './utils'
 
 export class DotFileManager {
