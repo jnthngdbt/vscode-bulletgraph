@@ -18,4 +18,5 @@ export enum EVisibility {
     eUndefined = "",
     eNormal = "[]",
     eFloor = "[+]",
+    eHide = "[x]",
 };

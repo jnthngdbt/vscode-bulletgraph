@@ -1,7 +1,7 @@
 import * as vscode from 'vscode';
 import { ok } from 'assert';
 
-import { COMMENT, LABEL_ID_SEP, EBullet, EEdge, ELink, ENode, EVisibility } from './constants'
+import { EBullet, EEdge, ELink, ENode, EVisibility } from './constants'
 import { LineManager } from './LineManager'
 import { generateRandomId } from './NodeIdGenerator'
 import { Strings } from './utils'
@@ -43,7 +43,7 @@ export class Node {
         this.id = generateRandomId();
     }
 
-    fill(line: LineManager, links: LinksMap, floorNodeIds: IdSet) {
+    fill(line: LineManager, links: LinksMap, floorNodeIds: IdSet, hideNodeIds: IdSet) {
         this.bullet = line.bullet;
 
         if (this.bullet === EBullet.eFlow) {
@@ -74,8 +74,10 @@ export class Node {
             })
         }
 
-        if (line.visibility === EVisibility.eFloor)
-            floorNodeIds.add(this.id);
+        switch (line.visibility) {
+            case EVisibility.eFloor: floorNodeIds.add(this.id); break;
+            case EVisibility.eHide: hideNodeIds.add(this.id); break;
+        }
     }
 }
 
@@ -152,14 +154,19 @@ export class DepthManager {
     nodeRerouteMap: { [key:string]:Id; } = {};
     bullet = new Bullet();
 
-    rerouteNodes(nodeIn: Node, floorNodeIds: IdSet, nodeOut: Node, isFloorReached = false, floorNodeId = "") {
+    rerouteNodes(nodeIn: Node, floorNodeIds: IdSet, hideNodeIds: IdSet, nodeOut: Node, isFloorReached = false, isHidden = false, floorNodeId = "") {
         nodeIn.children.forEach( childIn => {
             let childOut = new Node();
+
             let isFloorReachedForNext = isFloorReached || floorNodeIds.has(childIn.id);
             let floorNodeIdForNext = (!isFloorReached && isFloorReachedForNext) ? childIn.id : floorNodeId;
+
+            let isHiddenForNext = isHidden || hideNodeIds.has(childIn.id);
             
-            if (isFloorReached) {
+            if (isFloorReached) { // show current child if floor starts at it
                 this.nodeRerouteMap[childIn.id] = floorNodeId;
+            } else if (isHiddenForNext) { // do not show current child if hiding starts at it
+                this.nodeRerouteMap[childIn.id] = "";
             } else {
                 this.nodeRerouteMap[childIn.id] = childIn.id; // reroute to itself (no effect)
 
@@ -176,7 +183,7 @@ export class DepthManager {
 
                 nodeOut.children.push(childOut); // add it to ouput hierarchy
             }
-            this.rerouteNodes(childIn, floorNodeIds, childOut, isFloorReachedForNext, floorNodeIdForNext);
+            this.rerouteNodes(childIn, floorNodeIds, hideNodeIds, childOut, isFloorReachedForNext, isHiddenForNext, floorNodeIdForNext);
         });
     }
 
@@ -186,14 +193,14 @@ export class DepthManager {
             links.getNodeLinks(id).outputs.forEach( edge => {
                 if (edge.type !== EEdge.eHierarchy) {
                     const idDst = this.nodeRerouteMap[edge.idDst];
-                    if (idDst !== nodeId)
+                    if (nodeId && idDst && (idDst !== nodeId))
                         this.bullet.links.addEdge(nodeId, idDst, edge.type);
                 }
             })
             links.getNodeLinks(id).inputs.forEach( edge => {
                 if (edge.type !== EEdge.eHierarchy) {
                     const idSrc = this.nodeRerouteMap[edge.idSrc];
-                    if (idSrc !== nodeId)
+                    if (nodeId && idSrc && (idSrc !== nodeId))
                         this.bullet.links.addEdge(idSrc, nodeId, edge.type);
                 }
             })
@@ -202,7 +209,7 @@ export class DepthManager {
 
     pruneAndReorganize(bulletIn: Bullet): Bullet {
         this.bullet.clear();
-        this.rerouteNodes(bulletIn.hierarchy, bulletIn.floorNodeIds, this.bullet.hierarchy);
+        this.rerouteNodes(bulletIn.hierarchy, bulletIn.floorNodeIds, bulletIn.hideNodeIds, this.bullet.hierarchy);
         this.rerouteLinks(bulletIn.links);
         this.bullet.createHierarchyEdges(this.bullet.hierarchy);
         
@@ -215,11 +222,13 @@ export class Bullet {
     hierarchy = new Node();
     links = new LinksMap();
     floorNodeIds = new IdSet();
+    hideNodeIds = new IdSet();
 
     clear() {
         this.hierarchy = new Node();
         this.links = new LinksMap();
         this.floorNodeIds = new IdSet();
+        this.hideNodeIds = new IdSet();
     }
     
     // Parse the textual hierarchy into nested objects.
@@ -250,7 +259,7 @@ export class Bullet {
                 if (!this.line.isComment) {
                     let node = new Node();
     
-                    node.fill(this.line, this.links, this.floorNodeIds);
+                    node.fill(this.line, this.links, this.floorNodeIds, this.hideNodeIds);
     
                     // Create flow edges, if applicable
                     if (lastNode.id && (lastNode.bullet === EBullet.eFlow) && (node.bullet === EBullet.eFlow)) {

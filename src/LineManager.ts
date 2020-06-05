@@ -109,6 +109,7 @@ export class LineManager {
                     switch (this.components[i] as EVisibility) {
                         case EVisibility.eNormal: manageVisibilityComponent(i); break;
                         case EVisibility.eFloor: manageVisibilityComponent(i); break;
+                        case EVisibility.eHide: manageVisibilityComponent(i); break;
                     }
                 }
             }
@@ -141,6 +142,7 @@ export class LineManager {
                 switch (line.visibility) {
                     case EVisibility.eFloor:
                     case EVisibility.eNormal:
+                    case EVisibility.eHide:
                         replace(line.visibility, visibilityStr);
                         break;
                     case EVisibility.eUndefined:
@@ -155,18 +157,36 @@ export class LineManager {
             }
         });
     }
-    
-    foldLine() {
-        this.setVisibilityInDoc(EVisibility.eFloor);
-    
+
+    callUnfoldCommand() {
+        vscode.commands.executeCommand("editor.unfold");
+    }
+
+    callFoldCommandIfPossible() {
+        this.callUnfoldCommand(); // unfold first to avoid unexpected behavior if already folded
         let lineManager = new LineManager();
         if (lineManager.isActiveLineFoldable()) {
             vscode.commands.executeCommand("editor.fold");
         }
     }
     
+    foldLine() {
+        this.setVisibilityInDoc(EVisibility.eFloor);
+        this.callFoldCommandIfPossible();
+    }
+    
     unfoldLine() {
         this.setVisibilityInDoc(EVisibility.eNormal);
-        vscode.commands.executeCommand("editor.unfold");
+        this.callUnfoldCommand();
+    }
+
+    hideNode() {
+        this.setVisibilityInDoc(EVisibility.eHide);
+        this.callFoldCommandIfPossible();
+    }
+    
+    unhideNode() {
+        this.setVisibilityInDoc(EVisibility.eNormal);
+        this.callUnfoldCommand();
     }
 }

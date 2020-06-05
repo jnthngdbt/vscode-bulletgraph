@@ -13,7 +13,9 @@
 		"onCommand:vscode-bulletgraph.renderPreview",
 		"onCommand:vscode-bulletgraph.insertId",
 		"onCommand:vscode-bulletgraph.foldLine",
-		"onCommand:vscode-bulletgraph.unfoldLine"
+		"onCommand:vscode-bulletgraph.unfoldLine",
+		"onCommand:vscode-bulletgraph.hideNode",
+		"onCommand:vscode-bulletgraph.unhideNode"
 	],
 	"main": "./out/extension.js",
 	"contributes": {
@@ -33,6 +35,14 @@
 			{
 				"command": "vscode-bulletgraph.unfoldLine",
 				"title": "Bullet Graph: Unfold Line"
+			},
+			{
+				"command": "vscode-bulletgraph.hideNode",
+				"title": "Bullet Graph: Hide Node"
+			},
+			{
+				"command": "vscode-bulletgraph.unhideNode",
+				"title": "Bullet Graph: Unhide Node"
 			}
 		]
 	},
