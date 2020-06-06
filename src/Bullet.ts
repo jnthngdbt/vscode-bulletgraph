@@ -163,10 +163,10 @@ export class DepthManager {
 
             let isHiddenForNext = isHidden || hideNodeIds.has(childIn.id);
             
-            if (isFloorReached) { // show current child if floor starts at it
-                this.nodeRerouteMap[childIn.id] = floorNodeId;
-            } else if (isHiddenForNext) { // do not show current child if hiding starts at it
+            if (isHiddenForNext) { // do not show current child if hiding starts at it
                 this.nodeRerouteMap[childIn.id] = "";
+            } else if (isFloorReached) { // show current child if floor starts at it
+                this.nodeRerouteMap[childIn.id] = floorNodeId;
             } else {
                 this.nodeRerouteMap[childIn.id] = childIn.id; // reroute to itself (no effect)
 
