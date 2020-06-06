@@ -15,7 +15,8 @@
 		"onCommand:vscode-bulletgraph.foldLine",
 		"onCommand:vscode-bulletgraph.unfoldLine",
 		"onCommand:vscode-bulletgraph.hideNode",
-		"onCommand:vscode-bulletgraph.unhideNode"
+		"onCommand:vscode-bulletgraph.unhideNode",
+		"onCommand:vscode-bulletgraph.updateFolding"
 	],
 	"main": "./out/extension.js",
 	"contributes": {
@@ -43,6 +44,10 @@
 			{
 				"command": "vscode-bulletgraph.unhideNode",
 				"title": "Bullet Graph: Unhide Node"
+			},
+			{
+				"command": "vscode-bulletgraph.updateFolding",
+				"title": "Bullet Graph: Update Lines Folding"
 			}
 		]
 	},

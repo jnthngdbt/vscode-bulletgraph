@@ -30,17 +30,16 @@ export class LineManager {
         return this.isValid() && this.line.includes(LABEL_ID_SEP);
     }
 
-    isActiveLineFoldable(): boolean {
-        const activeLineIdx = this.getActiveLineIdx();
-        if (!activeLineIdx) return false;
+    isLineFoldable(lineIdx: number | undefined): boolean {
+        if (lineIdx === undefined) return false;
 
         // Next line.
-        this.parseLine(activeLineIdx + 1);
+        this.parseLine(lineIdx + 1);
         if (!this.isValid()) return false;
         const nextLineDepth = this.depth;
 
-        // Active line. Do it last so that line state is active line.
-        this.parseLine(activeLineIdx);
+        // Specified line. Do it last so that line state is active line.
+        this.parseLine(lineIdx);
         if (!this.isValid()) return false;
         const activeLineDepth = this.depth;
 
@@ -158,35 +157,68 @@ export class LineManager {
         });
     }
 
-    callUnfoldCommand() {
-        vscode.commands.executeCommand("editor.unfold");
+    callUnfoldCommand(lineIdx: number | undefined) {
+        if (lineIdx === undefined) {
+            vscode.commands.executeCommand("editor.unfold");
+            console.log("ok");
+            
+        } else {
+            vscode.commands.executeCommand("editor.unfold", { selectionLines: [lineIdx] });
+        }
     }
 
-    callFoldCommandIfPossible() {
-        this.callUnfoldCommand(); // unfold first to avoid unexpected behavior if already folded
-        let lineManager = new LineManager();
-        if (lineManager.isActiveLineFoldable()) {
+    callFoldCommand(lineIdx: number | undefined) {
+        if (lineIdx === undefined) {
             vscode.commands.executeCommand("editor.fold");
+        } else {
+            vscode.commands.executeCommand("editor.fold", { selectionLines: [lineIdx] });
+        }
+    }
+
+    callFoldCommandIfPossible(lineIdx: number | undefined) {
+        this.callUnfoldCommand(lineIdx); // unfold first to avoid unexpected behavior if already folded
+        let lineManager = new LineManager();
+        if (lineManager.isLineFoldable(lineIdx)) {
+            this.callFoldCommand(lineIdx);
         }
     }
     
     foldLine() {
         this.setVisibilityInDoc(EVisibility.eFloor);
-        this.callFoldCommandIfPossible();
+        this.callFoldCommandIfPossible(this.getActiveLineIdx());
     }
     
     unfoldLine() {
         this.setVisibilityInDoc(EVisibility.eNormal);
-        this.callUnfoldCommand();
+        this.callUnfoldCommand(this.getActiveLineIdx());
     }
 
     hideNode() {
         this.setVisibilityInDoc(EVisibility.eHide);
-        this.callFoldCommandIfPossible();
+        this.callFoldCommandIfPossible(this.getActiveLineIdx());
     }
     
     unhideNode() {
         this.setVisibilityInDoc(EVisibility.eNormal);
-        this.callUnfoldCommand();
+        this.callUnfoldCommand(this.getActiveLineIdx());
+    }
+
+    updateFolding() {
+        let doc = vscode.window.activeTextEditor?.document;
+        if (!doc) return;
+
+        let lineManager = new LineManager();
+
+        for (let i = doc.lineCount - 1; i >= 0; --i) {
+            lineManager.callUnfoldCommand(i);
+        }
+
+        for (let i = doc.lineCount - 1; i >= 0; --i) {
+            lineManager.clear();
+            lineManager.parseLine(i);
+            
+            if ([EVisibility.eFloor, EVisibility.eHide].includes(lineManager.visibility))
+                lineManager.callFoldCommandIfPossible(i);
+        }
     }
 }

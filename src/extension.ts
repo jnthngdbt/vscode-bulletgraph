@@ -57,6 +57,12 @@ export function activate(context: vscode.ExtensionContext) {
     );
 
     context.subscriptions.push(
+        vscode.commands.registerCommand('vscode-bulletgraph.updateFolding', () => {
+            lineManager.updateFolding();
+        })
+    );
+
+    context.subscriptions.push(
         vscode.workspace.onDidSaveTextDocument((doc: vscode.TextDocument) => {
             if (doc.fileName.endsWith(".blt"))
                 render();
