@@ -1,16 +1,16 @@
-- unreal engine 4
-    - datasmith // [+] datasmith
-        * importer of cad files from various cad design tools
+- unreal engine 4 // []
+    - datasmith // [] datasmith
+        * importer of cad files from various cad design tools // [x]
         - import options // []
             - elements to import (geometry, materials, lights, animations)
             - maximum edge length
             - normals
             - chord (max distance between triangles and parametric surface)
-    - dataprep // [+] 
+    - dataprep // [] 
         > create dataprep asset // []
             > content browser > add new > dataprep > dataprep asset
             > set file or folder to import top-right
-            > click import in toolbar // []
+            > click import in toolbar // [+]
                 > does a default datasmith import // [] <datasmith
                 > can visualize current state in viewer
             > define import workflow with available nodes bottom-left
@@ -18,7 +18,7 @@
             > when satisfied with workflow, click copy to project in toolbar // >projectContentDataprep
     - project // []
         - content // [+]
-            - dataprep // [+] projectContentDataprep
+            - dataprep // [] projectContentDataprep
                 - dataprep asset
                     * the dataprep pipeline, kind of blueprint
                 - dataprep scene // projectContentDataprepScene
