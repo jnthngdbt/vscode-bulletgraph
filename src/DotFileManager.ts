@@ -2,7 +2,7 @@ import * as vscode from 'vscode';
 import * as fs from 'fs';
 
 import { Bullet, Node, LinksMap } from './Bullet'
-import { ENode, EEdge } from './constants'
+import { ENode, EEdge, ERenderingEngine } from './constants'
 import { Strings } from './utils'
 
 export class DotFileManager {
@@ -141,18 +141,27 @@ export class DotFileManager {
         return str
     }
 
-    render(bullet: Bullet) {
+    render(bullet: Bullet, engine: ERenderingEngine) {
         const content = this.generate(bullet);
         const fullname = vscode.window.activeTextEditor?.document.fileName + ".dot";
-        fs.writeFile(fullname, content, () => this.writeCompletionHandler(fullname, content));
+        fs.writeFile(fullname, content, () => this.writeCompletionHandler(fullname, content, engine));
     }
 
-    writeCompletionHandler(fullname: string, content: string) {
-        let callback = (webpanel: any) => this.interactivePreviewWebpanelCallback(webpanel);
-        vscode.workspace.openTextDocument(fullname).then( (document) => {
-            let args = { document, content, callback };
-            vscode.commands.executeCommand("graphviz-interactive-preview.preview.beside", args);
-        });
+    writeCompletionHandler(fullname: string, content: string, engine: ERenderingEngine) {
+        switch (engine) {
+            case ERenderingEngine.eGraphviz:{
+                vscode.commands.executeCommand('graphviz.previewToSide', vscode.Uri.file(fullname));
+                break;
+            }
+            case ERenderingEngine.eGraphvizInteractive: {
+                let callback = (webpanel: any) => this.interactivePreviewWebpanelCallback(webpanel);
+                vscode.workspace.openTextDocument(fullname).then( (document) => {
+                    let args = { document, content, callback };
+                    vscode.commands.executeCommand("graphviz-interactive-preview.preview.beside", args);
+                });
+                break;
+            }
+        }
     }
 
     interactivePreviewWebpanelCallback(webpanel: any) {

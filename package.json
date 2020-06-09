@@ -52,7 +52,8 @@
 		]
 	},
 	"extensionDependencies": [
-		"tintinweb.graphviz-interactive-preview"
+		"tintinweb.graphviz-interactive-preview",
+		"joaompinto.vscode-graphviz"
 	],
 	"scripts": {
 		"vscode:prepublish": "npm run compile",
