@@ -35,31 +35,43 @@ export function activate(context: vscode.ExtensionContext) {
 
     context.subscriptions.push(
         vscode.commands.registerCommand('vscode-bulletgraph.foldLine', () => {
-            lineManager.foldLine();
+            lineManager.foldLine(lineManager.getActiveLineIdx());
         })
     );
 
     context.subscriptions.push(
         vscode.commands.registerCommand('vscode-bulletgraph.unfoldLine', () => {
-            lineManager.unfoldLine();
+            lineManager.unfoldLine(lineManager.getActiveLineIdx());
         })
     );
 
     context.subscriptions.push(
         vscode.commands.registerCommand('vscode-bulletgraph.hideNode', () => {
-            lineManager.hideNode();
+            lineManager.hideNode(lineManager.getActiveLineIdx());
         })
     );
 
     context.subscriptions.push(
         vscode.commands.registerCommand('vscode-bulletgraph.unhideNode', () => {
-            lineManager.unhideNode();
+            lineManager.unhideNode(lineManager.getActiveLineIdx());
         })
     );
 
     context.subscriptions.push(
         vscode.commands.registerCommand('vscode-bulletgraph.updateFolding', () => {
             lineManager.updateFolding();
+        })
+    );
+
+    context.subscriptions.push(
+        vscode.commands.registerCommand('vscode-bulletgraph.foldAll', () => {
+            lineManager.foldAll();
+        })
+    );
+
+    context.subscriptions.push(
+        vscode.commands.registerCommand('vscode-bulletgraph.unfoldAll', () => {
+            lineManager.unfoldAll();
         })
     );
 

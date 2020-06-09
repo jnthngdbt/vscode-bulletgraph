@@ -46,6 +46,10 @@ export class LineManager {
         return nextLineDepth > activeLineDepth;
     }
 
+    getLineCount(): number {
+        return vscode.window.activeTextEditor?.document.lineCount ?? 0;
+    }
+
     getActiveLineIdx(): number | undefined {
         return vscode.window?.activeTextEditor?.selection?.active.line;
     }
@@ -115,22 +119,22 @@ export class LineManager {
         }
     }
 
-    setVisibilityInDoc(visibilityStr: string) {
+    setVisibilityInDoc(lineIdx: number | undefined, visibilityStr: string, callback: any | undefined = undefined) {
         const editor = vscode.window.activeTextEditor;
-        if (!editor) return;
+        if ((lineIdx === undefined) || !editor) return;
     
-        let line = new LineManager();
-    
-        const lineIdx = line.getActiveLineIdx();
-        if (lineIdx === undefined) return;
-    
-        line.parseActiveLine();
-        if (!line.isValid() || line.isComment) return;
-    
+        let lineManager = new LineManager();
+        lineManager.parseLine(lineIdx);
+        
+        if (!lineManager.isValid() || lineManager.isComment) {
+            if (callback) callback();
+            return;
+        }
+
         editor.edit((editBuilder) => {
-            if (line.hasComponents()) {
+            if (lineManager.hasComponents()) {
                 let replace = (strIn: string, strOut: string) => {
-                    const pos = line.line.indexOf(strIn);
+                    const pos = lineManager.line.indexOf(strIn);
                     const range = new vscode.Range(
                         new vscode.Position(lineIdx, pos),
                         new vscode.Position(lineIdx, pos + strIn.length)
@@ -138,11 +142,11 @@ export class LineManager {
                     editBuilder.replace(range, strOut);
                 };
     
-                switch (line.visibility) {
+                switch (lineManager.visibility) {
                     case EVisibility.eFloor:
                     case EVisibility.eNormal:
                     case EVisibility.eHide:
-                        replace(line.visibility, visibilityStr);
+                        replace(lineManager.visibility, visibilityStr);
                         break;
                     case EVisibility.eUndefined:
                         replace(
@@ -151,17 +155,17 @@ export class LineManager {
                         break;
                 }
             } else {
-                editBuilder.insert(new vscode.Position(lineIdx, line.line.length), 
+                editBuilder.insert(new vscode.Position(lineIdx, lineManager.line.length), 
                     " " + LABEL_ID_SEP + " " + visibilityStr);
             }
+        }).then((success) => {
+            if (callback) callback();
         });
     }
 
     callUnfoldCommand(lineIdx: number | undefined) {
         if (lineIdx === undefined) {
             vscode.commands.executeCommand("editor.unfold");
-            console.log("ok");
-            
         } else {
             vscode.commands.executeCommand("editor.unfold", { selectionLines: [lineIdx] });
         }
@@ -183,42 +187,62 @@ export class LineManager {
         }
     }
     
-    foldLine() {
-        this.setVisibilityInDoc(EVisibility.eFloor);
-        this.callFoldCommandIfPossible(this.getActiveLineIdx());
+    foldLine(lineIdx: number | undefined) {
+        this.setVisibilityInDoc(lineIdx, EVisibility.eFloor);
+        this.callFoldCommandIfPossible(lineIdx);
     }
     
-    unfoldLine() {
-        this.setVisibilityInDoc(EVisibility.eNormal);
-        this.callUnfoldCommand(this.getActiveLineIdx());
+    unfoldLine(lineIdx: number | undefined) {
+        this.setVisibilityInDoc(lineIdx, EVisibility.eNormal);
+        this.callUnfoldCommand(lineIdx);
     }
 
-    hideNode() {
-        this.setVisibilityInDoc(EVisibility.eHide);
-        this.callFoldCommandIfPossible(this.getActiveLineIdx());
+    hideNode(lineIdx: number | undefined) {
+        this.setVisibilityInDoc(lineIdx, EVisibility.eHide);
+        this.callFoldCommandIfPossible(lineIdx);
     }
     
-    unhideNode() {
-        this.setVisibilityInDoc(EVisibility.eNormal);
-        this.callUnfoldCommand(this.getActiveLineIdx());
+    unhideNode(lineIdx: number | undefined) {
+        this.setVisibilityInDoc(lineIdx, EVisibility.eNormal);
+        this.callUnfoldCommand(lineIdx);
     }
 
     updateFolding() {
-        let doc = vscode.window.activeTextEditor?.document;
-        if (!doc) return;
-
         let lineManager = new LineManager();
 
-        for (let i = doc.lineCount - 1; i >= 0; --i) {
+        for (let i = this.getLineCount() - 1; i >= 0; --i) {
             lineManager.callUnfoldCommand(i);
         }
 
-        for (let i = doc.lineCount - 1; i >= 0; --i) {
+        for (let i = this.getLineCount() - 1; i >= 0; --i) {
             lineManager.clear();
             lineManager.parseLine(i);
             
             if ([EVisibility.eFloor, EVisibility.eHide].includes(lineManager.visibility))
                 lineManager.callFoldCommandIfPossible(i);
+        }
+    }
+
+    // Bleh. Document edit promise must resolve before doing another. Should do this more cleanly.
+    setVisibilityInDocChained(visibility: EVisibility, lineIdx: number) {
+        if (lineIdx < this.getLineCount()) {
+            this.setVisibilityInDoc(lineIdx, visibility, () => {
+                this.setVisibilityInDocChained(visibility, lineIdx + 1)
+            });
+        }
+    }
+
+    foldAll() {
+        this.setVisibilityInDocChained(EVisibility.eFloor, 0);
+        for (let i = this.getLineCount() - 1; i >= 0; --i) {
+            this.callFoldCommandIfPossible(i);
+        }
+    }
+
+    unfoldAll() {
+        this.setVisibilityInDocChained(EVisibility.eNormal, 0);
+        for (let i = this.getLineCount() - 1; i >= 0; --i) {
+            this.callUnfoldCommand(i);
         }
     }
 }
