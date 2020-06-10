@@ -26,8 +26,12 @@ export class LineManager {
         return !this.isComment && (this.depth >= 0);
     }
 
-    hasComponents(): boolean {
+    hasComponentSection(): boolean {
         return this.isValid() && this.line.includes(LABEL_ID_SEP);
+    }
+
+    hasComponents(): boolean {
+        return this.hasComponentSection() && (this.components.length > 0);
     }
 
     isLineFoldable(lineIdx: number | undefined): boolean {
@@ -119,44 +123,57 @@ export class LineManager {
         }
     }
 
-    setVisibilityInDoc(lineIdx: number | undefined, visibilityStr: string, callback: any | undefined = undefined) {
+    setVisibilityInDoc(lineIdx: number | undefined, visibility: EVisibility, callback: any | undefined = undefined) {
         const editor = vscode.window.activeTextEditor;
         if ((lineIdx === undefined) || !editor) return;
     
         let lineManager = new LineManager();
         lineManager.parseLine(lineIdx);
-        
-        if (!lineManager.isValid() || lineManager.isComment) {
+
+        if (!lineManager.isValid() || lineManager.isComment || (lineManager.visibility == visibility)) {
             if (callback) callback();
             return;
         }
 
+        const isVisibilityCompOptional = (visibility == EVisibility.eNormal) || (visibility == EVisibility.eUndefined);
+        const hasVisibilityComp = lineManager.visibility !== EVisibility.eUndefined;
+
+        // Possible cases. They should be exclusive, so testing order is not important.
+        const mustRemoveComponentSection = lineManager.hasComponentSection() && !lineManager.hasComponents() && isVisibilityCompOptional;
+        const mustCreateComponentSection = !lineManager.hasComponentSection() && !isVisibilityCompOptional;
+        const mustInsertVisibilityComp = lineManager.hasComponentSection() && !hasVisibilityComp && !isVisibilityCompOptional;
+        const mustReplaceVisibilityComp = hasVisibilityComp && !isVisibilityCompOptional;
+        const mustRemoveVisibilityCompOnly = lineManager.hasComponents() && hasVisibilityComp && isVisibilityCompOptional;
+
         editor.edit((editBuilder) => {
-            if (lineManager.hasComponents()) {
-                let replace = (strIn: string, strOut: string) => {
-                    const pos = lineManager.line.indexOf(strIn);
-                    const range = new vscode.Range(
-                        new vscode.Position(lineIdx, pos),
-                        new vscode.Position(lineIdx, pos + strIn.length)
-                    );
-                    editBuilder.replace(range, strOut);
-                };
-    
-                switch (lineManager.visibility) {
-                    case EVisibility.eFloor:
-                    case EVisibility.eNormal:
-                    case EVisibility.eHide:
-                        replace(lineManager.visibility, visibilityStr);
-                        break;
-                    case EVisibility.eUndefined:
-                        replace(
-                            LABEL_ID_SEP + " ", 
-                            LABEL_ID_SEP + " " + visibilityStr + " ");
-                        break;
+            let replace = (strIn: string, strOut: string) => {
+                const pos = lineManager.line.indexOf(strIn);
+                const range = new vscode.Range(
+                    new vscode.Position(lineIdx, pos),
+                    new vscode.Position(lineIdx, pos + strIn.length)
+                );
+                editBuilder.replace(range, strOut);
+            };
+
+            if (mustRemoveComponentSection) {
+                let compPos = lineManager.line.indexOf(LABEL_ID_SEP);
+                if (compPos > 0) {
+                    if (lineManager.line[compPos-1] === " ") compPos--; // remove trailing space if necessary
+                    replace(lineManager.line, lineManager.line.substr(0, compPos));
                 }
-            } else {
+            } else if (mustCreateComponentSection) {
                 editBuilder.insert(new vscode.Position(lineIdx, lineManager.line.length), 
-                    " " + LABEL_ID_SEP + " " + visibilityStr);
+                    " " + LABEL_ID_SEP + " " + visibility);
+            } else if (mustInsertVisibilityComp) {
+                replace(
+                    LABEL_ID_SEP, 
+                    LABEL_ID_SEP + " " + visibility)
+            } else if (mustReplaceVisibilityComp) {
+                replace(lineManager.visibility, visibility);
+            } else if (mustRemoveVisibilityCompOnly) {
+                replace(
+                    LABEL_ID_SEP + " " + lineManager.visibility + " ",
+                    LABEL_ID_SEP + " ");
             }
         }).then((success) => {
             if (callback) callback();
