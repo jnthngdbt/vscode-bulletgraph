@@ -1,14 +1,14 @@
-- information technology (IT) // []
-    - digital innovation team // []
+- information technology (IT)
+    - digital innovation team
         - members // [+]
             - Eric Vandermeeren
             - Jonathan Godbout
             - Marc Julien
             - Martin Vezina
-        - projects // []
+        - projects
             - 3d-scan-app // [x] id_3dscanapp
                 - overview
-                    - use case // []
+                    - use case
                         > sales consultant goes at client's house 
                         > uses bpro for sale process
                         > from bpro, launches 3d-scan-app
@@ -33,7 +33,7 @@
                         > enter mold specifications in database(s) // >id_Sqldatabases
                         > high resolution 3D scan
                         > put scan mesh on file server // >id_MoldScansProdServer
-            - DYOB 3.0 viewer // []
+            - DYOB 3.0 viewer
                 - overview
                 - CAD files
                     - bathfitter
@@ -44,25 +44,25 @@
                 - systems
                     - developer computer
                         - Lionel onedrive CAD files sync // <LionelOnedriveCadFiles
-    - systems // [+]
-        - teams // [x]
+    - systems // [x]
+        - teams
             - files 
-                - dyob cad files list // []
+                - dyob cad files list
                     // https://teams.microsoft.com/l/file/9CB49122-1E33-4411-8764-EC000C616536?tenantId=08d0bd98-977e-40f7-b3d7-4a3a0acd36e5&fileType=xlsx&objectUrl=https%3A%2F%2Fbmmtl.sharepoint.com%2Fsites%2F3DDYOB%2FShared%20Documents%2FGeneral%2F3D%20Data%20Requirements%2FDYOB%203D%20-%20MVP%20List.xlsx&baseUrl=https%3A%2F%2Fbmmtl.sharepoint.com%2Fsites%2F3DDYOB&serviceName=teams&threadId=19:57ae1bf279064dbfbbd1b50c0d5e8669@thread.tacv2&groupId=0565b8ad-5f98-4c91-bafb-6c1765ffa23d
                     // https://bmmtl-my.sharepoint.com/personal/lcoronelli_bathfitter_com/_layouts/15/onedrive.aspx?id=%2Fpersonal%2Flcoronelli%5Fbathfitter%5Fcom%2FDocuments%2FDYOB&originalPath=aHR0cHM6Ly9ibW10bC1teS5zaGFyZXBvaW50LmNvbS86ZjovZy9wZXJzb25hbC9sY29yb25lbGxpX2JhdGhmaXR0ZXJfY29tL0VxdzFOdjhyY0VWQnJHU2pTR09icXU4Qmo5TVN5MnV1T01CYVZTbUticVFkV0E%5FcnRpbWU9c1pXMnJuMEIyRWc
-        - developer computer // [+]
+        - developer computer
             - windows
                 - Unreal Engine
                 - git
                     - git client
                 - microsoft visual studio
                 - visual studio code
-                - mold data clone // []
+                - mold data clone
                 - bfmeasurement clone
             - mac
-        - jenkins // [+] id_Jenkins
-            - jobs // [+] id_JenkinsJobs
-                - daily // []
+        - jenkins // id_Jenkins
+            - jobs // id_JenkinsJobs
+                - daily
                     - update auto specs
                         > checkout latest release deployed in prod // <id_CredsBitbucket <id_3dscanappRepo 
                             > checkout 3d-scan-app release branch
@@ -83,7 +83,7 @@
                     - process bfi scans
                     - udpate jenkins data // id_UdpateJenkinsData <id_MoldDataRepo >id_MoldDataCloneJenkins
                         > runs git pull from mold data repo
-                - BFMeasurement multibranch pipeline // []
+                - BFMeasurement multibranch pipeline
                     - jenkinsfile (runs when pushing on branches)
                         - main pipeline
                             > checkout BFMeasurement from branch // <id_BfmeasurementRepo <id_CredsBitbucket
@@ -96,13 +96,13 @@
                             > test 'collision' test set // >id_JenkinsfileTestSet
                         - methods
                             > test set with scan atttribute // id_JenkinsfileTestSet >id_TestSets
-            - configuration // [+] id_JenkinsConfiguration
+            - configuration // id_JenkinsConfiguration
                 - credentials
                     - bitbucket // id_CredsBitbucket
                     - mac computer // id_CredsMacComputer
                         - jenkins user account // id_JenkinsUserAccount
                         - keychain access // id_KeychainAccess
-            - server (\\bfse-devmig) // [+]
+            - server (\\bfse-devmig)
                 - shared folders
                     - test
                         - test sets scans
@@ -111,8 +111,8 @@
                 - workspace
                     - branch
                         - BFMeasurement clone // id_BFMeasurementCloneJenkins
-            - agents // [+] id_JenkinsAgents
-                - windows (\\bfse-devmig) // []
+            - agents // id_JenkinsAgents
+                - windows (\\bfse-devmig)
                     - mold-data-clone
                         - config
                             - auto-specs csv files
@@ -121,13 +121,13 @@
                     - branch workspace
                         - bfmeasurement clone
                     - Unreal Engine
-                - mac // []
+                - mac
                     - 3d-scan-app clone
                         - bfmeasurement clone
                     - pcl-precompiled clone
                     - Unreal Engine
-        - file server 3d (\\bfse-3dapp1) // [] id_FileServer3d
-            - prod 3d-scan-app data // [+]
+        - file server 3d (\\bfse-3dapp1) // id_FileServer3d
+            - prod 3d-scan-app data
                 - mold data repo // id_MoldDataRepo
                     - mold scans // id_MoldScansProdServer
                     - config 
@@ -140,45 +140,45 @@
                     - bfi
                     - bpro
                     - standalone
-            - test 3d-scan-app data // [+]
+            - test 3d-scan-app data
                 - mold-data-repo
                 - scan-uploads
                     - bfi
                     - bpro
                     - standalone
-        - bitbucket // []
-            - bfmeasurement repo // [x] id_BfmeasurementRepo >id_BfmeasurementSubmodule
-                - tests // []
-                    - export mold features // [] id_ExportMoldFeatures
+        - bitbucket
+            - bfmeasurement repo // id_BfmeasurementRepo >id_BfmeasurementSubmodule
+                - tests
+                    - export mold features // id_ExportMoldFeatures
                     - export scan features // id_ExportScanFeatures
                     - test sets // id_TestSets
                     - process bfi scans // testProcessBfiScans
                     - test memory leak // id_TestMemoryLeak
-                - auto-specs python script // [] id_AutospecsPythonScript
+                - auto-specs python script // id_AutospecsPythonScript
                     > compute tolerances
                     > generate clean mold features CSV file
-                - recognition engine // []
+                - recognition engine
                     - algorithm
                         > load catalog
-                        > load parameters // [+]
+                        > load parameters
                             ? if parameters file exists 
                                 > load-xml
                             ? else
                                 > use-defaults
                         > load-scan-mesh
                         > preprocessing
-                        > short-list // []
+                        > short-list
                             > compute scan auto specs
                             > match molds auto specs
                                 > keep mold if within tolerances
                         > score with icp
                         ? if bfu known
                             > weighted score from historical data
-            - 3d-scan-app repo // [x] id_3dscanappRepo
+            - 3d-scan-app repo // id_3dscanappRepo
                 - release tags
                 - bfmeasurement submodule // id_BfmeasurementSubmodule
-        - sql-databases // [] id_Sqldatabases
-            - sedev-sql2005-0-sql2k12 // [+]
+        - sql-databases // id_Sqldatabases
+            - sedev-sql2005-0-sql2k12
                 - tables
                     - test-result
                     - test
@@ -190,4 +190,4 @@
                         - ScanId
                         - FileName (on fileserver)
                         - MoldNo
-                        - Processed // [+] <testProcessBfiScans
+                        - Processed // <testProcessBfiScans
