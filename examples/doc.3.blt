@@ -1,12 +1,12 @@
 - information technology (IT)
     - digital innovation team
-        - members // [+]
+        - people
             - Eric Vandermeeren
             - Jonathan Godbout
             - Marc Julien
             - Martin Vezina
         - projects
-            - 3d-scan-app // [x] id_3dscanapp
+            - 3d-scan-app // id_3dscanapp
                 - overview
                     - use case
                         > sales consultant goes at client's house 
@@ -36,15 +36,27 @@
             - DYOB 3.0 viewer
                 - overview
                 - CAD files
-                    - bathfitter
+                    - bathfitter objects
                         - designed in solidworks
                             - stored on Lionel onedrive // LionelOnedriveCadFiles
-                    - Manufacturers
+                    - external manufacturers objects
                         - delta
                 - systems
+                    - mechanical designer computer
+                        - solidworks
+                        - cad files
                     - developer computer
                         - Lionel onedrive CAD files sync // <LionelOnedriveCadFiles
-    - systems // [x]
+    - processes
+        - release production update
+            > entry in CRB confluence page // >id_ChangeReleaseBoardConfluencePage
+            > CRB meet thursdays afternoon
+            > CRB approves 
+    - systems
+        - change release board // id_ChangeReleaseBoard
+        - onedrive/sharepoint
+        - confluence
+            - change release board (CRB) page // id_ChangeReleaseBoardConfluencePage
         - teams
             - files 
                 - dyob cad files list
@@ -62,7 +74,7 @@
             - mac
         - jenkins // id_Jenkins
             - jobs // id_JenkinsJobs
-                - daily
+                - daily // [+]
                     - update auto specs
                         > checkout latest release deployed in prod // <id_CredsBitbucket <id_3dscanappRepo 
                             > checkout 3d-scan-app release branch
@@ -96,6 +108,9 @@
                             > test 'collision' test set // >id_JenkinsfileTestSet
                         - methods
                             > test set with scan atttribute // id_JenkinsfileTestSet >id_TestSets
+                - 3d-scan-app multibranch pipeline
+                - release 3d-scan-app
+                    - 
             - configuration // id_JenkinsConfiguration
                 - credentials
                     - bitbucket // id_CredsBitbucket
@@ -178,16 +193,50 @@
                 - release tags
                 - bfmeasurement submodule // id_BfmeasurementSubmodule
         - sql-databases // id_Sqldatabases
+            - sql-live\sql2k5
+                - webdata-live
+                    - tables
+                        - [dbo].[3DScan]
+                            - ScanId
+                            - AppointmentID
+                            - MoldNo
+                            - Processed
+                            - Filename
             - sedev-sql2005-0-sql2k12
-                - tables
-                    - test-result
-                    - test
-                    - scan-attribute
-                    - mold
-                    - 3d-scan-task
-                - views
-                    - BFI_Scan
-                        - ScanId
-                        - FileName (on fileserver)
-                        - MoldNo
-                        - Processed // <testProcessBfiScans
+                - 3D_Tests
+                    - tables
+                        - dbo.Test
+                        - dbo.TestResult
+                            - TestResultID
+                            - BuildID
+                            - TestID
+                            - ScanID
+                            - Rank
+                            - RankWeighted
+                            - RunTime
+                        - dbo.TestResult_Mold
+                            - BuildID
+                            - TestID
+                            - MoldID
+                            - TestResultID
+                            - Rank
+                            - Score
+                            - RejectionReason
+                        - dbo.ScanAttribute
+                            - id
+                            - code
+                            - description
+                        - dbo.Mold
+                        - dbo.3dScanTask
+                    - views
+                        - BFI_Scan
+                            - ScanId
+                            - FileName (on fileserver)
+                            - MoldNo
+                            - Processed // <testProcessBfiScans
+                            - ScanDate
+                            - ProcessedDate // <testProcessBfiScans
+                    - procedures
+                        - [dbo].[updateBFIScanData]
+
+

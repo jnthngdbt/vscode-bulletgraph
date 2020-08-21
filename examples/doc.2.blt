@@ -19,9 +19,11 @@
             - support label containing "guillemets"
             - support spaces and/or tabs mixed
             - subgraph label size proportional to number of dependencies
-            - auto line breaks
-                - number of chars threshold
+            - auto line breaks (number of chars threshold)
+            - support comments (graphviz is like c++)
         - what to do
+            - fold/unfold to maximum depth
+            - fold everything except current node
             - generalize bullet: skip hierarchy, hide subgraph, floor, limit depth
             - font size multiple of depth (inversely; leaves are 120)
                 - potential big images in size, but may be easily compressed (may)
@@ -33,10 +35,6 @@
                 - make node and links bold red
             - group leaves together in same node
             - support condition flow (if, else) displayed with triangle
-            - support comments
-                - graphviz is like c++  
-                    - but used for ids
-            - support a marker to specify nodes to show
             - write generated.dot file in hidden app data and preview it auto
             - syntax highlighting // <id_OpenDebugInstance >>>id_SupportMarkdown
             - detect duplicate id
