@@ -297,8 +297,11 @@ export class Bullet {
             if (lhs.bullet !== rhs.bullet) return 0; // do not change order
             if (lhs.bullet === EBullet.eFlow) return 0; // do not change order
             if (lhs.getType() === rhs.getType()) return 0; // do not change order
-            if (lhs.isSubgraph()) return -1; // we want subgraphs first
-            return 1 // here a subgraph is on right and not left, so we want to switch
+            if (lhs.isSubgraph() && !rhs.isSubgraph()) return -1; // we want subgraphs first
+            if (rhs.isSubgraph() && !lhs.isSubgraph()) return 1; // we want subgraphs first
+            if (!lhs.isLeaf() && rhs.isLeaf()) return -1; // we want subgraphs first
+            if (!rhs.isLeaf() && lhs.isLeaf()) return 1; // we want subgraphs first
+            return 0;
         });
     
         // Create hierarchy edges to children, and recurse.
