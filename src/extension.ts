@@ -17,7 +17,7 @@ function render() {
 
     // Render a Graphviz dot file.
     let dotFileManager = new DotFileManager();
-    dotFileManager.render(depthBullet, ERenderingEngine.eGraphviz);
+    dotFileManager.render(depthBullet, ERenderingEngine.eGraphvizInteractive);
 }
 
 export function activate(context: vscode.ExtensionContext) {

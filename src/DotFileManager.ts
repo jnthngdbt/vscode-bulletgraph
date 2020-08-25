@@ -2,7 +2,7 @@ import * as vscode from 'vscode';
 import * as fs from 'fs';
 
 import { Bullet, Node, LinksMap } from './Bullet'
-import { ENode, EEdge, ERenderingEngine } from './constants'
+import { ENode, EEdge, ERenderingEngine, FONTSIZE_FACTOR } from './constants'
 import { Strings } from './utils'
 
 export class DotFileManager {
@@ -86,7 +86,7 @@ export class DotFileManager {
             if (node.type == type) {
                 // Determine a font size, depending on dependency size.
                 // atan(0.1) ~ 0.1, atan(0.5) ~ 0.45, atan(1) ~ 0.8, atan(10) ~ 1.5 
-                const curveFactor = 50; // lower: big numbers damped // higher: more linear, can cause big graphs to have extreme big fonts
+                const curveFactor = FONTSIZE_FACTOR; // lower: big numbers damped // higher: more linear, can cause big graphs to have extreme big fonts
                 const fontsize = Math.round(14 + Math.atan(node.dependencySize / curveFactor) * curveFactor);
     
                 str += indent + node.id;
