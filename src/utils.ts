@@ -28,7 +28,7 @@ export namespace Strings {
         });
     }
 
-    export function wordWrap(str: string, maxCharsOnLine = 25): string {
+    export function wordWrap(str: string, newLineChar = "\\n", maxCharsOnLine = 25): string {
         str = str.trim();
     
         // Determine where to cut.
@@ -48,7 +48,7 @@ export namespace Strings {
     
             const canCut = (ch == ' ') || (ch == '\t') || (ch == '-') || (ch == '\\') || (ch == '/');
             if (canCut && (i >= currentLineBreak * cutSteps)) {
-                wrappedStr += "\\n";
+                wrappedStr += newLineChar;
                 currentLineBreak++;
             }
         }

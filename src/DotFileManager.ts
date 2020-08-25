@@ -32,17 +32,17 @@ export class DotFileManager {
         str += "\n";
     
         str += indent + "// Node style for type SUBGRAPH_PROCESS. \n";
-        str += indent + "node [color=grey30, fontcolor=\"#aaaadd\", fontsize=14, shape=plain] \n";
+        str += indent + "node [color=grey30, fontcolor=\"#aaaadd\", fontsize=14, shape=plain] \n"; // #aaaadd/#8888bb
         str += this.printNodes(root.children, indent, ENode.eSubgraphProcess);
         str += "\n";
         
         str += indent + "// Node style for type DATA. \n";
-        str += indent + "node [color=grey20, fontcolor=grey60, fontsize=14, style=none, shape=box] \n";
+        str += indent + "node [color=grey20, fontcolor=grey70, fontsize=14, style=none, shape=box] \n";
         str += this.printNodes(root.children, indent, ENode.eDefault);
         str += "\n";
     
         str += indent + "// Node style for type PROCESS. \n";
-        str += indent + "node [color=\"#555588\", fontcolor=\"#8888bb\", fontsize=14, style=rounded, shape=box] \n";
+        str += indent + "node [color=\"#555588\", fontcolor=\"#9999bb\", fontsize=14, style=rounded, shape=box] \n";
         str += this.printNodes(root.children, indent, ENode.eProcess);
         str += "\n";
         
@@ -129,23 +129,23 @@ export class DotFileManager {
     
         let str = "";
         children.forEach( node => {
-            if (node.children.length >= 1) {
+            if (node.isSubgraph()) {
                 let style = "";
                 
-                if (node.isSubgraph()) {
-                    if (node.isProcess()) {
-                        style = "color = \"#555588\"; style = rounded";
-                    } else {
-                        style = "color = gray30; style = none";
-                    }
+                if (node.isProcess()) {
+                    style = "color = \"#555588\"; style = rounded";
+                } else {
+                    style = "color = gray30; style = none";
                 }
     
                 str += "\n";
                 str += indent + "subgraph cluster" + node.id + " {\n";
                 str += indent + Strings.TAB + style + "\n";
-                str += indent + Strings.TAB + node.id + " [label=\"" + Strings.wordWrap(node.label) + "\"] // subgraph name \n";
+                str += indent + Strings.TAB + node.id + " [label=< <B>" + Strings.wordWrap(node.label, "<BR/>") + "</B> >] // subgraph name \n";
                 str += this.printNodesHierarchy(node.children, indent + Strings.TAB);
                 str += indent + "} \n";
+            } else if (!node.isLeaf()) {
+                str += indent + node.id + " [label=< <B>" + Strings.wordWrap(node.label, "<BR/>") + "</B> >]\n";
             } else {
                 str += indent + node.id + " [label=\"" + Strings.wordWrap(node.label) + "\"]\n";
             }
