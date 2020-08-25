@@ -10,7 +10,6 @@ export type Id = string;
 
 export class Node {
     bullet: EBullet = EBullet.eDefault;
-    type: ENode = ENode.eDefault;
     label: string = "";
     id: Id = "";
     dependencySize = 0;
@@ -23,16 +22,40 @@ export class Node {
     }
 
     isLeaf() {
-        return (this.type === ENode.eDefault) || (this.type === ENode.eProcess);
+        return this.dependencySize === 0;
+    }
+
+    isSubgraph() {
+        return this.children.length > 0;
     }
 
     isProcess() {
-        return (this.type === ENode.eProcess) || (this.type === ENode.eSubgraphProcess);
+        return this.bullet === EBullet.eFlow;
+    }
+
+    getType(): ENode {
+        if (this.bullet === EBullet.eDefault) {
+            if (this.children.length > 0) {
+                return ENode.eSubgraph;
+            } else if (this.dependencySize > 0) {
+                return ENode.eFolded;
+            } else {
+                return ENode.eDefault;
+            }
+        } else if (this.bullet === EBullet.eFlow) {
+            if (this.children.length > 0) {
+                return ENode.eSubgraphProcess;
+            } else if (this.dependencySize > 0) {
+                return ENode.eProcessFolded;
+            } else {
+                return ENode.eProcess;
+            }
+        }
+        return ENode.eDefault;
     }
 
     clear() {
         this.bullet = EBullet.eDefault;
-        this.type = ENode.eDefault;
         this.label = "";
         this.id = "";
         this.children = [];
@@ -45,13 +68,6 @@ export class Node {
 
     fill(line: LineManager, links: LinksMap, floorNodeIds: IdSet, hideNodeIds: IdSet) {
         this.bullet = line.bullet;
-
-        if (this.bullet === EBullet.eFlow) {
-            this.type = ENode.eProcess;
-        } else {
-            this.type = ENode.eDefault;
-        }
-    
         this.label = line.label;
     
         // Get node ID. Create one if necessary.
@@ -175,12 +191,6 @@ export class DepthManager {
                 childOut.dependencySize = childIn.dependencySize;
                 childOut.id = childIn.id;
                 childOut.label = childIn.label;
-                childOut.type = childIn.type;
-
-                if (isFloorReachedForNext) {
-                    childOut.type = childOut.isProcess() ? ENode.eProcess : ENode.eDefault;
-                }
-
                 nodeOut.children.push(childOut); // add it to ouput hierarchy
             }
             this.rerouteNodes(childIn, floorNodeIds, hideNodeIds, childOut, isFloorReachedForNext, isHiddenForNext, floorNodeIdForNext);
@@ -265,16 +275,9 @@ export class Bullet {
                     if (lastNode.id && (lastNode.bullet === EBullet.eFlow) && (node.bullet === EBullet.eFlow)) {
                         this.links.addEdge(lastNode.id, node.id, EEdge.eFlow);
                     }
-    
-                    // Force subgraph type of parent node, since now have child.
-                    const depth = this.line.depth;
-                    if (currentParentForIndent[depth].bullet === EBullet.eFlow) {
-                        currentParentForIndent[depth].type = ENode.eSubgraphProcess;
-                    } else {
-                        currentParentForIndent[depth].type = ENode.eSubgraph;
-                    }
-    
+                    
                     // Fill hierarchy.
+                    const depth = this.line.depth;
                     currentParentForIndent[depth].children.push(node)
                     currentParentForIndent[depth + 1] = node
     
@@ -293,9 +296,8 @@ export class Bullet {
         node.children.sort((lhs, rhs) => {
             if (lhs.bullet !== rhs.bullet) return 0; // do not change order
             if (lhs.bullet === EBullet.eFlow) return 0; // do not change order
-            if (lhs.type === rhs.type) return 0; // do not change order
-            if (lhs.type === ENode.eSubgraphProcess) return -1; // we want subgraphs first
-            if (lhs.type === ENode.eSubgraph) return -1; // we want subgraphs first
+            if (lhs.getType() === rhs.getType()) return 0; // do not change order
+            if (lhs.isSubgraph()) return -1; // we want subgraphs first
             return 1 // here a subgraph is on right and not left, so we want to switch
         });
     

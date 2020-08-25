@@ -45,6 +45,16 @@ export class DotFileManager {
         str += indent + "node [color=\"#555588\", fontcolor=\"#8888bb\", fontsize=14, style=rounded, shape=box] \n";
         str += this.printNodes(root.children, indent, ENode.eProcess);
         str += "\n";
+        
+        str += indent + "// Node style for type DATA (folded). \n";
+        str += indent + "node [color=grey20, fontcolor=grey80, fontsize=14, style=none, shape=box] \n";
+        str += this.printNodes(root.children, indent, ENode.eFolded);
+        str += "\n";
+    
+        str += indent + "// Node style for type PROCESS (folded). \n";
+        str += indent + "node [color=\"#555588\", fontcolor=\"#aaaadd\", fontsize=14, style=rounded, shape=box] \n";
+        str += this.printNodes(root.children, indent, ENode.eProcessFolded);
+        str += "\n";
     
         str += indent + "// Edge style for type FLOW. \n";
         str += indent + "edge [color=\"#555588\", style=straight] \n";
@@ -83,7 +93,7 @@ export class DotFileManager {
         
         let str = "";
         children.forEach( node => {
-            if (node.type == type) {
+            if (node.getType() == type) {
                 // Determine a font size, depending on dependency size.
                 // atan(0.1) ~ 0.1, atan(0.5) ~ 0.45, atan(1) ~ 0.8, atan(10) ~ 1.5 
                 const curveFactor = FONTSIZE_FACTOR; // lower: big numbers damped // higher: more linear, can cause big graphs to have extreme big fonts
@@ -121,10 +131,13 @@ export class DotFileManager {
         children.forEach( node => {
             if (node.children.length >= 1) {
                 let style = "";
-                if (node.type === ENode.eSubgraphProcess) {
-                    style = "color = \"#555588\"; style = rounded";
-                } else if (node.type === ENode.eSubgraph) {
-                    style = "color = gray30; style = none";
+                
+                if (node.isSubgraph()) {
+                    if (node.isProcess()) {
+                        style = "color = \"#555588\"; style = rounded";
+                    } else {
+                        style = "color = gray30; style = none";
+                    }
                 }
     
                 str += "\n";
