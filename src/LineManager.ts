@@ -297,6 +297,12 @@ export class LineManager {
 
     revealNode(lineIdx: number) {
         this.parseActiveLine();
-        this.setVisibilityInDocChainedParentsReverse(EVisibility.eNormal, lineIdx, this.depth);
+
+        if (this.visibility === EVisibility.eHide) // special case when start line is hidden
+            this.setVisibilityInDoc(lineIdx, EVisibility.eNormal, undefined, (lineManager: LineManager) => {
+                this.setVisibilityInDocChainedParentsReverse(EVisibility.eNormal, lineIdx, this.depth);
+            });
+        else
+            this.setVisibilityInDocChainedParentsReverse(EVisibility.eNormal, lineIdx, this.depth);
     }
 }
