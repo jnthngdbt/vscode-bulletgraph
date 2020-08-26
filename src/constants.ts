@@ -1,5 +1,8 @@
 export const COMMENT = "//";
 export const LABEL_ID_SEP = "//";
+export const BASE_FONTSIZE = 30;
+export const BASE_ARROWSIZE = 2;
+export const BASE_PENWIDTH = 2;
 export const FONTSIZE_FACTOR = 2;
 
 export enum ENode { eDefault, eProcess, eSubgraph, eSubgraphProcess, eFolded, eProcessFolded };

@@ -2,7 +2,7 @@ import * as vscode from 'vscode';
 import * as fs from 'fs';
 
 import { Bullet, Node, LinksMap } from './Bullet'
-import { ENode, EEdge, ERenderingEngine, FONTSIZE_FACTOR } from './constants'
+import { ENode, EEdge, ERenderingEngine, BASE_ARROWSIZE, BASE_FONTSIZE, BASE_PENWIDTH, FONTSIZE_FACTOR } from './constants'
 import { Strings } from './utils'
 
 export class DotFileManager {
@@ -22,37 +22,37 @@ export class DotFileManager {
     
         str += indent + "// High level default styles. \n";
         str += indent + "graph [bgcolor = grey10, fontcolor = grey50, fontname=\"arial narrow\"] \n";
-        str += indent + "edge [fontname=\"arial narrow\"] \n";
-        str += indent + "node [fontname=\"arial narrow\"] \n";
+        str += indent + `edge [fontname=\"arial narrow\", penwidth=${BASE_PENWIDTH}, arrowsize=${BASE_ARROWSIZE}] \n`;
+        str += indent + `node [fontname=\"arial narrow\", penwidth=${BASE_PENWIDTH}] \n`;
         str += "\n";
     
         str += indent + "// Node style for type SUBGRAPH_DATA. \n";
-        str += indent + "node [color=grey30, fontcolor=grey80, fontsize=14, shape=plain] \n";
+        str += indent + `node [color=grey30, fontcolor=grey80, fontsize=${BASE_FONTSIZE}, shape=plain] \n`;
         str += this.printNodes(root.children, indent, ENode.eSubgraph);
         str += "\n";
     
         str += indent + "// Node style for type SUBGRAPH_PROCESS. \n";
-        str += indent + "node [color=grey30, fontcolor=\"#aaaadd\", fontsize=14, shape=plain] \n"; // #aaaadd/#8888bb
+        str += indent + `node [color=grey30, fontcolor=\"#aaaadd\", fontsize=${BASE_FONTSIZE}, shape=plain] \n`; // #aaaadd/#8888bb
         str += this.printNodes(root.children, indent, ENode.eSubgraphProcess);
         str += "\n";
         
         str += indent + "// Node style for type DATA. \n";
-        str += indent + "node [color=grey20, fontcolor=grey70, fontsize=14, style=none, shape=box] \n";
+        str += indent + `node [color=grey20, fontcolor=grey70, fontsize=${BASE_FONTSIZE}, style=none, shape=box] \n`;
         str += this.printNodes(root.children, indent, ENode.eDefault);
         str += "\n";
     
         str += indent + "// Node style for type PROCESS. \n";
-        str += indent + "node [color=\"#555588\", fontcolor=\"#9999bb\", fontsize=14, style=rounded, shape=box] \n";
+        str += indent + `node [color=\"#555588\", fontcolor=\"#9999bb\", fontsize=${BASE_FONTSIZE}, style=rounded, shape=box] \n`;
         str += this.printNodes(root.children, indent, ENode.eProcess);
         str += "\n";
         
         str += indent + "// Node style for type DATA (folded). \n";
-        str += indent + "node [color=grey20, fontcolor=grey80, fontsize=14, style=none, shape=box] \n";
+        str += indent + `node [color=grey20, fontcolor=grey80, fontsize=${BASE_FONTSIZE}, style=none, shape=box] \n`;
         str += this.printNodes(root.children, indent, ENode.eFolded);
         str += "\n";
     
         str += indent + "// Node style for type PROCESS (folded). \n";
-        str += indent + "node [color=\"#555588\", fontcolor=\"#aaaadd\", fontsize=14, style=rounded, shape=box] \n";
+        str += indent + `node [color=\"#555588\", fontcolor=\"#aaaadd\", fontsize=${BASE_FONTSIZE}, style=rounded, shape=box] \n`;
         str += this.printNodes(root.children, indent, ENode.eProcessFolded);
         str += "\n";
     
@@ -67,7 +67,7 @@ export class DotFileManager {
         str += "\n";
     
         str += indent + "// Edge style for type LINK. \n";
-        str += indent + "edge [color=\"#bb55bb\", style=straight, arrowtail=inv, arrowhead=normal, penwidth=1] \n"; // known random bug with dir=both when splines=ortho
+        str += indent + "edge [color=\"#bb55bb\", style=straight, arrowtail=inv, arrowhead=normal] \n"; // known random bug with dir=both when splines=ortho
         str += this.printEdges(indent, bullet.links, EEdge.eLink);
         str += "\n";
         
@@ -97,7 +97,7 @@ export class DotFileManager {
                 // Determine a font size, depending on dependency size.
                 // atan(0.1) ~ 0.1, atan(0.5) ~ 0.45, atan(1) ~ 0.8, atan(10) ~ 1.5 
                 const curveFactor = FONTSIZE_FACTOR; // lower: big numbers damped // higher: more linear, can cause big graphs to have extreme big fonts
-                const fontsize = Math.round(14 + Math.atan(node.dependencySize / curveFactor) * curveFactor);
+                const fontsize = Math.round(BASE_FONTSIZE + Math.atan(node.dependencySize / curveFactor) * curveFactor);
     
                 str += indent + node.id;
                 if (node.dependencySize)
@@ -133,9 +133,9 @@ export class DotFileManager {
                 let style = "";
                 
                 if (node.isProcess()) {
-                    style = "color = \"#555588\"; style = rounded";
+                    style = `color = \"#555588\"; style = rounded; penwidth = ${BASE_PENWIDTH}`;
                 } else {
-                    style = "color = gray30; style = none";
+                    style = `color = gray30; style = none; penwidth = ${BASE_PENWIDTH}`;
                 }
     
                 str += "\n";
