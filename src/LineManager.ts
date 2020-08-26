@@ -66,6 +66,7 @@ export class LineManager {
         this.clear();
 
         if (lineIdx === undefined) return;
+        if (lineIdx < 0) return;
 
         const editor = vscode.window.activeTextEditor;
         if (!editor) return;
@@ -123,15 +124,17 @@ export class LineManager {
         }
     }
 
-    setVisibilityInDoc(lineIdx: number | undefined, visibility: EVisibility, callback: any | undefined = undefined) {
+    setVisibilityInDoc(lineIdx: number | undefined, visibility: EVisibility, maxDepth: number | undefined = undefined, callback: any | undefined = undefined) {
         const editor = vscode.window.activeTextEditor;
         if ((lineIdx === undefined) || !editor) return;
     
         let lineManager = new LineManager();
         lineManager.parseLine(lineIdx);
 
-        if (!lineManager.isValid() || lineManager.isComment || (lineManager.visibility == visibility)) {
-            if (callback) callback();
+        const isMaxDepthRespected = (maxDepth === undefined) || (lineManager.depth < maxDepth);
+
+        if (!lineManager.isValid() || lineManager.isComment || (lineManager.visibility == visibility) || !isMaxDepthRespected) {
+            if (callback) callback(lineManager);
             return;
         }
 
@@ -176,7 +179,7 @@ export class LineManager {
                     LABEL_ID_SEP + " ");
             }
         }).then((success) => {
-            if (callback) callback();
+            if (callback) callback(lineManager);
         });
     }
 
@@ -243,8 +246,18 @@ export class LineManager {
     // Bleh. Document edit promise must resolve before doing another. Should do this more cleanly.
     setVisibilityInDocChained(visibility: EVisibility, lineIdx: number) {
         if (lineIdx < this.getLineCount()) {
-            this.setVisibilityInDoc(lineIdx, visibility, () => {
+            this.setVisibilityInDoc(lineIdx, visibility, undefined, (lineManager: LineManager) => {
                 this.setVisibilityInDocChained(visibility, lineIdx + 1)
+            });
+        }
+    }
+
+    // Bleh. Document edit promise must resolve before doing another. Should do this more cleanly.
+    setVisibilityInDocChainedParentsReverse(visibility: EVisibility, lineIdx: number, maxDepth: number) {
+        if (lineIdx >= 0) {
+            this.setVisibilityInDoc(lineIdx, visibility, maxDepth, (lineManager: LineManager) => {
+                let nextMaxDepth = (lineManager.depth >= 0 && lineManager.depth < maxDepth) ? lineManager.depth : maxDepth;
+                this.setVisibilityInDocChainedParentsReverse(visibility, lineIdx - 1, nextMaxDepth);
             });
         }
     }
@@ -261,5 +274,10 @@ export class LineManager {
         for (let i = this.getLineCount() - 1; i >= 0; --i) {
             this.callUnfoldCommand(i);
         }
+    }
+
+    revealNode(lineIdx: number) {
+        this.parseActiveLine();
+        this.setVisibilityInDocChainedParentsReverse(EVisibility.eNormal, lineIdx, this.depth);
     }
 }

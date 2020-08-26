@@ -58,6 +58,10 @@
 			{
 				"command": "vscode-bulletgraph.unfoldAll",
 				"title": "Bullet Graph: Unfold All"
+			},
+			{
+				"command": "vscode-bulletgraph.revealNode",
+				"title": "Bullet Graph: Reveal Node"
 			}
 		]
 	},
