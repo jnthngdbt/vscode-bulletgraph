@@ -124,16 +124,16 @@ export class LineManager {
         }
     }
 
-    setVisibilityInDoc(lineIdx: number | undefined, visibility: EVisibility, maxDepth: number | undefined = undefined, callback: any | undefined = undefined) {
+    setVisibilityInDoc(lineIdx: number | undefined, visibility: EVisibility, selector: any | undefined = undefined, callback: any | undefined = undefined) {
         const editor = vscode.window.activeTextEditor;
         if ((lineIdx === undefined) || !editor) return;
     
         let lineManager = new LineManager();
         lineManager.parseLine(lineIdx);
 
-        const isMaxDepthRespected = (maxDepth === undefined) || (lineManager.depth < maxDepth);
+        const isSelectorRespected = (selector === undefined) || selector(lineManager);
 
-        if (!lineManager.isValid() || lineManager.isComment || (lineManager.visibility == visibility) || !isMaxDepthRespected) {
+        if (!lineManager.isValid() || lineManager.isComment || (lineManager.visibility == visibility) || !isSelectorRespected) {
             if (callback) callback(lineManager);
             return;
         }
@@ -244,21 +244,27 @@ export class LineManager {
     }
 
     // Bleh. Document edit promise must resolve before doing another. Should do this more cleanly.
-    setVisibilityInDocChained(visibility: EVisibility, lineIdx: number) {
+    setVisibilityInDocChained(visibility: EVisibility, lineIdx: number, selector: any | undefined = undefined, completionHandler: any | undefined = undefined) {
         if (lineIdx < this.getLineCount()) {
-            this.setVisibilityInDoc(lineIdx, visibility, undefined, (lineManager: LineManager) => {
-                this.setVisibilityInDocChained(visibility, lineIdx + 1)
+            this.setVisibilityInDoc(lineIdx, visibility, selector, (lineManager: LineManager) => {
+                this.setVisibilityInDocChained(visibility, lineIdx + 1, selector, completionHandler);
             });
+        } else if (completionHandler !== undefined) {
+            completionHandler();
         }
     }
 
     // Bleh. Document edit promise must resolve before doing another. Should do this more cleanly.
     setVisibilityInDocChainedParentsReverse(visibility: EVisibility, lineIdx: number, maxDepth: number) {
         if (lineIdx >= 0) {
-            this.setVisibilityInDoc(lineIdx, visibility, maxDepth, (lineManager: LineManager) => {
+            let selector = (lineManager: LineManager) => {
+                return (maxDepth === undefined) || (lineManager.depth < maxDepth);
+            };
+            let completionHandler = (lineManager: LineManager) => {
                 let nextMaxDepth = (lineManager.depth >= 0 && lineManager.depth < maxDepth) ? lineManager.depth : maxDepth;
                 this.setVisibilityInDocChainedParentsReverse(visibility, lineIdx - 1, nextMaxDepth);
-            });
+            };
+            this.setVisibilityInDoc(lineIdx, visibility, selector, completionHandler);
         }
     }
 
@@ -274,6 +280,19 @@ export class LineManager {
         for (let i = this.getLineCount() - 1; i >= 0; --i) {
             this.callUnfoldCommand(i);
         }
+    }
+
+    hideAll() {
+        this.setVisibilityInDocChained(EVisibility.eHide, 0);
+        for (let i = this.getLineCount() - 1; i >= 0; --i) {
+            this.callFoldCommandIfPossible(i);
+        }
+    }
+
+    unhideAll() {
+        let selector = (lineManager: LineManager) => { return lineManager.visibility === EVisibility.eHide; }; // only unhide hidden nodes
+        let completionHandler = () => { this.updateFolding(); };
+        this.setVisibilityInDocChained(EVisibility.eNormal, 0, selector, completionHandler);
     }
 
     revealNode(lineIdx: number) {

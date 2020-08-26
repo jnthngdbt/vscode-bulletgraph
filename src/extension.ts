@@ -76,8 +76,20 @@ export function activate(context: vscode.ExtensionContext) {
     );
 
     context.subscriptions.push(
+        vscode.commands.registerCommand('vscode-bulletgraph.hideAll', () => {
+            lineManager.hideAll();
+        })
+    );
+
+    context.subscriptions.push(
+        vscode.commands.registerCommand('vscode-bulletgraph.unhideAll', () => {
+            lineManager.unhideAll();
+        })
+    );
+
+    context.subscriptions.push(
         vscode.commands.registerCommand('vscode-bulletgraph.revealNode', () => {
-            lineManager.revealNode(lineManager.getActiveLineIdx());
+            lineManager.revealNode(lineManager.getActiveLineIdx() ?? -1);
         })
     );
 

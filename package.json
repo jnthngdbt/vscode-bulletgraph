@@ -18,7 +18,10 @@
 		"onCommand:vscode-bulletgraph.unhideNode",
 		"onCommand:vscode-bulletgraph.updateFolding",
 		"onCommand:vscode-bulletgraph.foldAll",
-		"onCommand:vscode-bulletgraph.unfoldAll"
+		"onCommand:vscode-bulletgraph.unfoldAll",
+		"onCommand:vscode-bulletgraph.hideAll",
+		"onCommand:vscode-bulletgraph.unhideAll",
+		"onCommand:vscode-bulletgraph.revealNode"
 	],
 	"main": "./out/extension.js",
 	"contributes": {
@@ -58,6 +61,14 @@
 			{
 				"command": "vscode-bulletgraph.unfoldAll",
 				"title": "Bullet Graph: Unfold All"
+			},
+			{
+				"command": "vscode-bulletgraph.hideAll",
+				"title": "Bullet Graph: Hide All"
+			},
+			{
+				"command": "vscode-bulletgraph.unhideAll",
+				"title": "Bullet Graph: Unhide All"
 			},
 			{
 				"command": "vscode-bulletgraph.revealNode",
