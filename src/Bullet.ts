@@ -5,6 +5,7 @@ import { EBullet, EEdge, ELink, ENode, EVisibility } from './constants'
 import { LineManager } from './LineManager'
 import { generateRandomId } from './NodeIdGenerator'
 import { Strings } from './utils'
+import { link } from 'fs';
 
 export type Id = string;
 
@@ -217,11 +218,41 @@ export class DepthManager {
         }
     }
 
+    removeDuplicateLinksInArray(edges : Array<Edge>) {
+        const isDuplicate = (edgeIdx = 0): Boolean => {
+            for (let i = 0; i < edgeIdx; i++) { // avoid i === edgeIdx, to not test with itself
+                if (edges[i].idSrc == edges[edgeIdx].idSrc)
+                    if (edges[i].idDst == edges[edgeIdx].idDst)
+                        if (edges[i].type === edges[edgeIdx].type)
+                            return true;
+            }
+            return false;
+        };
+
+        // Find duplicates and delete them.
+        for (let i = edges.length-1; i >= 0; i--) { // go backwards to not be affected by deletes
+            if (isDuplicate(i)) {
+                edges.splice(i, 1); // delete
+            }
+        }
+    }
+
+    removeDuplicateLinks() {
+        let links = this.bullet.links;
+        let nodeIds = links.getNodeIds();
+        nodeIds.forEach(nodeId => {
+            let nodeLinks = links.getNodeLinks(nodeId);
+            this.removeDuplicateLinksInArray(nodeLinks.inputs);
+            this.removeDuplicateLinksInArray(nodeLinks.outputs);
+        });
+    }
+
     pruneAndReorganize(bulletIn: Bullet): Bullet {
         this.bullet.clear();
         this.rerouteNodes(bulletIn.hierarchy, bulletIn.floorNodeIds, bulletIn.hideNodeIds, this.bullet.hierarchy);
         this.rerouteLinks(bulletIn.links);
         this.bullet.createHierarchyEdges(this.bullet.hierarchy);
+        this.removeDuplicateLinks();
         
         return this.bullet;
     }
