@@ -355,7 +355,7 @@ export class Bullet {
             }
     
             // Remember last leaf node for chaining.
-            const isLeaf = child.isLeaf();
+            const isLeaf = !child.isSubgraph();
             if (isLeaf) {
                 lastLeafNode = child;
             }
