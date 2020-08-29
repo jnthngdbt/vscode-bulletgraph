@@ -3,9 +3,6 @@ import { ok } from 'assert';
 
 import { EBullet, EEdge, ELink, ENode, EVisibility } from './constants'
 import { LineManager } from './LineManager'
-import { generateRandomId } from './NodeIdGenerator'
-import { Strings } from './utils'
-import { link } from 'fs';
 
 export type Id = string;
 
@@ -62,34 +59,13 @@ export class Node {
         this.children = [];
     }
 
-    // Adapted from code snippet generating a uuid.
-    setRandomId(): void {
-        this.id = generateRandomId();
-    }
-
     fill(line: LineManager, links: LinksMap, floorNodeIds: IdSet, hideNodeIds: IdSet) {
         this.bullet = line.bullet;
         this.label = line.label;
-    
-        // Get node ID. Create one if necessary.
-        this.setRandomId() // initialize to random id
-        if (line.components.length > 0) {
-            line.components.forEach( (linkId: string) => {
-                linkId = linkId.trim();
-                if (linkId) {
-                    let type = linkId[0] as ELink; // first char is the link type (if any)
-                    linkId = Strings.removeSpecialCharacters(linkId);
-                    
-                    if (type === ELink.eOut) {
-                        links.addEdge(this.id, linkId, EEdge.eLink)
-                    } else if (type === ELink.eIn) {
-                        links.addEdge(linkId, this.id, EEdge.eLink)
-                    } else { // no link type char, or no at all
-                        this.id = linkId // assume it is the current node id
-                    }
-                }
-            })
-        }
+        this.id = line.id;
+
+        line.idsIn.forEach( id => { links.addEdge(id, this.id, EEdge.eLink) });
+        line.idsOut.forEach( id => { links.addEdge(this.id, id, EEdge.eLink) });
 
         switch (line.visibility) {
             case EVisibility.eFloor: floorNodeIds.add(this.id); break;

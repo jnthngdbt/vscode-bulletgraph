@@ -1,7 +1,9 @@
 import * as vscode from 'vscode';
 
-import { COMMENT, LABEL_ID_SEP, EBullet, EVisibility } from './constants'
+import { COMMENT, LABEL_ID_SEP, EBullet, ELink, EVisibility } from './constants'
 import { Strings } from './utils'
+
+import { generateRandomId } from './NodeIdGenerator'
 
 export class LineManager {
     line = "";
@@ -10,7 +12,11 @@ export class LineManager {
     bullet = EBullet.eDefault;
     label = "";
     visibility = EVisibility.eUndefined;
-    components: Array<string> = [];
+    id = "";
+    idsIn: Array<string> = [];
+    idsOut: Array<string> = [];
+    hasComponents = false;
+    hasComponentSection = false;
 
     clear() {
         this.line = "";
@@ -19,19 +25,15 @@ export class LineManager {
         this.bullet = EBullet.eDefault;
         this.label = "";
         this.visibility = EVisibility.eUndefined;
-        this.components = [];
+        this.id = "";
+        this.idsIn = [];
+        this.idsOut = [];
+        this.hasComponents = false;
+        this.hasComponentSection = false;
     }
 
     isValid(): boolean {
         return !this.isComment && (this.depth >= 0);
-    }
-
-    hasComponentSection(): boolean {
-        return this.isValid() && this.line.includes(LABEL_ID_SEP);
-    }
-
-    hasComponents(): boolean {
-        return this.hasComponentSection() && (this.components.length > 0);
     }
 
     isLineFoldable(lineIdx: number | undefined): boolean {
@@ -104,22 +106,43 @@ export class LineManager {
         
             const split = line.split(LABEL_ID_SEP)
             this.label = split[0].trim()
+
+            this.hasComponentSection = split.length > 1;
+
+            this.id = generateRandomId();
         
-            if (split.length > 1) {
-                this.components = split[1].trim().split(' ')
+            if (!this.hasComponentSection) {
+                this.hasComponents = false;
+            } else {
+                let components = split[1].trim().split(' ')
 
-                let manageVisibilityComponent = (i: number) => {
-                    this.visibility = this.components[i] as EVisibility;
-                    this.components.splice(i, 1); // remove 
-                }
-
-                for (let i = 0; i < this.components.length; ++i) {
-                    switch (this.components[i] as EVisibility) {
-                        case EVisibility.eNormal: manageVisibilityComponent(i); break;
-                        case EVisibility.eFloor: manageVisibilityComponent(i); break;
-                        case EVisibility.eHide: manageVisibilityComponent(i); break;
+                // Extract visibility, if present.
+                for (let i = 0; i < components.length; ++i) {
+                    switch (components[i] as EVisibility) {
+                        case EVisibility.eNormal: this.visibility = components[i] as EVisibility; break;
+                        case EVisibility.eFloor: this.visibility = components[i] as EVisibility; break;
+                        case EVisibility.eHide: this.visibility = components[i] as EVisibility; break;
+                        default: { // not visibility token, so id (node id or link id)
+                            let id = components[i].trim();
+                            if (id) {
+                                let type = id[0] as ELink; // first char is the link type (if any)
+                                id = Strings.removeSpecialCharacters(id);
+                                
+                                if (type === ELink.eOut) {
+                                    this.idsOut.push(id);
+                                } else if (type === ELink.eIn) {
+                                    this.idsIn.push(id);
+                                } else { // no link type char, or no at all
+                                    this.id = id // assume it is the current node id
+                                }
+                            }
+                        }
                     }
                 }
+
+                // True if the component section contains something other than a visibility token.
+                let hasVisibility = this.visibility != EVisibility.eUndefined;
+                this.hasComponents = (components.length > 1) || !hasVisibility; // being here, we know we have at least 1 component, may be visibility
             }
         }
     }
@@ -142,11 +165,11 @@ export class LineManager {
         const hasVisibilityComp = lineManager.visibility !== EVisibility.eUndefined;
 
         // Possible cases. They should be exclusive, so testing order is not important.
-        const mustRemoveComponentSection = lineManager.hasComponentSection() && !lineManager.hasComponents() && isVisibilityCompOptional;
-        const mustCreateComponentSection = !lineManager.hasComponentSection() && !isVisibilityCompOptional;
-        const mustInsertVisibilityComp = lineManager.hasComponentSection() && !hasVisibilityComp && !isVisibilityCompOptional;
+        const mustRemoveComponentSection = lineManager.hasComponentSection && !lineManager.hasComponents && isVisibilityCompOptional;
+        const mustCreateComponentSection = !lineManager.hasComponentSection && !isVisibilityCompOptional;
+        const mustInsertVisibilityComp = lineManager.hasComponentSection && !hasVisibilityComp && !isVisibilityCompOptional;
         const mustReplaceVisibilityComp = hasVisibilityComp && !isVisibilityCompOptional;
-        const mustRemoveVisibilityCompOnly = lineManager.hasComponents() && hasVisibilityComp && isVisibilityCompOptional;
+        const mustRemoveVisibilityCompOnly = lineManager.hasComponents && hasVisibilityComp && isVisibilityCompOptional;
 
         editor.edit((editBuilder) => {
             let replace = (strIn: string, strOut: string) => {
