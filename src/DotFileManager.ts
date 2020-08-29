@@ -21,18 +21,18 @@ export class DotFileManager {
         str += "\n";
     
         str += indent + "// High level default styles. \n";
-        str += indent + "graph [bgcolor = grey10, fontcolor = grey50, fontname=\"arial narrow\"] \n";
+        str += indent + "graph [bgcolor = grey20, fontcolor = grey50, fontname=\"arial narrow\"] \n";
         str += indent + `edge [fontname=\"arial narrow\", penwidth=${BASE_PENWIDTH}, arrowsize=${BASE_ARROWSIZE}] \n`;
         str += indent + `node [fontname=\"arial narrow\", penwidth=${BASE_PENWIDTH}] \n`;
         str += "\n";
     
-        str += indent + "// Node style for type SUBGRAPH_DATA. \n";
-        str += indent + `node [color=grey30, fontcolor=grey80, fontsize=${BASE_FONTSIZE}, shape=plain] \n`;
+        str += indent + "// Node style for type SUBGRAPH_DATA (title only, no box). \n";
+        str += indent + `node [fontcolor=grey80, fontsize=${BASE_FONTSIZE}, shape=plain] \n`;
         str += this.printNodes(root.children, indent, ENode.eSubgraph);
         str += "\n";
     
-        str += indent + "// Node style for type SUBGRAPH_PROCESS. \n";
-        str += indent + `node [color=grey30, fontcolor=\"#aaaadd\", fontsize=${BASE_FONTSIZE}, shape=plain] \n`; // #aaaadd/#8888bb
+        str += indent + "// Node style for type SUBGRAPH_PROCESS (title only, no box). \n";
+        str += indent + `node [fontcolor=\"#aaaadd\", fontsize=${BASE_FONTSIZE}, shape=plain] \n`; // #aaaadd/#8888bb
         str += this.printNodes(root.children, indent, ENode.eSubgraphProcess);
         str += "\n";
         
@@ -100,8 +100,20 @@ export class DotFileManager {
                 const fontsize = Math.round(BASE_FONTSIZE + Math.atan(node.dependencySize / curveFactor) * curveFactor);
     
                 str += indent + node.id;
-                if (node.dependencySize)
-                    str += ` [fontsize=${fontsize}]`;
+
+                let props = [];
+                if (node.dependencySize) props.push(`fontsize=${fontsize}`);
+                if (node.isHighlight) props.push(`style = filled, fillcolor=\"#332233\"`);
+
+                if (props.length > 0) {
+                    str += " [";
+                    for (let i = 0; i < props.length; ++i) {
+                        str += props[i];
+                        if (i < props.length-1) str += ", ";
+                    }
+                    str += "]";
+                }
+
                 str += ` // ${node.label}`;
                 str += "\n";
             }
@@ -131,11 +143,19 @@ export class DotFileManager {
         children.forEach( node => {
             if (node.isSubgraph()) {
                 let style = "";
-                
+
+                style += `penwidth = ${BASE_PENWIDTH}; `;
+
                 if (node.isProcess()) {
-                    style = `color = \"#555588\"; style = rounded; penwidth = ${BASE_PENWIDTH}`;
+                    style += `color = \"#555588\"; style = "rounded,filled"; `;
                 } else {
-                    style = `color = gray30; style = none; penwidth = ${BASE_PENWIDTH}`;
+                    style += `color = gray30; style = filled; `;
+                } 
+                
+                if (node.isHighlight) {
+                    style += `fillcolor = \"#332233\"; `;
+                } else {
+                    style += `fillcolor = none; `;
                 }
     
                 str += "\n";

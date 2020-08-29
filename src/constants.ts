@@ -1,5 +1,7 @@
 export const COMMENT = "//";
 export const LABEL_ID_SEP = "//";
+export const HIGHLIGHT_TOKEN = "[*]";
+
 export const BASE_FONTSIZE = 30;
 export const BASE_ARROWSIZE = 1.5;
 export const BASE_PENWIDTH = 2;

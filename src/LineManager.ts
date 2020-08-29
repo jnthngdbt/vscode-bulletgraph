@@ -1,6 +1,6 @@
 import * as vscode from 'vscode';
 
-import { COMMENT, LABEL_ID_SEP, EBullet, ELink, EVisibility } from './constants'
+import { COMMENT, LABEL_ID_SEP, HIGHLIGHT_TOKEN, EBullet, ELink, EVisibility } from './constants'
 import { Strings } from './utils'
 
 import { generateRandomId } from './NodeIdGenerator'
@@ -12,6 +12,7 @@ export class LineManager {
     bullet = EBullet.eDefault;
     label = "";
     visibility = EVisibility.eUndefined;
+    isHighlight = false;
     id = "";
     idsIn: Array<string> = [];
     idsOut: Array<string> = [];
@@ -25,6 +26,7 @@ export class LineManager {
         this.bullet = EBullet.eDefault;
         this.label = "";
         this.visibility = EVisibility.eUndefined;
+        this.isHighlight = false;
         this.id = "";
         this.idsIn = [];
         this.idsOut = [];
@@ -122,18 +124,22 @@ export class LineManager {
                         case EVisibility.eNormal: this.visibility = components[i] as EVisibility; break;
                         case EVisibility.eFloor: this.visibility = components[i] as EVisibility; break;
                         case EVisibility.eHide: this.visibility = components[i] as EVisibility; break;
-                        default: { // not visibility token, so id (node id or link id)
-                            let id = components[i].trim();
-                            if (id) {
-                                let type = id[0] as ELink; // first char is the link type (if any)
-                                id = Strings.removeSpecialCharacters(id);
-                                
-                                if (type === ELink.eOut) {
-                                    this.idsOut.push(id);
-                                } else if (type === ELink.eIn) {
-                                    this.idsIn.push(id);
-                                } else { // no link type char, or no at all
-                                    this.id = id // assume it is the current node id
+                        default: { // not visibility token
+                            if (components[i] === HIGHLIGHT_TOKEN) {
+                                this.isHighlight = true;
+                            } else { // id (node id or link id)
+                                let id = components[i].trim();
+                                if (id) {
+                                    let type = id[0] as ELink; // first char is the link type (if any)
+                                    id = Strings.removeSpecialCharacters(id);
+                                    
+                                    if (type === ELink.eOut) {
+                                        this.idsOut.push(id);
+                                    } else if (type === ELink.eIn) {
+                                        this.idsIn.push(id);
+                                    } else { // no link type char, or no at all
+                                        this.id = id // assume it is the current node id
+                                    }
                                 }
                             }
                         }

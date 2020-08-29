@@ -10,6 +10,7 @@ export class Node {
     bullet: EBullet = EBullet.eDefault;
     label: string = "";
     id: Id = "";
+    isHighlight = false;
     dependencySize = 0;
     children: Array<Node> = [];
 
@@ -56,6 +57,8 @@ export class Node {
         this.bullet = EBullet.eDefault;
         this.label = "";
         this.id = "";
+        this.isHighlight = false;
+        this.dependencySize = 0;
         this.children = [];
     }
 
@@ -63,6 +66,7 @@ export class Node {
         this.bullet = line.bullet;
         this.label = line.label;
         this.id = line.id;
+        this.isHighlight = line.isHighlight;
 
         line.idsIn.forEach( id => { links.addEdge(id, this.id, EEdge.eLink) });
         line.idsOut.forEach( id => { links.addEdge(this.id, id, EEdge.eLink) });
@@ -167,6 +171,7 @@ export class DepthManager {
                 childOut.bullet = childIn.bullet;
                 childOut.dependencySize = childIn.dependencySize;
                 childOut.id = childIn.id;
+                childOut.isHighlight = childIn.isHighlight;
                 childOut.label = childIn.label;
                 nodeOut.children.push(childOut); // add it to ouput hierarchy
             }
