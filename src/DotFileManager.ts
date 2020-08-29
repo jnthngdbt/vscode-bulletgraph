@@ -103,7 +103,11 @@ export class DotFileManager {
 
                 let props = [];
                 if (node.dependencySize) props.push(`fontsize=${fontsize}`);
-                if (node.isHighlight) props.push(`style = filled, fillcolor=\"#332233\"`);
+                if (node.isHighlight) {
+                    props.push(`fillcolor=\"#332233\"`);
+                    if (node.isProcess()) props.push(`style = \"rounded,filled\"`);
+                    else props.push(`style = filled`);
+                }
 
                 if (props.length > 0) {
                     str += " [";
