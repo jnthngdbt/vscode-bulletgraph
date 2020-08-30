@@ -21,7 +21,7 @@ export class DotFileManager {
         str += "\n";
     
         str += indent + "// High level default styles. \n";
-        str += indent + "graph [bgcolor = grey20, fontcolor = grey50, fontname=\"arial narrow\"] \n";
+        str += indent + "graph [bgcolor = grey15, fontcolor = grey50, fontname=\"arial narrow\"] \n";
         str += indent + `edge [fontname=\"arial narrow\", penwidth=${BASE_PENWIDTH}, arrowsize=${BASE_ARROWSIZE}] \n`;
         str += indent + `node [fontname=\"arial narrow\", penwidth=${BASE_PENWIDTH}] \n`;
         str += "\n";
@@ -37,7 +37,7 @@ export class DotFileManager {
         str += "\n";
         
         str += indent + "// Node style for type DATA. \n";
-        str += indent + `node [color=grey20, fontcolor=grey70, fontsize=${BASE_FONTSIZE}, style=none, shape=box] \n`;
+        str += indent + `node [color=grey30, fontcolor=grey70, fontsize=${BASE_FONTSIZE}, style=none, shape=box] \n`;
         str += this.printNodes(root.children, indent, ENode.eDefault);
         str += "\n";
     
@@ -47,7 +47,7 @@ export class DotFileManager {
         str += "\n";
         
         str += indent + "// Node style for type DATA (folded). \n";
-        str += indent + `node [color=grey20, fontcolor=grey80, fontsize=${BASE_FONTSIZE}, style=none, shape=box] \n`;
+        str += indent + `node [color=grey30, fontcolor=grey80, fontsize=${BASE_FONTSIZE}, style=none, shape=box] \n`;
         str += this.printNodes(root.children, indent, ENode.eFolded);
         str += "\n";
     
@@ -104,7 +104,7 @@ export class DotFileManager {
                 let props = [];
                 if (node.dependencySize) props.push(`fontsize=${fontsize}`);
                 if (node.isHighlight) {
-                    props.push(`fillcolor=\"#332233\"`);
+                    props.push(`fillcolor=\"#442244\"`);
                     if (node.isProcess()) props.push(`style = \"rounded,filled\"`);
                     else props.push(`style = filled`);
                 }
@@ -157,7 +157,7 @@ export class DotFileManager {
                 } 
                 
                 if (node.isHighlight) {
-                    style += `fillcolor = \"#332233\"; `;
+                    style += `fillcolor = \"#442244\"; `;
                 } else {
                     style += `fillcolor = none; `;
                 }
