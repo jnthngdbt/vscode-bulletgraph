@@ -5,6 +5,7 @@ import { ERenderingEngine } from './constants'
 import { DotFileManager } from './DotFileManager'
 import { LineManager } from './LineManager'
 import { insertNodeIdStringFromLineContent } from './NodeIdGenerator'
+import { DocumentManager } from './DocumentManager';
 
 function render() {
     // Parsing the editor file to get the bullet graph structure.
@@ -21,7 +22,7 @@ function render() {
 }
 
 export function activate(context: vscode.ExtensionContext) {
-    let lineManager = new LineManager();
+    let documentManager = new DocumentManager();
 
     context.subscriptions.push(
         vscode.commands.registerCommand('vscode-bulletgraph.renderPreview', render)
@@ -35,61 +36,61 @@ export function activate(context: vscode.ExtensionContext) {
 
     context.subscriptions.push(
         vscode.commands.registerCommand('vscode-bulletgraph.foldLine', () => {
-            lineManager.foldLine(lineManager.getActiveLineIdx());
+            documentManager.foldLine(documentManager.getActiveLineIdx());
         })
     );
 
     context.subscriptions.push(
         vscode.commands.registerCommand('vscode-bulletgraph.unfoldLine', () => {
-            lineManager.unfoldLine(lineManager.getActiveLineIdx());
+            documentManager.unfoldLine(documentManager.getActiveLineIdx());
         })
     );
 
     context.subscriptions.push(
         vscode.commands.registerCommand('vscode-bulletgraph.hideNode', () => {
-            lineManager.hideNode(lineManager.getActiveLineIdx());
+            documentManager.hideNode(documentManager.getActiveLineIdx());
         })
     );
 
     context.subscriptions.push(
         vscode.commands.registerCommand('vscode-bulletgraph.unhideNode', () => {
-            lineManager.unhideNode(lineManager.getActiveLineIdx());
+            documentManager.unhideNode(documentManager.getActiveLineIdx());
         })
     );
 
     context.subscriptions.push(
         vscode.commands.registerCommand('vscode-bulletgraph.updateFolding', () => {
-            lineManager.updateFolding();
+            documentManager.updateFolding();
         })
     );
 
     context.subscriptions.push(
         vscode.commands.registerCommand('vscode-bulletgraph.foldAll', () => {
-            lineManager.foldAll();
+            documentManager.foldAll();
         })
     );
 
     context.subscriptions.push(
         vscode.commands.registerCommand('vscode-bulletgraph.unfoldAll', () => {
-            lineManager.unfoldAll();
+            documentManager.unfoldAll();
         })
     );
 
     context.subscriptions.push(
         vscode.commands.registerCommand('vscode-bulletgraph.hideAll', () => {
-            lineManager.hideAll();
+            documentManager.hideAll();
         })
     );
 
     context.subscriptions.push(
         vscode.commands.registerCommand('vscode-bulletgraph.unhideAll', () => {
-            lineManager.unhideAll();
+            documentManager.unhideAll();
         })
     );
 
     context.subscriptions.push(
         vscode.commands.registerCommand('vscode-bulletgraph.revealNode', () => {
-            lineManager.revealNode(lineManager.getActiveLineIdx() ?? -1);
+            documentManager.revealNode(documentManager.getActiveLineIdx() ?? -1);
         })
     );
 
