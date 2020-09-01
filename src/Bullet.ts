@@ -289,9 +289,11 @@ export class Bullet {
                     }
                     
                     // Fill hierarchy.
-                    const depth = this.line.depth;
-                    currentParentForIndent[depth].children.push(node)
-                    currentParentForIndent[depth + 1] = node
+                    if (this.line.label.length > 0) { // this was added to give a way to not connect two subsequent flow nodes, but putting an empty node (no label) betweem
+                        const depth = this.line.depth;
+                        currentParentForIndent[depth].children.push(node)
+                        currentParentForIndent[depth + 1] = node
+                    }
     
                     lastNode = node
                 }
