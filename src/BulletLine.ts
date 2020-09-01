@@ -3,7 +3,7 @@ import { Strings } from './utils'
 
 import { generateRandomId } from './NodeIdGenerator'
 
-export class LineManager {
+export class BulletLine {
     text = "";
     isComment = false;
     depth = -1;

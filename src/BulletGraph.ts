@@ -1,6 +1,6 @@
 import { EBullet, EEdge, ENode, EVisibility } from './constants'
 import { DocumentManager } from './DocumentManager'
-import { LineManager } from './LineManager'
+import { BulletLine } from './BulletLine'
 
 export type Id = string;
 
@@ -60,7 +60,7 @@ export class Node {
         this.children = [];
     }
 
-    fill(line: LineManager, links: LinksMap, floorNodeIds: IdSet, hideNodeIds: IdSet) {
+    fill(line: BulletLine, links: LinksMap, floorNodeIds: IdSet, hideNodeIds: IdSet) {
         this.bullet = line.bullet;
         this.label = line.label;
         this.id = line.id;
@@ -164,7 +164,7 @@ export class BulletGraph {
         this.parse(doc.bulletLines);
     }
 
-    parse(bulletLines: Array<LineManager>) {
+    parse(bulletLines: Array<BulletLine>) {
         this.clear();
     
         let lastNode = this.hierarchy;

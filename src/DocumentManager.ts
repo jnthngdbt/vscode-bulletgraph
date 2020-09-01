@@ -1,10 +1,10 @@
 import * as vscode from 'vscode';
 
 import { LABEL_ID_SEP, EVisibility } from './constants'
-import { LineManager } from './LineManager';
+import { BulletLine } from './BulletLine';
 
 export class DocumentManager {
-    bulletLines: Array<LineManager> = [];
+    bulletLines: Array<BulletLine> = [];
 
     isLineFoldable(lineIdx: number | undefined): boolean {
         if (lineIdx === undefined) return false;
@@ -30,12 +30,12 @@ export class DocumentManager {
         return vscode.window?.activeTextEditor?.selection?.active.line;
     }
 
-    parseActiveLine(): LineManager {
+    parseActiveLine(): BulletLine {
         return this.parseLine(this.getActiveLineIdx());
     }
 
-    parseLine(lineIdx: number | undefined): LineManager {
-        let line = new LineManager();
+    parseLine(lineIdx: number | undefined): BulletLine {
+        let line = new BulletLine();
 
         if (lineIdx === undefined) return line;
         if (lineIdx < 0) return line;
@@ -61,7 +61,7 @@ export class DocumentManager {
     
         lines.forEach( line => {
             if (line.trim().length > 0) { // skip empty line, or only containing tabs/spaces
-                let bulletLine = new LineManager();
+                let bulletLine = new BulletLine();
                 bulletLine.parse(line);
                 this.bulletLines.push(bulletLine);
             }
@@ -184,7 +184,7 @@ export class DocumentManager {
     // Bleh. Document edit promise must resolve before doing another. Should do this more cleanly.
     setVisibilityInDocChained(visibility: EVisibility, lineIdx: number, selector: any | undefined = undefined, completionHandler: any | undefined = undefined) {
         if (lineIdx < this.getLineCount()) {
-            this.setVisibilityInDoc(lineIdx, visibility, selector, (lineManager: LineManager) => {
+            this.setVisibilityInDoc(lineIdx, visibility, selector, (lineManager: BulletLine) => {
                 this.setVisibilityInDocChained(visibility, lineIdx + 1, selector, completionHandler);
             });
         } else if (completionHandler !== undefined) {
@@ -195,10 +195,10 @@ export class DocumentManager {
     // Bleh. Document edit promise must resolve before doing another. Should do this more cleanly.
     setVisibilityInDocChainedParentsReverse(visibility: EVisibility, lineIdx: number, maxDepth: number) {
         if (lineIdx >= 0) {
-            let selector = (lineManager: LineManager) => {
+            let selector = (lineManager: BulletLine) => {
                 return (maxDepth === undefined) || (lineManager.depth < maxDepth);
             };
-            let completionHandler = (lineManager: LineManager) => {
+            let completionHandler = (lineManager: BulletLine) => {
                 let nextMaxDepth = (lineManager.depth >= 0 && lineManager.depth < maxDepth) ? lineManager.depth : maxDepth;
                 this.setVisibilityInDocChainedParentsReverse(visibility, lineIdx - 1, nextMaxDepth);
             };
@@ -228,7 +228,7 @@ export class DocumentManager {
     }
 
     unhideAll() {
-        let selector = (line: LineManager) => { return line.visibility === EVisibility.eHide; }; // only unhide hidden nodes
+        let selector = (line: BulletLine) => { return line.visibility === EVisibility.eHide; }; // only unhide hidden nodes
         let completionHandler = () => { /* this.updateFolding(); */ };
         this.setVisibilityInDocChained(EVisibility.eNormal, 0, selector, completionHandler);
     }
@@ -237,7 +237,7 @@ export class DocumentManager {
         const line = this.parseActiveLine();
 
         if (line.visibility === EVisibility.eHide) // special case when start line is hidden
-            this.setVisibilityInDoc(lineIdx, EVisibility.eNormal, undefined, (lineManager: LineManager) => {
+            this.setVisibilityInDoc(lineIdx, EVisibility.eNormal, undefined, (lineManager: BulletLine) => {
                 this.setVisibilityInDocChainedParentsReverse(EVisibility.eNormal, lineIdx, line.depth);
             });
         else
