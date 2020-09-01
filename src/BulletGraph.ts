@@ -149,7 +149,7 @@ export class IdSet {
 
 export class DepthManager {
     nodeRerouteMap: { [key:string]:Id; } = {};
-    bullet = new Bullet();
+    bullet = new BulletGraph();
 
     rerouteNodes(nodeIn: Node, floorNodeIds: IdSet, hideNodeIds: IdSet, nodeOut: Node, isFloorReached = false, isHidden = false, floorNodeId = "") {
         nodeIn.children.forEach( childIn => {
@@ -228,7 +228,7 @@ export class DepthManager {
         });
     }
 
-    pruneAndReorganize(bulletIn: Bullet): Bullet {
+    pruneAndReorganize(bulletIn: BulletGraph): BulletGraph {
         this.bullet.clear();
         this.rerouteNodes(bulletIn.hierarchy, bulletIn.floorNodeIds, bulletIn.hideNodeIds, this.bullet.hierarchy);
         this.rerouteLinks(bulletIn.links);
@@ -239,7 +239,7 @@ export class DepthManager {
     }
 }
 
-export class Bullet {
+export class BulletGraph {
     line = new LineManager();
     hierarchy = new Node();
     links = new LinksMap();

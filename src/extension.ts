@@ -1,6 +1,6 @@
 import * as vscode from 'vscode';
 
-import { Bullet, DepthManager } from './Bullet'
+import { BulletGraph, DepthManager } from './BulletGraph'
 import { ERenderingEngine } from './constants'
 import { DotFileManager } from './DotFileManager'
 import { LineManager } from './LineManager'
@@ -9,7 +9,7 @@ import { DocumentManager } from './DocumentManager';
 
 function render() {
     // Parsing the editor file to get the bullet graph structure.
-    let bullet = new Bullet();
+    let bullet = new BulletGraph();
     bullet.parseEditorFile();
 
     // Simplify the graph, if necessary, by having a maximum depth.

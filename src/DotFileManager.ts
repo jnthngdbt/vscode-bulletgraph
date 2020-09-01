@@ -1,14 +1,14 @@
 import * as vscode from 'vscode';
 import * as fs from 'fs';
 
-import { Bullet, Node, LinksMap } from './Bullet'
+import { BulletGraph, Node, LinksMap } from './BulletGraph'
 import { ENode, EEdge, ERenderingEngine, BASE_ARROWSIZE, BASE_FONTSIZE, BASE_PENWIDTH, FONTSIZE_FACTOR } from './constants'
 import { Strings } from './utils'
 
 export class DotFileManager {
     constructor() {}
 
-    generate(bullet: Bullet): string {	
+    generate(bullet: BulletGraph): string {	
         let str  = "";
         str += "digraph G { \n";
         str += "\n";
@@ -178,7 +178,7 @@ export class DotFileManager {
         return str
     }
 
-    render(bullet: Bullet, engine: ERenderingEngine) {
+    render(bullet: BulletGraph, engine: ERenderingEngine) {
         const content = this.generate(bullet);
         const fullname = vscode.window.activeTextEditor?.document.fileName + ".dot";
         fs.writeFile(fullname, content, () => this.writeCompletionHandler(fullname, content, engine));
