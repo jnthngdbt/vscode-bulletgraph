@@ -1,7 +1,5 @@
-import * as vscode from 'vscode';
-import { ok } from 'assert';
-
-import { EBullet, EEdge, ELink, ENode, EVisibility } from './constants'
+import { EBullet, EEdge, ENode, EVisibility } from './constants'
+import { DocumentManager } from './DocumentManager'
 import { LineManager } from './LineManager'
 
 export type Id = string;
@@ -148,7 +146,6 @@ export class IdSet {
 }
 
 export class BulletGraph {
-    line = new LineManager();
     hierarchy = new Node();
     links = new LinksMap();
     floorNodeIds = new IdSet();
@@ -161,50 +158,38 @@ export class BulletGraph {
         this.hideNodeIds = new IdSet();
     }
     
-    // Parse the textual hierarchy into nested objects.
     parseEditorFile() {
-        let text = vscode.window.activeTextEditor?.document.getText() ?? "";
-        
-        if (!text) {
-            vscode.window.showErrorMessage('Bullet Graph: No editor is active.');
-        }
-        
+        let doc = new DocumentManager();
+        doc.parseEditorFile();
+        this.parse(doc.bulletLines);
+    }
+
+    parse(bulletLines: Array<LineManager>) {
         this.clear();
     
         let lastNode = this.hierarchy;
         let currentParentForIndent: { [key:number]:Node; } = {};
         currentParentForIndent[0] = this.hierarchy;
     
-        const lines = text.split(/\r?\n/) ?? []; // new lines
+        bulletLines.forEach( line => {
+            if (!line.isComment) {
+                let node = new Node();
 
-        if (!lines) {
-            vscode.window.showErrorMessage('Bullet Graph: Could not parse current editor.');
-        }
-    
-        lines.forEach( line => {
-            if (line.trim().length > 0) { // skip empty line, or only containing tabs/spaces
-                this.line.clear();
-                this.line.parse(line);
-    
-                if (!this.line.isComment) {
-                    let node = new Node();
-    
-                    node.fill(this.line, this.links, this.floorNodeIds, this.hideNodeIds);
-    
-                    // Create flow edges, if applicable
-                    if (lastNode.id && (lastNode.bullet === EBullet.eFlow) && (node.bullet === EBullet.eFlow)) {
-                        this.links.addEdge(lastNode.id, node.id, EEdge.eFlow);
-                    }
-                    
-                    // Fill hierarchy.
-                    if (this.line.label.length > 0) { // this was added to give a way to not connect two subsequent flow nodes, but putting an empty node (no label) betweem
-                        const depth = this.line.depth;
-                        currentParentForIndent[depth].children.push(node)
-                        currentParentForIndent[depth + 1] = node
-                    }
-    
-                    lastNode = node
+                node.fill(line, this.links, this.floorNodeIds, this.hideNodeIds);
+
+                // Create flow edges, if applicable
+                if (lastNode.id && (lastNode.bullet === EBullet.eFlow) && (node.bullet === EBullet.eFlow)) {
+                    this.links.addEdge(lastNode.id, node.id, EEdge.eFlow);
                 }
+                
+                // Fill hierarchy.
+                if (line.label.length > 0) { // this was added to give a way to not connect two subsequent flow nodes, but putting an empty node (no label) betweem
+                    const depth = line.depth;
+                    currentParentForIndent[depth].children.push(node)
+                    currentParentForIndent[depth + 1] = node
+                }
+
+                lastNode = node
             }
         })
 

@@ -1,19 +1,10 @@
 import * as vscode from 'vscode';
 
-import { COMMENT, LABEL_ID_SEP, HIGHLIGHT_TOKEN, EBullet, ELink, EVisibility } from './constants'
-import { Strings } from './utils'
-
-import { generateRandomId } from './NodeIdGenerator'
+import { LABEL_ID_SEP, EVisibility } from './constants'
 import { LineManager } from './LineManager';
 
 export class DocumentManager {
-    lines: Array<LineManager> = [];
-    line = new LineManager(); 
-
-    clear() {
-        this.lines = [];
-        this.line.clear();
-    }
+    bulletLines: Array<LineManager> = [];
 
     isLineFoldable(lineIdx: number | undefined): boolean {
         if (lineIdx === undefined) return false;
@@ -57,6 +48,24 @@ export class DocumentManager {
         line.parse(editor.document.lineAt(lineIdx).text);
 
         return line;
+    }
+
+    parseEditorFile() {
+        let text = vscode.window.activeTextEditor?.document.getText() ?? "";
+        if (!text) vscode.window.showErrorMessage('Bullet Graph: No editor is active.');
+        
+        this.bulletLines = [];
+    
+        const lines = text.split(/\r?\n/) ?? []; // new lines
+        if (!lines) vscode.window.showErrorMessage('Bullet Graph: Could not parse current editor.');
+    
+        lines.forEach( line => {
+            if (line.trim().length > 0) { // skip empty line, or only containing tabs/spaces
+                let bulletLine = new LineManager();
+                bulletLine.parse(line);
+                this.bulletLines.push(bulletLine);
+            }
+        })
     }
 
     setVisibilityInDoc(lineIdx: number | undefined, visibility: EVisibility, selector: any | undefined = undefined, callback: any | undefined = undefined) {

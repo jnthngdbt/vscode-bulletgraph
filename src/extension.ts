@@ -4,7 +4,6 @@ import { BulletGraph } from './BulletGraph'
 import { DepthManager } from './DepthManager'
 import { ERenderingEngine } from './constants'
 import { DotFileManager } from './DotFileManager'
-import { LineManager } from './LineManager'
 import { insertNodeIdStringFromLineContent } from './NodeIdGenerator'
 import { DocumentManager } from './DocumentManager';
 

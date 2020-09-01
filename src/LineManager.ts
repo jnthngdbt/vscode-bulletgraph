@@ -1,5 +1,3 @@
-import * as vscode from 'vscode';
-
 import { COMMENT, LABEL_ID_SEP, HIGHLIGHT_TOKEN, EBullet, ELink, EVisibility } from './constants'
 import { Strings } from './utils'
 
