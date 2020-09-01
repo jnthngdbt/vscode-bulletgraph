@@ -1,6 +1,7 @@
 import * as vscode from 'vscode';
 
-import { BulletGraph, DepthManager } from './BulletGraph'
+import { BulletGraph } from './BulletGraph'
+import { DepthManager } from './DepthManager'
 import { ERenderingEngine } from './constants'
 import { DotFileManager } from './DotFileManager'
 import { LineManager } from './LineManager'
