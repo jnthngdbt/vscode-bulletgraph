@@ -123,11 +123,13 @@ export class DocumentManager {
         editor.edit((editBuilder) => {
             let replace = (strIn: string, strOut: string) => {
                 const pos = line.text.indexOf(strIn);
-                const range = new vscode.Range(
-                    new vscode.Position(lineIdx, pos),
-                    new vscode.Position(lineIdx, pos + strIn.length)
-                );
-                editBuilder.replace(range, strOut);
+                if (pos >= 0) {
+                    const range = new vscode.Range(
+                        new vscode.Position(lineIdx, pos),
+                        new vscode.Position(lineIdx, pos + strIn.length)
+                    );
+                    editBuilder.replace(range, strOut);
+                }
             };
 
             if (mustRemoveComponentSection) {
@@ -146,9 +148,7 @@ export class DocumentManager {
             } else if (mustReplaceVisibilityComp) {
                 replace(line.visibility, visibility);
             } else if (mustRemoveVisibilityCompOnly) {
-                replace(
-                    LABEL_ID_SEP + " " + line.visibility + " ",
-                    LABEL_ID_SEP + " ");
+                replace(" " + line.visibility, "");
             }
         }).then((success) => {
             if (callback) callback(line);
@@ -186,9 +186,11 @@ export class DocumentManager {
     }
     
     foldLine(lineIdx: number | undefined, completionHandler: any | undefined = undefined) {
-        this.setVisibilityInDoc(lineIdx, EVisibility.eFloor, undefined, () => {
-            this.callFoldCommandIfPossible(lineIdx, completionHandler);
-        });
+        if (this.isLineFoldable(lineIdx)) {
+            this.setVisibilityInDoc(lineIdx, EVisibility.eFloor, undefined, () => {
+                this.callFoldCommand(lineIdx, completionHandler); // already tested that is foldable
+            });
+        }
     }
     
     unfoldLine(lineIdx: number | undefined, completionHandler: any | undefined = undefined) {
@@ -258,7 +260,8 @@ export class DocumentManager {
     }
 
     foldAll(completionHandler: any | undefined = undefined) {
-        this.setVisibilityInDocChained(EVisibility.eFloor, 0, undefined, completionHandler);
+        let selector = (line: BulletLine) => { return this.isLineFoldable(line.index); }; // not optimal, implies that all lines are read twice
+        this.setVisibilityInDocChained(EVisibility.eFloor, 0, selector, completionHandler);
     }
 
     unfoldAll(completionHandler: any | undefined = undefined) {
