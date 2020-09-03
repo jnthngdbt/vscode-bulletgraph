@@ -287,4 +287,13 @@ export class DocumentManager {
         else
             this.setVisibilityInDocChainedParentsReverse(EVisibility.eNormal, lineIdx, line.depth, completionHandler);
     }
+
+    foldLevel(level: number, completionHandler: any | undefined = undefined) {
+        this.foldAll(() => {
+            let selector = (line: BulletLine) => { return line.depth <= level; };
+            this.setVisibilityInDocChained(EVisibility.eNormal, 0, selector, () => { // unfold
+                this.updateFolding(completionHandler);
+            });
+        });
+    }
 }

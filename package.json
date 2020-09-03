@@ -22,7 +22,13 @@
 		"onCommand:vscode-bulletgraph.unfoldAll",
 		"onCommand:vscode-bulletgraph.hideAll",
 		"onCommand:vscode-bulletgraph.unhideAll",
-		"onCommand:vscode-bulletgraph.revealNode"
+		"onCommand:vscode-bulletgraph.revealNode",
+		"onCommand:vscode-bulletgraph.foldLevel1",
+		"onCommand:vscode-bulletgraph.foldLevel2",
+		"onCommand:vscode-bulletgraph.foldLevel3",
+		"onCommand:vscode-bulletgraph.foldLevel4",
+		"onCommand:vscode-bulletgraph.foldLevel5",
+		"onCommand:vscode-bulletgraph.foldLevel6"
 	],
 	"main": "./out/extension.js",
 	"contributes": {
@@ -78,6 +84,30 @@
 			{
 				"command": "vscode-bulletgraph.revealNode",
 				"title": "Bullet Graph: Reveal Node"
+			},
+			{
+				"command": "vscode-bulletgraph.foldLevel1",
+				"title": "Bullet Graph: Fold Level 1"
+			},
+			{
+				"command": "vscode-bulletgraph.foldLevel2",
+				"title": "Bullet Graph: Fold Level 2"
+			},
+			{
+				"command": "vscode-bulletgraph.foldLevel3",
+				"title": "Bullet Graph: Fold Level 3"
+			},
+			{
+				"command": "vscode-bulletgraph.foldLevel4",
+				"title": "Bullet Graph: Fold Level 4"
+			},
+			{
+				"command": "vscode-bulletgraph.foldLevel5",
+				"title": "Bullet Graph: Fold Level 5"
+			},
+			{
+				"command": "vscode-bulletgraph.foldLevel6",
+				"title": "Bullet Graph: Fold Level 6"
 			}
 		],
         "keybindings": [
