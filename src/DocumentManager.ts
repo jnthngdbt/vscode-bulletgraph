@@ -1,10 +1,16 @@
 import * as vscode from 'vscode';
 
-import { LABEL_ID_SEP, EVisibility } from './constants'
+import { LABEL_ID_SEP, EVisibility, NEW_SCRIPT_CHAR, SCRIPT_LINE_TOKEN } from './constants'
 import { BulletLine } from './BulletLine';
 
+export class DocumentLine {
+    text = "";
+    index = -1;
+}
+
 export class DocumentManager {
-    bulletLines: Array<BulletLine> = [];
+    bulletLines: Array<DocumentLine> = [];
+    scriptLines: Array<DocumentLine> = [];
 
     isLineFoldable(lineIdx: number | undefined): boolean {
         if (lineIdx === undefined) return false;
@@ -45,27 +51,46 @@ export class DocumentManager {
 
         if (lineIdx >= editor.document.lineCount) return line;
 
-        line.parse(editor.document.lineAt(lineIdx).text);
+        line.parse(editor.document.lineAt(lineIdx).text, lineIdx);
 
         return line;
     }
 
-    parseEditorFile() {
+    extractLines() {
         let text = vscode.window.activeTextEditor?.document.getText() ?? "";
         if (!text) vscode.window.showErrorMessage('Bullet Graph: No editor is active.');
-        
-        this.bulletLines = [];
     
-        const lines = text.split(/\r?\n/) ?? []; // new lines
+        const lines: Array<string> = text.split(/\r?\n/) ?? []; // new lines
         if (!lines) vscode.window.showErrorMessage('Bullet Graph: Could not parse current editor.');
-    
+
+        let lineIdx = 0;
         lines.forEach( line => {
-            if (line.trim().length > 0) { // skip empty line, or only containing tabs/spaces
-                let bulletLine = new BulletLine();
-                bulletLine.parse(line);
-                this.bulletLines.push(bulletLine);
+            const lineTrim = line.trim();
+            if (lineTrim.length > 0) { // skip empty line, or only containing tabs/spaces
+                let docLine = new DocumentLine();
+                docLine.index = lineIdx;
+                if (lineTrim[0] === SCRIPT_LINE_TOKEN) {
+                    docLine.text = lineTrim;
+                    this.scriptLines.push(docLine);
+                } else {
+                    docLine.text = line;
+                    this.bulletLines.push(docLine);
+                }
             }
-        })
+            lineIdx++;
+        });
+    }
+
+    parseBulletsLines(): Array<BulletLine> {
+        let bulletLines: Array<BulletLine> = [];
+
+        this.bulletLines.forEach( line => {
+            let bulletLine = new BulletLine();
+            bulletLine.parse(line.text, line.index);
+            bulletLines.push(bulletLine);
+        });
+
+        return bulletLines;
     }
 
     setVisibilityInDoc(lineIdx: number | undefined, visibility: EVisibility, selector: any | undefined = undefined, callback: any | undefined = undefined) {
@@ -126,59 +151,79 @@ export class DocumentManager {
         });
     }
 
-    callUnfoldCommand(lineIdx: number | undefined) {
+    callUnfoldCommand(lineIdx: number | undefined, completionHandler: any | undefined = undefined) {
         if (lineIdx === undefined) {
-            vscode.commands.executeCommand("editor.unfold");
+            vscode.commands.executeCommand("editor.unfold").then(() => { 
+                if (completionHandler) completionHandler(); });
         } else {
-            vscode.commands.executeCommand("editor.unfold", { selectionLines: [lineIdx] });
+            vscode.commands.executeCommand("editor.unfold", { selectionLines: [lineIdx] }).then(() => { 
+                if (completionHandler) completionHandler(); });
         }
     }
 
-    callFoldCommand(lineIdx: number | undefined) {
+    callFoldCommand(lineIdx: number | undefined, completionHandler: any | undefined = undefined) {
         if (lineIdx === undefined) {
-            vscode.commands.executeCommand("editor.fold");
+            vscode.commands.executeCommand("editor.fold").then(() => { 
+                if (completionHandler) completionHandler(); });
         } else {
-            vscode.commands.executeCommand("editor.fold", { selectionLines: [lineIdx] });
+            vscode.commands.executeCommand("editor.fold", { selectionLines: [lineIdx] }).then(() => { 
+                if (completionHandler) completionHandler(); });
         }
     }
 
-    callFoldCommandIfPossible(lineIdx: number | undefined) {
-        this.callUnfoldCommand(lineIdx); // unfold first to avoid unexpected behavior if already folded
-        if (this.isLineFoldable(lineIdx)) {
-            this.callFoldCommand(lineIdx);
-        }
+    callFoldCommandIfPossible(lineIdx: number | undefined, completionHandler: any | undefined = undefined) {
+        this.callUnfoldCommand(lineIdx, () => { // unfold first to avoid unexpected behavior if already folded
+            if (this.isLineFoldable(lineIdx)) {
+                this.callFoldCommand(lineIdx, completionHandler);
+            } else {
+                if (completionHandler) completionHandler();
+            }
+        });
     }
     
-    foldLine(lineIdx: number | undefined) {
-        this.setVisibilityInDoc(lineIdx, EVisibility.eFloor);
-        this.callFoldCommandIfPossible(lineIdx);
+    foldLine(lineIdx: number | undefined, completionHandler: any | undefined = undefined) {
+        this.setVisibilityInDoc(lineIdx, EVisibility.eFloor, undefined, () => {
+            this.callFoldCommandIfPossible(lineIdx, completionHandler);
+        });
     }
     
-    unfoldLine(lineIdx: number | undefined) {
-        this.setVisibilityInDoc(lineIdx, EVisibility.eNormal);
-        this.callUnfoldCommand(lineIdx);
+    unfoldLine(lineIdx: number | undefined, completionHandler: any | undefined = undefined) {
+        this.setVisibilityInDoc(lineIdx, EVisibility.eNormal, undefined, () => {
+            this.callUnfoldCommand(lineIdx, completionHandler);
+        });
     }
 
-    hideNode(lineIdx: number | undefined) {
+    hideNode(lineIdx: number | undefined, completionHandler: any | undefined = undefined) {
         this.setVisibilityInDoc(lineIdx, EVisibility.eHide);
-        this.callFoldCommandIfPossible(lineIdx);
+        this.callFoldCommandIfPossible(lineIdx, completionHandler);
     }
     
-    unhideNode(lineIdx: number | undefined) {
+    unhideNode(lineIdx: number | undefined, completionHandler: any | undefined = undefined) {
         this.setVisibilityInDoc(lineIdx, EVisibility.eNormal);
-        this.callUnfoldCommand(lineIdx);
+        this.callUnfoldCommand(lineIdx, completionHandler);
     }
 
-    updateFolding() {
+    updateFoldingChained(lineIdx: number, completionHandler: any | undefined = undefined) {
+        if (lineIdx >= 0) {
+            const line = this.parseLine(lineIdx);
+            if ([EVisibility.eFloor, EVisibility.eHide].includes(line.visibility) && line.isValid()) {
+                this.callFoldCommandIfPossible(lineIdx, () => { 
+                    this.updateFoldingChained(lineIdx - 1, completionHandler);
+                });
+            } else {
+                this.updateFoldingChained(lineIdx - 1, completionHandler);
+            }
+        } else {
+            if (completionHandler) completionHandler();
+        }
+    }
+
+    updateFolding(completionHandler: any | undefined = undefined) {
         for (let i = this.getLineCount() - 1; i >= 0; --i) {
             this.callUnfoldCommand(i);
         }
 
-        for (let i = this.getLineCount() - 1; i >= 0; --i) {
-            const line = this.parseLine(i);
-            if ([EVisibility.eFloor, EVisibility.eHide].includes(line.visibility))
-                this.callFoldCommandIfPossible(i);
-        }
+        this.updateFoldingChained(this.getLineCount(), completionHandler);
     }
 
     // Bleh. Document edit promise must resolve before doing another. Should do this more cleanly.
@@ -193,54 +238,46 @@ export class DocumentManager {
     }
 
     // Bleh. Document edit promise must resolve before doing another. Should do this more cleanly.
-    setVisibilityInDocChainedParentsReverse(visibility: EVisibility, lineIdx: number, maxDepth: number) {
+    setVisibilityInDocChainedParentsReverse(visibility: EVisibility, lineIdx: number, maxDepth: number, completionHandler: any | undefined = undefined) {
         if (lineIdx >= 0) {
             let selector = (lineManager: BulletLine) => {
                 return (maxDepth === undefined) || (lineManager.depth < maxDepth);
             };
-            let completionHandler = (lineManager: BulletLine) => {
+            let callback = (lineManager: BulletLine) => {
                 let nextMaxDepth = (lineManager.depth >= 0 && lineManager.depth < maxDepth) ? lineManager.depth : maxDepth;
-                this.setVisibilityInDocChainedParentsReverse(visibility, lineIdx - 1, nextMaxDepth);
+                this.setVisibilityInDocChainedParentsReverse(visibility, lineIdx - 1, nextMaxDepth, completionHandler);
             };
-            this.setVisibilityInDoc(lineIdx, visibility, selector, completionHandler);
+            this.setVisibilityInDoc(lineIdx, visibility, selector, callback);
+        } else {
+            if (completionHandler) completionHandler();
         }
     }
 
-    foldAll() {
-        this.setVisibilityInDocChained(EVisibility.eFloor, 0);
-        // for (let i = this.getLineCount() - 1; i >= 0; --i) {
-        //     this.callFoldCommandIfPossible(i);
-        // }
+    foldAll(completionHandler: any | undefined = undefined) {
+        this.setVisibilityInDocChained(EVisibility.eFloor, 0, undefined, completionHandler);
     }
 
-    unfoldAll() {
-        this.setVisibilityInDocChained(EVisibility.eNormal, 0);
-        // for (let i = this.getLineCount() - 1; i >= 0; --i) {
-        //     this.callUnfoldCommand(i);
-        // }
+    unfoldAll(completionHandler: any | undefined = undefined) {
+        this.setVisibilityInDocChained(EVisibility.eNormal, 0, undefined, completionHandler);
     }
 
-    hideAll() {
-        this.setVisibilityInDocChained(EVisibility.eHide, 0);
-        // for (let i = this.getLineCount() - 1; i >= 0; --i) {
-        //     this.callFoldCommandIfPossible(i);
-        // }
+    hideAll(completionHandler: any | undefined = undefined) {
+        this.setVisibilityInDocChained(EVisibility.eHide, 0, undefined, completionHandler);
     }
 
-    unhideAll() {
+    unhideAll(completionHandler: any | undefined = undefined) {
         let selector = (line: BulletLine) => { return line.visibility === EVisibility.eHide; }; // only unhide hidden nodes
-        let completionHandler = () => { /* this.updateFolding(); */ };
         this.setVisibilityInDocChained(EVisibility.eNormal, 0, selector, completionHandler);
     }
 
-    revealNode(lineIdx: number) {
-        const line = this.parseActiveLine();
+    revealNode(lineIdx: number, completionHandler: any | undefined = undefined) {
+        const line = this.parseLine(lineIdx);
 
         if (line.visibility === EVisibility.eHide) // special case when start line is hidden
             this.setVisibilityInDoc(lineIdx, EVisibility.eNormal, undefined, (lineManager: BulletLine) => {
-                this.setVisibilityInDocChainedParentsReverse(EVisibility.eNormal, lineIdx, line.depth);
+                this.setVisibilityInDocChainedParentsReverse(EVisibility.eNormal, lineIdx, line.depth, completionHandler);
             });
         else
-            this.setVisibilityInDocChainedParentsReverse(EVisibility.eNormal, lineIdx, line.depth);
+            this.setVisibilityInDocChainedParentsReverse(EVisibility.eNormal, lineIdx, line.depth, completionHandler);
     }
 }

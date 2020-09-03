@@ -11,6 +11,7 @@
 	],
 	"activationEvents": [
 		"onCommand:vscode-bulletgraph.renderPreview",
+		"onCommand:vscode-bulletgraph.renderScriptPreview",
 		"onCommand:vscode-bulletgraph.insertId",
 		"onCommand:vscode-bulletgraph.foldLine",
 		"onCommand:vscode-bulletgraph.unfoldLine",
@@ -29,6 +30,10 @@
 			{
 				"command": "vscode-bulletgraph.renderPreview",
 				"title": "Bullet Graph: Render Preview Beside"
+			},
+			{
+				"command": "vscode-bulletgraph.renderScriptPreview",
+				"title": "Bullet Graph: Render Script Preview Beside"
 			},
 			{
 				"command": "vscode-bulletgraph.insertId",
@@ -74,7 +79,39 @@
 				"command": "vscode-bulletgraph.revealNode",
 				"title": "Bullet Graph: Reveal Node"
 			}
-		]
+		],
+        "keybindings": [
+            {
+                "command": "vscode-bulletgraph.renderPreview",
+                "key": "shift+alt+enter",
+                "mac": "shift+cmd+enter"
+            },
+            {
+                "command": "vscode-bulletgraph.renderScriptPreview",
+                "key": "ctrl+shift+alt+enter",
+                "mac": "ctrl+shift+cmd+enter"
+            },
+            {
+                "command": "vscode-bulletgraph.hideNode",
+                "key": "ctrl+shift+alt+left",
+                "mac": "ctrl+shift+cmd+left"
+            },
+            {
+                "command": "vscode-bulletgraph.unhideNode",
+                "key": "ctrl+shift+alt+right",
+                "mac": "ctrl+shift+cmd+right"
+            },
+            {
+                "command": "vscode-bulletgraph.foldLine",
+                "key": "shift+alt+left",
+                "mac": "shift+cmd+left"
+            },
+            {
+                "command": "vscode-bulletgraph.unfoldLine",
+                "key": "shift+alt+right",
+                "mac": "shift+cmd+right"
+            }
+        ]
 	},
 	"extensionDependencies": [
 		"tintinweb.graphviz-interactive-preview",

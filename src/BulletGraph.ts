@@ -157,11 +157,12 @@ export class BulletGraph {
         this.floorNodeIds = new IdSet();
         this.hideNodeIds = new IdSet();
     }
-    
+
     parseEditorFile() {
         let doc = new DocumentManager();
-        doc.parseEditorFile();
-        this.parse(doc.bulletLines);
+        doc.extractLines();
+        const bulletLines = doc.parseBulletsLines();
+        this.parse(bulletLines);
     }
 
     parse(bulletLines: Array<BulletLine>) {

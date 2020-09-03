@@ -6,6 +6,7 @@ import { ERenderingEngine } from './constants'
 import { DotFileManager } from './DotFileManager'
 import { insertNodeIdStringFromLineContent } from './NodeIdGenerator'
 import { DocumentManager } from './DocumentManager';
+import { ScriptManager } from './ScriptManager';
 
 function render() {
     // Parsing the editor file to get the bullet graph structure.
@@ -21,11 +22,22 @@ function render() {
     dotFileManager.render(depthBullet, ERenderingEngine.eGraphvizInteractive);
 }
 
+function renderScript() {
+    let script = new ScriptManager();
+    script.runScriptIfSpecified( () => {
+        render();
+    });
+}
+
 export function activate(context: vscode.ExtensionContext) {
     let documentManager = new DocumentManager();
 
     context.subscriptions.push(
         vscode.commands.registerCommand('vscode-bulletgraph.renderPreview', render)
+    );
+
+    context.subscriptions.push(
+        vscode.commands.registerCommand('vscode-bulletgraph.renderScriptPreview', renderScript)
     );
 
     context.subscriptions.push(

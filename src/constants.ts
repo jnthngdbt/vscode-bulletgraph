@@ -1,6 +1,8 @@
 export const COMMENT = "//";
 export const LABEL_ID_SEP = "//";
 export const HIGHLIGHT_TOKEN = "[*]";
+export const SCRIPT_LINE_TOKEN = '$';
+export const NEW_SCRIPT_CHAR = '[';
 
 export const BASE_FONTSIZE = 30;
 export const BASE_ARROWSIZE = 1.5;
