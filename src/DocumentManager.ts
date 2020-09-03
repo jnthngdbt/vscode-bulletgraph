@@ -3,6 +3,10 @@ import * as vscode from 'vscode';
 import { LABEL_ID_SEP, EVisibility, NEW_SCRIPT_CHAR, SCRIPT_LINE_TOKEN } from './constants'
 import { BulletLine } from './BulletLine';
 
+export function isScriptLine(text: string): Boolean {
+    return text.trim().startsWith(SCRIPT_LINE_TOKEN);
+}
+
 export class DocumentLine {
     text = "";
     index = -1;
@@ -101,7 +105,7 @@ export class DocumentManager {
 
         const isSelectorRespected = (selector === undefined) || selector(line);
 
-        if (!line.isValid() || line.isComment || (line.visibility == visibility) || !isSelectorRespected) {
+        if (isScriptLine(line.text) || !line.isValid() || line.isComment || (line.visibility == visibility) || !isSelectorRespected) {
             if (callback) callback(line);
             return;
         }

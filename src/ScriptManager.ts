@@ -78,15 +78,18 @@ export class ScriptManager {
     runCommand(script: Script, commandIdx: number, scriptCompletionHandler: any) {
         if (commandIdx < script.commands.length) {
             let completionHandler = () => { this.runCommand(script, commandIdx + 1, scriptCompletionHandler); };
-            
+
             const command = script.commands[commandIdx];
-            if (command.name === 'hideAll') { this.doc.hideAll(completionHandler); } 
+            if      (command.name === 'hideAll'         ) { this.doc.hideAll(completionHandler); } 
             else if (command.name === 'unhideAll'       ) { this.doc.unhideAll(completionHandler); }
-            else if (command.name === 'updateFolding'   ) { this.doc.updateFolding(completionHandler); }
             else if (command.name === 'foldAll'         ) { this.doc.foldAll(completionHandler); } 
             else if (command.name === 'unfoldAll'       ) { this.doc.unfoldAll(completionHandler); } 
+            else if (command.name === 'hideNode'        ) { this.doc.hideNode(command.argument.lineIdx, completionHandler); } 
+            else if (command.name === 'unhideNode'      ) { this.doc.unhideNode(command.argument.lineIdx, completionHandler); } 
             else if (command.name === 'foldNode'        ) { this.doc.foldLine(command.argument.lineIdx, completionHandler); } 
+            else if (command.name === 'unfoldNode'      ) { this.doc.unfoldLine(command.argument.lineIdx, completionHandler); } 
             else if (command.name === 'revealNode'      ) { this.doc.revealNode(command.argument.lineIdx, completionHandler); } 
+            else if (command.name === 'updateFolding'   ) { this.doc.updateFolding(completionHandler); }
             else { completionHandler(); }
         } else {
             scriptCompletionHandler();
