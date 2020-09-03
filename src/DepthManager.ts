@@ -56,10 +56,8 @@ export class DepthManager {
     removeDuplicateLinksInArray(edges : Array<Edge>) {
         const isDuplicate = (edgeIdx = 0): Boolean => {
             for (let i = 0; i < edgeIdx; i++) { // avoid i === edgeIdx, to not test with itself
-                if (edges[i].idSrc == edges[edgeIdx].idSrc)
-                    if (edges[i].idDst == edges[edgeIdx].idDst)
-                        if (edges[i].type === edges[edgeIdx].type)
-                            return true;
+                if (edges[i].isEqual(edges[edgeIdx]))
+                    return true;
             }
             return false;
         };
@@ -80,6 +78,50 @@ export class DepthManager {
             this.removeDuplicateLinksInArray(nodeLinks.inputs);
             this.removeDuplicateLinksInArray(nodeLinks.outputs);
         });
+        
+        console.log(this.bullet.links);
+    }
+
+    convertBackAndForthLinksToBidirectional() {
+        let links = this.bullet.links;
+        let nodeIds = links.getNodeIds();
+
+        const setBidirectionalIfItIs = (output: Edge, inputs: Array<Edge>): Boolean => {
+            for (let input of inputs) {
+                if (input.isEqual(output)) { // is bidirectional
+                    output.type = EEdge.eBiLink;
+                    input.type = EEdge.eBiLink;
+                    return true;
+                }
+            }
+            return false;
+        };
+
+        const updateBidirectionalLinksOfOtherNode = (otherNodeId: Id, srcNodeId: Id) => {
+            let setFromList = (list: Array<Edge>) => {
+                list.forEach( edge => {
+                    if (edge.idDst === srcNodeId) {
+                        edge.type = EEdge.eBiLink;
+                        edge.mustRender = false; // deactivate if, will be rendered by other node
+                    }
+                });
+            };
+
+            let nodeLinks = links.getNodeLinks(otherNodeId);
+            setFromList(nodeLinks.outputs);
+            setFromList(nodeLinks.inputs);
+        };
+
+        nodeIds.forEach(nodeId => {
+            let nodeLinks = links.getNodeLinks(nodeId);
+            nodeLinks.outputs.forEach( output => {
+                if (output.mustRender) { // skip if was already updated from other node
+                    if (setBidirectionalIfItIs(output, nodeLinks.inputs)) { // if is bidirectional
+                        updateBidirectionalLinksOfOtherNode(output.idDst, nodeId);
+                    }
+                }
+            });
+        });
     }
 
     pruneAndReorganize(bulletIn: BulletGraph): BulletGraph {
@@ -88,6 +130,7 @@ export class DepthManager {
         this.rerouteLinks(bulletIn.links);
         this.bullet.createHierarchyEdges(this.bullet.hierarchy);
         this.removeDuplicateLinks();
+        this.convertBackAndForthLinksToBidirectional();
         
         return this.bullet;
     }

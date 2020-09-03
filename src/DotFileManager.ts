@@ -70,6 +70,11 @@ export class DotFileManager {
         str += indent + "edge [color=\"#bb55bb\", style=straight, arrowtail=inv, arrowhead=normal] \n"; // known random bug with dir=both when splines=ortho
         str += this.printEdges(indent, bullet.links, EEdge.eLink);
         str += "\n";
+
+        str += indent + "// Edge style for type BIDIRECTIONAL LINK. \n";
+        str += indent + "edge [color=\"#ff77ff\", style=straight, dir=both, arrowtail=normal, arrowhead=normal] \n"; // known random bug with dir=both when splines=ortho
+        str += this.printEdges(indent, bullet.links, EEdge.eBiLink);
+        str += "\n";
         
         str += indent + "// Style for undeclared nodes (can help debug if something is wrong). \n";
         str += indent + "node [color=\"#aa3333\", fontcolor=grey10, style=\"rounded,filled\", shape=box] \n";
@@ -132,7 +137,7 @@ export class DotFileManager {
         for (var id of links.getNodeIds()) {
             let nodeOutEdges = links.getNodeLinks(id).outputs;
             nodeOutEdges.forEach( edge => {
-                if (edge.type === type) {
+                if (edge.mustRender && edge.type === type) {
                     str += indent + edge.idSrc + " -> " + edge.idDst + "\n";
                 }
             })

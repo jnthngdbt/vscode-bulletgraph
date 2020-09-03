@@ -10,7 +10,7 @@ export const BASE_PENWIDTH = 2;
 export const FONTSIZE_FACTOR = 2;
 
 export enum ENode { eDefault, eProcess, eSubgraph, eSubgraphProcess, eFolded, eProcessFolded };
-export enum EEdge { eHierarchy, eFlow, eLink };
+export enum EEdge { eHierarchy, eFlow, eLink, eBiLink };
 
 export enum ELink { 
     eIn = '<', 

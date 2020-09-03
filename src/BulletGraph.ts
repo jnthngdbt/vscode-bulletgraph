@@ -80,10 +80,20 @@ export class Edge {
     idSrc: Id;
     idDst: Id;
     type: EEdge;
+    mustRender = true;
     constructor(idSrc: Id, idDst: Id, type: EEdge) {
         this.idSrc = idSrc;
         this.idDst = idDst;
         this.type = type;
+        this.mustRender = true;
+    }
+
+    isEqual(other: Edge): Boolean {
+        if (this.idSrc == other.idSrc)
+            if (this.idDst == other.idDst)
+                if (this.type === other.type)
+                    return true;
+        return false;
     }
 }
 
