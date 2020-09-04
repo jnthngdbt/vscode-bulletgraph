@@ -107,11 +107,11 @@ export function activate(context: vscode.ExtensionContext) {
     );
 
     context.subscriptions.push(
-        vscode.workspace.onDidSaveTextDocument((doc: vscode.TextDocument) => {
-            if (doc.fileName.endsWith(".blt"))
-                render();
+        vscode.commands.registerCommand('vscode-bulletgraph.connectNode', () => {
+            documentManager.connectNode(documentManager.getActiveLineIdx() ?? -1);
         })
-    )
+    );
+
     context.subscriptions.push( vscode.commands.registerCommand('vscode-bulletgraph.foldLevel1', () => { documentManager.foldLevel(1); }) );
     context.subscriptions.push( vscode.commands.registerCommand('vscode-bulletgraph.foldLevel2', () => { documentManager.foldLevel(2); }) );
     context.subscriptions.push( vscode.commands.registerCommand('vscode-bulletgraph.foldLevel3', () => { documentManager.foldLevel(3); }) );

@@ -9,6 +9,8 @@ export const BASE_ARROWSIZE = 1.5;
 export const BASE_PENWIDTH = 2;
 export const FONTSIZE_FACTOR = 2;
 
+export type Id = string;
+
 export enum ENode { eDefault, eProcess, eSubgraph, eSubgraphProcess, eFolded, eProcessFolded };
 export enum EEdge { eHierarchy, eFlow, eLink, eBiLink };
 

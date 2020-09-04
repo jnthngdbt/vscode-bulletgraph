@@ -1,6 +1,6 @@
 import * as vscode from 'vscode';
 
-import { LABEL_ID_SEP, EVisibility, NEW_SCRIPT_CHAR, SCRIPT_LINE_TOKEN } from './constants'
+import { Id, LABEL_ID_SEP, EVisibility, NEW_SCRIPT_CHAR, SCRIPT_LINE_TOKEN } from './constants'
 import { BulletLine } from './BulletLine';
 
 export function isScriptLine(text: string): Boolean {
@@ -295,5 +295,80 @@ export class DocumentManager {
                 this.updateFolding(completionHandler);
             });
         });
+    }
+
+    getLineIdxForId(id: Id, bulletLines: Array<BulletLine>): number {
+        for (let bulletLine of bulletLines) {
+            if (bulletLine.id === id)
+                return bulletLine.index;
+        }
+        return -1;
+    }
+
+    revealNodeChained(linesToReveal: Array<number>, idx: number, completionHandler: any | undefined = undefined) {
+        if (idx < linesToReveal.length) {
+            this.revealNode(linesToReveal[idx], () => {
+                this.revealNodeChained(linesToReveal, idx + 1, completionHandler);
+            })
+        } else {
+            if (completionHandler) completionHandler();
+        }
+    }
+
+    findLinesLinkedToNode(bullets: Array<BulletLine>, nodeBullet: BulletLine, lines: Array<number>) {
+        let addLinkedNodeLines = (linkedIds: Array<Id>) => {
+            for (let id of linkedIds) {
+                let idx = this.getLineIdxForId(id, bullets);
+                if (idx >= 0) lines.push(idx);
+            }
+        }
+
+        console.log(nodeBullet);
+
+        addLinkedNodeLines(nodeBullet.idsIn);
+        addLinkedNodeLines(nodeBullet.idsOut);
+
+        for (let bullet of bullets) {
+            if (bullet.idsIn.includes(nodeBullet.id)) lines.push(bullet.index);
+            if (bullet.idsOut.includes(nodeBullet.id)) lines.push(bullet.index);
+        }
+    }
+
+    connectNode(nodeLineIdx: number, completionHandler: any | undefined = undefined) {
+        const nodeBullet = this.parseLine(nodeLineIdx);
+        if (nodeBullet.isValid()) {
+            this.extractLines();
+            const bullets = this.parseBulletsLines();
+
+            // Find the index of the current node in the bullet list.
+            const nodeIdx = bullets.findIndex( bullet => bullet.index === nodeBullet.index );
+    
+            let linesToReveal: Array<number> = [];
+            linesToReveal.push(nodeLineIdx);
+
+            // Link current node.
+            this.findLinesLinkedToNode(bullets, nodeBullet, linesToReveal);
+            // Link all children of current node.
+            for (let i = nodeIdx; i < bullets.length; i++)
+                if (bullets[i].depth > nodeBullet.depth)
+                    this.findLinesLinkedToNode(bullets, bullets[i], linesToReveal);
+                else if (bullets[i].depth < nodeBullet.depth)
+                    break;
+            // Link all parents of current node.
+            for (let i = nodeIdx; i >= 0; i--)
+                if (bullets[i].depth < nodeBullet.depth)
+                    this.findLinesLinkedToNode(bullets, bullets[i], linesToReveal);
+                else if (bullets[i].depth > nodeBullet.depth)
+                    break;
+
+            linesToReveal = [...new Set(linesToReveal)]; // remove duplicates
+            linesToReveal.sort();
+            
+            // TODO MUST CONVERT HIDE TO FOLD FOR CHILDREN
+            this.revealNodeChained(linesToReveal, 0, completionHandler);
+
+        } else {
+            if (completionHandler) completionHandler();
+        }
     }
 }

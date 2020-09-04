@@ -23,6 +23,7 @@
 		"onCommand:vscode-bulletgraph.hideAll",
 		"onCommand:vscode-bulletgraph.unhideAll",
 		"onCommand:vscode-bulletgraph.revealNode",
+		"onCommand:vscode-bulletgraph.connectNode",
 		"onCommand:vscode-bulletgraph.foldLevel1",
 		"onCommand:vscode-bulletgraph.foldLevel2",
 		"onCommand:vscode-bulletgraph.foldLevel3",
@@ -84,6 +85,10 @@
 			{
 				"command": "vscode-bulletgraph.revealNode",
 				"title": "Bullet Graph: Reveal Node"
+			},
+			{
+				"command": "vscode-bulletgraph.connectNode",
+				"title": "Bullet Graph: Connect Node"
 			},
 			{
 				"command": "vscode-bulletgraph.foldLevel1",

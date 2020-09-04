@@ -1,8 +1,6 @@
-import { EBullet, EEdge, ENode, EVisibility } from './constants'
+import { Id, EBullet, EEdge, ENode, EVisibility } from './constants'
 import { DocumentManager } from './DocumentManager'
 import { BulletLine } from './BulletLine'
-
-export type Id = string;
 
 export class Node {
     bullet: EBullet = EBullet.eDefault;

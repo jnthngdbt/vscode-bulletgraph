@@ -89,6 +89,7 @@ export class ScriptManager {
             else if (command.name === 'foldNode'        ) { this.doc.foldLine(command.argument.lineIdx, completionHandler); } 
             else if (command.name === 'unfoldNode'      ) { this.doc.unfoldLine(command.argument.lineIdx, completionHandler); } 
             else if (command.name === 'revealNode'      ) { this.doc.revealNode(command.argument.lineIdx, completionHandler); } 
+            else if (command.name === 'connectNode'     ) { this.doc.connectNode(command.argument.lineIdx, completionHandler); } 
             else if (command.name === 'updateFolding'   ) { this.doc.updateFolding(completionHandler); }
             else { completionHandler(); }
         } else {

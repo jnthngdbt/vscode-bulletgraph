@@ -1,5 +1,5 @@
-import { BulletGraph, Node, IdSet, Id, LinksMap, Edge } from './BulletGraph';
-import { EEdge } from './constants'
+import { BulletGraph, Node, IdSet, LinksMap, Edge } from './BulletGraph';
+import { Id, EEdge } from './constants'
 
 export class DepthManager {
     nodeRerouteMap: { [key:string]:Id; } = {};
