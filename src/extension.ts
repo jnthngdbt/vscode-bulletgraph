@@ -101,6 +101,12 @@ export function activate(context: vscode.ExtensionContext) {
     );
 
     context.subscriptions.push(
+        vscode.commands.registerCommand('vscode-bulletgraph.foldChildren', () => {
+            documentManager.foldChildren(documentManager.getActiveLineIdx() ?? -1);
+        })
+    );
+
+    context.subscriptions.push(
         vscode.commands.registerCommand('vscode-bulletgraph.revealNode', () => {
             documentManager.revealNode(documentManager.getActiveLineIdx() ?? -1);
         })

@@ -78,8 +78,6 @@ export class DepthManager {
             this.removeDuplicateLinksInArray(nodeLinks.inputs);
             this.removeDuplicateLinksInArray(nodeLinks.outputs);
         });
-        
-        console.log(this.bullet.links);
     }
 
     convertBackAndForthLinksToBidirectional() {

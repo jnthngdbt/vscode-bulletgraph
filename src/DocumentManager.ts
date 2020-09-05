@@ -233,10 +233,24 @@ export class DocumentManager {
     }
 
     // Bleh. Document edit promise must resolve before doing another. Should do this more cleanly.
-    setVisibilityInDocChained(visibility: EVisibility, lineIdx: number, selector: any | undefined = undefined, completionHandler: any | undefined = undefined) {
+    setVisibilityInDocChained(visibility: EVisibility, lineIdx: number, selector: any | undefined = undefined, completionHandler: any | undefined = undefined, stopCriteria: any | undefined = undefined) {
+        // Merge selector filter and stop criteria into a single selector, to not process line if it passes
+        // the selector, but triggers stop criteria.
+        let selectorMerged = (line: BulletLine) => {
+            let resultSelector = true;
+            let resultStopCriteria = false;
+            if (stopCriteria) resultStopCriteria = stopCriteria(line);
+            if (selector) resultSelector = selector(line);
+            return resultSelector && !resultStopCriteria;
+        };
+
         if (lineIdx < this.getLineCount()) {
-            this.setVisibilityInDoc(lineIdx, visibility, selector, (lineManager: BulletLine) => {
-                this.setVisibilityInDocChained(visibility, lineIdx + 1, selector, completionHandler);
+            this.setVisibilityInDoc(lineIdx, visibility, selectorMerged, (bullet: BulletLine) => {
+                if (!stopCriteria || !stopCriteria(bullet))
+                    this.setVisibilityInDocChained(visibility, lineIdx + 1, selector, completionHandler, stopCriteria);
+                else if (completionHandler !== undefined) {
+                    completionHandler();
+                }
             });
         } else if (completionHandler !== undefined) {
             completionHandler();
@@ -276,16 +290,25 @@ export class DocumentManager {
         let selector = (line: BulletLine) => { return line.visibility === EVisibility.eHide; }; // only unhide hidden nodes
         this.setVisibilityInDocChained(EVisibility.eNormal, 0, selector, completionHandler);
     }
+    
+    foldChildren(lineIdx: number, completionHandler: any | undefined = undefined) {
+        const nodeBullet = this.parseLine(lineIdx);
+        let stopCriteria = (line: BulletLine) => { return line.depth <= nodeBullet.depth; };
+        this.setVisibilityInDocChained(EVisibility.eFloor, nodeBullet.index + 1, undefined, completionHandler, stopCriteria);
+    }
 
     revealNode(lineIdx: number, completionHandler: any | undefined = undefined) {
         const line = this.parseLine(lineIdx);
 
-        if (line.visibility === EVisibility.eHide) // special case when start line is hidden
-            this.setVisibilityInDoc(lineIdx, EVisibility.eNormal, undefined, (lineManager: BulletLine) => {
+        // Fold children to make sure they are not hidden, to avoid missing underlying interactions.
+        this.foldChildren(lineIdx, () => {
+            if (line.visibility === EVisibility.eHide) // special case when start line is hidden
+                this.setVisibilityInDoc(lineIdx, EVisibility.eFloor, undefined, (lineManager: BulletLine) => {
+                    this.setVisibilityInDocChainedParentsReverse(EVisibility.eNormal, lineIdx, line.depth, completionHandler);
+                });
+            else
                 this.setVisibilityInDocChainedParentsReverse(EVisibility.eNormal, lineIdx, line.depth, completionHandler);
-            });
-        else
-            this.setVisibilityInDocChainedParentsReverse(EVisibility.eNormal, lineIdx, line.depth, completionHandler);
+        });
     }
 
     foldLevel(level: number, completionHandler: any | undefined = undefined) {
@@ -323,11 +346,11 @@ export class DocumentManager {
             }
         }
 
-        console.log(nodeBullet);
-
+        // Added lines that the node directly link.
         addLinkedNodeLines(nodeBullet.idsIn);
         addLinkedNodeLines(nodeBullet.idsOut);
 
+        // Add
         for (let bullet of bullets) {
             if (bullet.idsIn.includes(nodeBullet.id)) lines.push(bullet.index);
             if (bullet.idsOut.includes(nodeBullet.id)) lines.push(bullet.index);
@@ -343,6 +366,7 @@ export class DocumentManager {
             // Find the index of the current node in the bullet list.
             const nodeIdx = bullets.findIndex( bullet => bullet.index === nodeBullet.index );
     
+            // Initialize the array of lines on which to call revealNode command.
             let linesToReveal: Array<number> = [];
             linesToReveal.push(nodeLineIdx);
 
@@ -361,12 +385,12 @@ export class DocumentManager {
                 else if (bullets[i].depth > nodeBullet.depth)
                     break;
 
-            linesToReveal = [...new Set(linesToReveal)]; // remove duplicates
+            // Remove duplicates and sort.
+            linesToReveal = [...new Set(linesToReveal)];
             linesToReveal.sort();
             
             // TODO MUST CONVERT HIDE TO FOLD FOR CHILDREN
             this.revealNodeChained(linesToReveal, 0, completionHandler);
-
         } else {
             if (completionHandler) completionHandler();
         }
