@@ -34,6 +34,25 @@
 	],
 	"main": "./out/extension.js",
 	"contributes": {
+		"languages": [
+            {
+                "id": "bullet",
+                "aliases": [
+                    "Bullet"
+                ],
+                "extensions": [
+                    ".blt"
+                ],
+                "configuration": "syntax/bullet.configuration.json"
+            }
+        ],
+        "grammars": [
+            {
+                "language": "bullet",
+                "scopeName": "source.blt",
+                "path": "syntax/bullet.tmLanguage"
+            }
+        ],
 		"commands": [
 			{
 				"command": "vscode-bulletgraph.renderPreview",
