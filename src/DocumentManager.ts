@@ -16,20 +16,34 @@ export class DocumentManager {
     bulletLines: Array<DocumentLine> = [];
     scriptLines: Array<DocumentLine> = [];
 
-    isLineFoldable(lineIdx: number | undefined): boolean {
+    isLineParent(lineIdx: number | undefined) {
         if (lineIdx === undefined) return false;
 
-        // Next line.
-        let line = this.parseLine(lineIdx + 1);
+        let line = this.parseLine(lineIdx);
         if (!line.isValid()) return false;
-        const nextLineDepth = line.depth;
 
-        // Specified line. Do it last so that line state is active line.
-        line = this.parseLine(lineIdx);
+        for (let i = lineIdx + 1; i < this.getLineCount(); i++) {
+            let next = this.parseLine(i);
+            if (next.isValid()) {
+                if (next.depth > line.depth)
+                    return true;
+                else 
+                    return false;
+            }
+        }
+   
+        return false;
+    }
+
+    isLineFoldableByEditor(lineIdx: number | undefined): boolean {
+        if (lineIdx === undefined) return false;
+
+        // The direct next line must be indented.
+        let line = this.parseLine(lineIdx);
+        let next = this.parseLine(line.index + 1);
+        if (!next.isValid()) return false;
         if (!line.isValid()) return false;
-        const activeLineDepth = line.depth;
-
-        return nextLineDepth > activeLineDepth;
+        return next.depth > line.depth;
     }
 
     getLineCount(): number {
@@ -110,6 +124,11 @@ export class DocumentManager {
             return;
         }
 
+        if (visibility === EVisibility.eFloor) {
+            if (!this.isLineParent(lineIdx))
+                visibility = EVisibility.eNormal;
+        }
+
         const isVisibilityCompOptional = (visibility == EVisibility.eNormal) || (visibility == EVisibility.eUndefined);
         const hasVisibilityComp = line.visibility !== EVisibility.eUndefined;
 
@@ -177,7 +196,7 @@ export class DocumentManager {
 
     callFoldCommandIfPossible(lineIdx: number | undefined, completionHandler: any | undefined = undefined) {
         this.callUnfoldCommand(lineIdx, () => { // unfold first to avoid unexpected behavior if already folded
-            if (this.isLineFoldable(lineIdx)) {
+            if (this.isLineFoldableByEditor(lineIdx)) {
                 this.callFoldCommand(lineIdx, completionHandler);
             } else {
                 if (completionHandler) completionHandler();
@@ -186,27 +205,19 @@ export class DocumentManager {
     }
     
     foldLine(lineIdx: number | undefined, completionHandler: any | undefined = undefined) {
-        if (this.isLineFoldable(lineIdx)) {
-            this.setVisibilityInDoc(lineIdx, EVisibility.eFloor, undefined, () => {
-                this.callFoldCommand(lineIdx, completionHandler); // already tested that is foldable
-            });
-        }
+        this.setVisibilityInDoc(lineIdx, EVisibility.eFloor);
     }
     
     unfoldLine(lineIdx: number | undefined, completionHandler: any | undefined = undefined) {
-        this.setVisibilityInDoc(lineIdx, EVisibility.eNormal, undefined, () => {
-            this.callUnfoldCommand(lineIdx, completionHandler);
-        });
+        this.setVisibilityInDoc(lineIdx, EVisibility.eNormal);
     }
 
     hideNode(lineIdx: number | undefined, completionHandler: any | undefined = undefined) {
         this.setVisibilityInDoc(lineIdx, EVisibility.eHide);
-        this.callFoldCommandIfPossible(lineIdx, completionHandler);
     }
     
     unhideNode(lineIdx: number | undefined, completionHandler: any | undefined = undefined) {
         this.setVisibilityInDoc(lineIdx, EVisibility.eNormal);
-        this.callUnfoldCommand(lineIdx, completionHandler);
     }
 
     updateFoldingChained(lineIdx: number, completionHandler: any | undefined = undefined) {
@@ -225,9 +236,8 @@ export class DocumentManager {
     }
 
     updateFolding(completionHandler: any | undefined = undefined) {
-        for (let i = this.getLineCount() - 1; i >= 0; --i) {
+        for (let i = this.getLineCount() - 1; i >= 0; --i)
             this.callUnfoldCommand(i);
-        }
 
         this.updateFoldingChained(this.getLineCount(), completionHandler);
     }
@@ -247,11 +257,11 @@ export class DocumentManager {
         if (lineIdx < this.getLineCount()) {
             this.setVisibilityInDoc(lineIdx, visibility, selectorMerged, (bullet: BulletLine) => {
                 if (!stopCriteria || !stopCriteria(bullet))
-                    this.setVisibilityInDocChained(visibility, lineIdx + 1, selector, completionHandler, stopCriteria);
+                        this.setVisibilityInDocChained(visibility, lineIdx + 1, selector, completionHandler, stopCriteria);
                 else if (completionHandler !== undefined) {
                     completionHandler();
                 }
-            });
+                    });
         } else if (completionHandler !== undefined) {
             completionHandler();
         }
@@ -265,7 +275,7 @@ export class DocumentManager {
             };
             let callback = (lineManager: BulletLine) => {
                 let nextMaxDepth = (lineManager.depth >= 0 && lineManager.depth < maxDepth) ? lineManager.depth : maxDepth;
-                this.setVisibilityInDocChainedParentsReverse(visibility, lineIdx - 1, nextMaxDepth, completionHandler);
+                    this.setVisibilityInDocChainedParentsReverse(visibility, lineIdx - 1, nextMaxDepth, completionHandler);
             };
             this.setVisibilityInDoc(lineIdx, visibility, selector, callback);
         } else {
@@ -274,8 +284,7 @@ export class DocumentManager {
     }
 
     foldAll(completionHandler: any | undefined = undefined) {
-        let selector = (line: BulletLine) => { return this.isLineFoldable(line.index); }; // not optimal, implies that all lines are read twice
-        this.setVisibilityInDocChained(EVisibility.eFloor, 0, selector, completionHandler);
+        this.setVisibilityInDocChained(EVisibility.eFloor, 0, undefined, completionHandler);
     }
 
     unfoldAll(completionHandler: any | undefined = undefined) {
@@ -302,12 +311,13 @@ export class DocumentManager {
 
         // Fold children to make sure they are not hidden, to avoid missing underlying interactions.
         this.foldChildren(lineIdx, () => {
-            if (line.visibility === EVisibility.eHide) // special case when start line is hidden
-                this.setVisibilityInDoc(lineIdx, EVisibility.eFloor, undefined, (lineManager: BulletLine) => {
+            if (line.visibility === EVisibility.eHide) { // special case when start line is hidden
+                this.setVisibilityInDoc(lineIdx, EVisibility.eFloor, undefined, () => {
                     this.setVisibilityInDocChainedParentsReverse(EVisibility.eNormal, lineIdx, line.depth, completionHandler);
                 });
-            else
+            } else {
                 this.setVisibilityInDocChainedParentsReverse(EVisibility.eNormal, lineIdx, line.depth, completionHandler);
+            }
         });
     }
 
@@ -372,24 +382,26 @@ export class DocumentManager {
 
             // Link current node.
             this.findLinesLinkedToNode(bullets, nodeBullet, linesToReveal);
+
             // Link all children of current node.
             for (let i = nodeIdx; i < bullets.length; i++)
                 if (bullets[i].depth > nodeBullet.depth)
                     this.findLinesLinkedToNode(bullets, bullets[i], linesToReveal);
-                else if (bullets[i].depth < nodeBullet.depth)
-                    break;
+                else if (bullets[i].depth <= nodeBullet.depth)
+                    break; // stop when no longer a child
+
             // Link all parents of current node.
+            let maxDepth = nodeBullet.depth;
             for (let i = nodeIdx; i >= 0; i--)
-                if (bullets[i].depth < nodeBullet.depth)
+                if (bullets[i].depth < maxDepth) {
                     this.findLinesLinkedToNode(bullets, bullets[i], linesToReveal);
-                else if (bullets[i].depth > nodeBullet.depth)
-                    break;
+                    maxDepth = bullets[i].depth;
+                }
 
             // Remove duplicates and sort.
             linesToReveal = [...new Set(linesToReveal)];
             linesToReveal.sort();
             
-            // TODO MUST CONVERT HIDE TO FOLD FOR CHILDREN
             this.revealNodeChained(linesToReveal, 0, completionHandler);
         } else {
             if (completionHandler) completionHandler();
