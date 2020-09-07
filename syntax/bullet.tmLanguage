@@ -75,6 +75,18 @@
 				</dict>
 			</array>
 		</dict>
+        <dict>
+            <key>match</key>
+            <string>.*\[x\].*\n</string>
+            <key>name</key>
+            <string>comment.line.hidden.blt</string>
+        </dict>
+        <dict>
+            <key>match</key>
+            <string>.*\[\*\].*\n</string>
+            <key>name</key>
+            <string>storage.type.blt</string>
+        </dict>
 	</array>
 	<key>scopeName</key>
 	<string>source.blt</string>
