@@ -75,12 +75,11 @@ export class BulletLine {
             if (!this.hasComponentSection) {
                 this.hasComponents = false;
             } else {
-                let components = split[1].trim().split(' ')
+                let components = split[1].trim().split(' ');
 
                 // Extract visibility, if present.
                 for (let i = 0; i < components.length; ++i) {
                     switch (components[i] as EVisibility) {
-                        case EVisibility.eNormal: this.visibility = components[i] as EVisibility; break;
                         case EVisibility.eFold: this.visibility = components[i] as EVisibility; break;
                         case EVisibility.eFoldHidden: this.visibility = components[i] as EVisibility; break;
                         case EVisibility.eHide: this.visibility = components[i] as EVisibility; break;
