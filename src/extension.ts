@@ -107,6 +107,12 @@ export function activate(context: vscode.ExtensionContext) {
     );
 
     context.subscriptions.push(
+        vscode.commands.registerCommand('vscode-bulletgraph.updateChildren', () => {
+            documentManager.updateChildren(documentManager.getActiveLineIdx() ?? -1);
+        })
+    );
+
+    context.subscriptions.push(
         vscode.commands.registerCommand('vscode-bulletgraph.revealNode', () => {
             documentManager.revealNode(documentManager.getActiveLineIdx() ?? -1);
         })

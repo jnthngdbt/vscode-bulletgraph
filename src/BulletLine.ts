@@ -10,7 +10,7 @@ export class BulletLine {
     depth = -1;
     bullet = EBullet.eDefault;
     label = "";
-    visibility = EVisibility.eUndefined;
+    visibility = EVisibility.eNormal;
     isHighlight = false;
     id = "";
     idsIn: Array<string> = [];
@@ -25,7 +25,7 @@ export class BulletLine {
         this.depth = -1;
         this.bullet = EBullet.eDefault;
         this.label = "";
-        this.visibility = EVisibility.eUndefined;
+        this.visibility = EVisibility.eNormal;
         this.isHighlight = false;
         this.id = "";
         this.idsIn = [];
@@ -107,7 +107,7 @@ export class BulletLine {
                 }
 
                 // True if the component section contains something other than a visibility token.
-                let hasVisibility = this.visibility != EVisibility.eUndefined;
+                let hasVisibility = this.visibility != EVisibility.eNormal;
                 this.hasComponents = (components.length > 1) || !hasVisibility; // being here, we know we have at least 1 component, may be visibility
             }
         }

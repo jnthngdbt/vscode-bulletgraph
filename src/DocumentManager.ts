@@ -165,8 +165,8 @@ export class DocumentManager {
             return;
         }
 
-        const isVisibilityCompOptional = (visibility == EVisibility.eNormal) || (visibility == EVisibility.eUndefined);
-        const hasVisibilityComp = line.visibility !== EVisibility.eUndefined;
+        const isVisibilityCompOptional = visibility === EVisibility.eNormal;
+        const hasVisibilityComp = line.visibility !== EVisibility.eNormal;
 
         // Possible cases. They should be exclusive, so testing order is not important.
         const mustRemoveComponentSection = line.hasComponentSection && !line.hasComponents && isVisibilityCompOptional;
@@ -241,19 +241,27 @@ export class DocumentManager {
     }
     
     foldLine(lineIdx: number | undefined, completionHandler: any | undefined = undefined) {
-        this.setVisibilityInDoc(lineIdx, EVisibility.eFold);
+        this.setVisibilityInDoc(lineIdx, EVisibility.eFold, undefined, (line: BulletLine) => {
+            this.updateChildren(lineIdx, completionHandler); // used to update children visibility
+        });
     }
     
     unfoldLine(lineIdx: number | undefined, completionHandler: any | undefined = undefined) {
-        this.setVisibilityInDoc(lineIdx, EVisibility.eNormal);
+        this.setVisibilityInDoc(lineIdx, EVisibility.eNormal, undefined, (line: BulletLine) => {
+           this.updateChildren(lineIdx, completionHandler); // used to update children visibility
+        });
     }
 
     hideNode(lineIdx: number | undefined, completionHandler: any | undefined = undefined) {
-        this.setVisibilityInDoc(lineIdx, EVisibility.eHide);
+        this.setVisibilityInDoc(lineIdx, EVisibility.eHide, undefined, (line: BulletLine) => {
+            this.updateChildren(lineIdx, completionHandler); // used to update children visibility
+        });
     }
     
     unhideNode(lineIdx: number | undefined, completionHandler: any | undefined = undefined) {
-        this.setVisibilityInDoc(lineIdx, EVisibility.eNormal);
+        this.setVisibilityInDoc(lineIdx, EVisibility.eNormal, undefined, (line: BulletLine) => {
+            this.updateChildren(lineIdx, completionHandler); // used to update children visibility
+        });
     }
 
     updateFoldingChained(lineIdx: number, completionHandler: any | undefined = undefined) {
@@ -336,10 +344,32 @@ export class DocumentManager {
         this.setVisibilityInDocChained(EVisibility.eNormal, 0, selector, completionHandler);
     }
     
-    foldChildren(lineIdx: number, completionHandler: any | undefined = undefined) {
+    foldChildren(lineIdx: number | undefined, completionHandler: any | undefined = undefined) {
         const nodeBullet = this.parseLine(lineIdx);
         let stopCriteria = (line: BulletLine) => { return line.depth <= nodeBullet.depth; };
         this.setVisibilityInDocChained(EVisibility.eFold, nodeBullet.index + 1, undefined, completionHandler, stopCriteria);
+    }
+    
+    updateChildren(lineIdx: number | undefined, completionHandler: any | undefined = undefined) {
+        const line = this.parseLine(lineIdx);
+        if (line.isValid())
+            this.updateChildrenChained(line.index + 1, line.depth, completionHandler);
+    }
+
+    updateChildrenChained(lineIdx: number, minDepth: number, completionHandler: any | undefined = undefined) {
+        let call = (visibility: EVisibility) => {
+            this.setVisibilityInDoc(lineIdx, visibility, undefined, () => {
+                this.updateChildrenChained(lineIdx + 1, minDepth, completionHandler);
+            });
+        }
+        const line = this.parseLine(lineIdx);
+        if (line.depth > minDepth && lineIdx < this.getLineCount()) {
+            if (this.isLineHiddenByParentHide(lineIdx)) call(EVisibility.eHide);
+            else if (this.isLineHiddenByFold(lineIdx)) call(EVisibility.eFoldHidden);
+            else if (line.visibility === EVisibility.eFoldHidden) call(EVisibility.eFold);
+        } else {
+            if (completionHandler !== undefined) completionHandler();
+        }
     }
 
     revealNode(lineIdx: number, completionHandler: any | undefined = undefined) {

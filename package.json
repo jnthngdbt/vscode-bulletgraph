@@ -23,6 +23,7 @@
 		"onCommand:vscode-bulletgraph.hideAll",
 		"onCommand:vscode-bulletgraph.unhideAll",
 		"onCommand:vscode-bulletgraph.foldChildren",
+		"onCommand:vscode-bulletgraph.updateChildren",
 		"onCommand:vscode-bulletgraph.revealNode",
 		"onCommand:vscode-bulletgraph.connectNode",
 		"onCommand:vscode-bulletgraph.foldLevel1",
@@ -109,6 +110,10 @@
 			{
 				"command": "vscode-bulletgraph.foldChildren",
 				"title": "Bullet Graph: Fold Children"
+			},
+			{
+				"command": "vscode-bulletgraph.updateChildren",
+				"title": "Bullet Graph: Update Children"
 			},
 			{
 				"command": "vscode-bulletgraph.connectNode",
