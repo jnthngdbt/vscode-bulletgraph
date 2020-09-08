@@ -47,24 +47,29 @@ export class DocumentManager {
     }
 
     isLineHiddenByFold(lineIdx: number | undefined) {
-        if (lineIdx === undefined) return false;
+        let parent = this.getParentLine(lineIdx);
+        return parent && (parent.visibility === EVisibility.eFold || (parent.visibility === EVisibility.eFoldHidden));
+    }
+
+    isLineHiddenByParentHide(lineIdx: number | undefined) {
+        let parent = this.getParentLine(lineIdx);
+        return parent && parent.visibility === EVisibility.eHide;
+    }
+
+    getParentLine(lineIdx: number | undefined): BulletLine | undefined {
+        if (lineIdx === undefined) return undefined;
 
         let line = this.parseLine(lineIdx);
-        if (!line.isValid()) return false;
+        if (!line.isValid()) return undefined;
 
-        for (let i = lineIdx -1; i >= 0; i--) {
+        for (let i = line.index - 1; i >= 0; i--) {
             let prev = this.parseLine(i);
-            if (prev.isValid() && prev.depth <= line.depth) {
-                if (prev.depth === line.depth && prev.visibility === EVisibility.eFoldHidden)
-                    return true;
-                else if (prev.depth < line.depth && (prev.visibility === EVisibility.eFold || prev.visibility === EVisibility.eFoldHidden))
-                    return true;
-                else 
-                    return false;
+            if (prev.isValid() && prev.depth < line.depth) {
+                return prev;
             }
         }
 
-        return false;
+        return undefined;
     }
 
     getLineCount(): number {
@@ -138,14 +143,19 @@ export class DocumentManager {
     
         const line = this.parseLine(lineIdx);
 
-        if (visibility === EVisibility.eFold) {
-            if (line.visibility === EVisibility.eFoldHidden) {
-                if (callback) callback(line);
-                return;
-            }
+        // If node is hidden, make sure its visibility is hidden.
+        if (this.isLineHiddenByParentHide(lineIdx)) {
+            visibility = EVisibility.eHide;
+        }
 
-            if (this.isLineHiddenByFold(lineIdx))
-                visibility = EVisibility.eFoldHidden;
+        // For a fold hidden node, the only visibility change possible is hide.
+        else if (this.isLineHiddenByFold(lineIdx) && (visibility !== EVisibility.eHide)) {
+            visibility = EVisibility.eFoldHidden;
+        }
+
+        // Do not set fold visibility on a leaf (no child), as useless.
+        else if (!this.isLineParent(lineIdx) && (visibility === EVisibility.eFold)) {
+            visibility = EVisibility.eNormal;
         }
 
         const isSelectorRespected = (selector === undefined) || selector(line);
