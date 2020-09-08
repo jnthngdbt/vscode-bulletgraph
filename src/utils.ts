@@ -1,5 +1,11 @@
 import * as vscode from 'vscode';
 
+import { SCRIPT_LINE_TOKEN } from './constants'
+
+export function isScriptLine(text: string): Boolean {
+    return text.trim().startsWith(SCRIPT_LINE_TOKEN);
+}
+
 export namespace Strings {
     export const TAB = "\t";
 

@@ -1,5 +1,5 @@
 import { COMMENT, LABEL_ID_SEP, HIGHLIGHT_TOKEN, EBullet, ELink, EVisibility } from './constants'
-import { Strings } from './utils'
+import { Strings, isScriptLine } from './utils'
 
 import { generateRandomId } from './NodeIdGenerator'
 
@@ -35,7 +35,7 @@ export class BulletLine {
     }
 
     isValid(): Boolean {
-        return !this.isComment && (this.depth >= 0);
+        return !this.isComment && (this.depth >= 0) && !isScriptLine(this.text);
     }
 
     parse(lineIn: string | undefined, lineIdx: number) {

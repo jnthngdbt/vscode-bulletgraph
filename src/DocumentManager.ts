@@ -1,11 +1,8 @@
 import * as vscode from 'vscode';
 
-import { Id, LABEL_ID_SEP, EVisibility, NEW_SCRIPT_CHAR, SCRIPT_LINE_TOKEN } from './constants'
+import { Id, LABEL_ID_SEP, EVisibility, SCRIPT_LINE_TOKEN } from './constants'
+import { isScriptLine } from './utils'
 import { BulletLine } from './BulletLine';
-
-export function isScriptLine(text: string): Boolean {
-    return text.trim().startsWith(SCRIPT_LINE_TOKEN);
-}
 
 export class DocumentLine {
     text = "";
@@ -362,13 +359,19 @@ export class DocumentManager {
                 this.updateChildrenChained(lineIdx + 1, minDepth, completionHandler);
             });
         }
+        
         const line = this.parseLine(lineIdx);
-        if (line.depth > minDepth && lineIdx < this.getLineCount()) {
-            if (this.isLineHiddenByParentHide(lineIdx)) call(EVisibility.eHide);
-            else if (this.isLineHiddenByFold(lineIdx)) call(EVisibility.eFoldHidden);
-            else if (line.visibility === EVisibility.eFoldHidden) call(EVisibility.eFold);
+
+        if (line.isValid()) {
+            if (line.depth > minDepth && lineIdx < this.getLineCount()) {
+                if (this.isLineHiddenByParentHide(lineIdx)) call(EVisibility.eHide);
+                else if (this.isLineHiddenByFold(lineIdx)) call(EVisibility.eFoldHidden);
+                else if (line.visibility === EVisibility.eFoldHidden) call(EVisibility.eFold);
+            } else {
+                if (completionHandler !== undefined) completionHandler();
+            }    
         } else {
-            if (completionHandler !== undefined) completionHandler();
+            this.updateChildrenChained(lineIdx + 1, minDepth, completionHandler);
         }
     }
 
