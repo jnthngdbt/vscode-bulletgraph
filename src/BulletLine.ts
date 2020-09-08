@@ -81,7 +81,8 @@ export class BulletLine {
                 for (let i = 0; i < components.length; ++i) {
                     switch (components[i] as EVisibility) {
                         case EVisibility.eNormal: this.visibility = components[i] as EVisibility; break;
-                        case EVisibility.eFloor: this.visibility = components[i] as EVisibility; break;
+                        case EVisibility.eFold: this.visibility = components[i] as EVisibility; break;
+                        case EVisibility.eFoldHidden: this.visibility = components[i] as EVisibility; break;
                         case EVisibility.eHide: this.visibility = components[i] as EVisibility; break;
                         default: { // not visibility token
                             if (components[i] === HIGHLIGHT_TOKEN) {

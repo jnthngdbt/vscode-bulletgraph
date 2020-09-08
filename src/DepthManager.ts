@@ -124,7 +124,7 @@ export class DepthManager {
 
     pruneAndReorganize(bulletIn: BulletGraph): BulletGraph {
         this.bullet.clear();
-        this.rerouteNodes(bulletIn.hierarchy, bulletIn.floorNodeIds, bulletIn.hideNodeIds, this.bullet.hierarchy);
+        this.rerouteNodes(bulletIn.hierarchy, bulletIn.foldNodeIds, bulletIn.hideNodeIds, this.bullet.hierarchy);
         this.rerouteLinks(bulletIn.links);
         this.bullet.createHierarchyEdges(this.bullet.hierarchy);
         this.removeDuplicateLinks();

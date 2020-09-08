@@ -58,7 +58,7 @@ export class Node {
         this.children = [];
     }
 
-    fill(line: BulletLine, links: LinksMap, floorNodeIds: IdSet, hideNodeIds: IdSet) {
+    fill(line: BulletLine, links: LinksMap, foldNodeIds: IdSet, hideNodeIds: IdSet) {
         this.bullet = line.bullet;
         this.label = line.label;
         this.id = line.id;
@@ -68,7 +68,7 @@ export class Node {
         line.idsOut.forEach( id => { links.addEdge(this.id, id, EEdge.eLink) });
 
         switch (line.visibility) {
-            case EVisibility.eFloor: floorNodeIds.add(this.id); break;
+            case EVisibility.eFold: foldNodeIds.add(this.id); break;
             case EVisibility.eHide: hideNodeIds.add(this.id); break;
         }
     }
@@ -156,13 +156,13 @@ export class IdSet {
 export class BulletGraph {
     hierarchy = new Node();
     links = new LinksMap();
-    floorNodeIds = new IdSet();
+    foldNodeIds = new IdSet();
     hideNodeIds = new IdSet();
 
     clear() {
         this.hierarchy = new Node();
         this.links = new LinksMap();
-        this.floorNodeIds = new IdSet();
+        this.foldNodeIds = new IdSet();
         this.hideNodeIds = new IdSet();
     }
 
@@ -184,7 +184,7 @@ export class BulletGraph {
             if (!line.isComment) {
                 let node = new Node();
 
-                node.fill(line, this.links, this.floorNodeIds, this.hideNodeIds);
+                node.fill(line, this.links, this.foldNodeIds, this.hideNodeIds);
 
                 // Create flow edges, if applicable
                 if (lastNode.id && (lastNode.bullet === EBullet.eFlow) && (node.bullet === EBullet.eFlow)) {

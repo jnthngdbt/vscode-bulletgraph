@@ -27,7 +27,8 @@ export enum EBullet {
 export enum EVisibility {
     eUndefined = "",
     eNormal = "[]",
-    eFloor = "[+]",
+    eFold = "[+]",
+    eFoldHidden = "[-]",
     eHide = "[x]",
 };
 

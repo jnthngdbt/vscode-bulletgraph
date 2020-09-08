@@ -46,6 +46,27 @@ export class DocumentManager {
         return next.depth > line.depth;
     }
 
+    isLineHiddenByFold(lineIdx: number | undefined) {
+        if (lineIdx === undefined) return false;
+
+        let line = this.parseLine(lineIdx);
+        if (!line.isValid()) return false;
+
+        for (let i = lineIdx -1; i >= 0; i--) {
+            let prev = this.parseLine(i);
+            if (prev.isValid() && prev.depth <= line.depth) {
+                if (prev.depth === line.depth && prev.visibility === EVisibility.eFoldHidden)
+                    return true;
+                else if (prev.depth < line.depth && (prev.visibility === EVisibility.eFold || prev.visibility === EVisibility.eFoldHidden))
+                    return true;
+                else 
+                    return false;
+            }
+        }
+
+        return false;
+    }
+
     getLineCount(): number {
         return vscode.window.activeTextEditor?.document.lineCount ?? 0;
     }
@@ -117,16 +138,21 @@ export class DocumentManager {
     
         const line = this.parseLine(lineIdx);
 
+        if (visibility === EVisibility.eFold) {
+            if (line.visibility === EVisibility.eFoldHidden) {
+                if (callback) callback(line);
+                return;
+            }
+
+            if (this.isLineHiddenByFold(lineIdx))
+                visibility = EVisibility.eFoldHidden;
+        }
+
         const isSelectorRespected = (selector === undefined) || selector(line);
 
         if (isScriptLine(line.text) || !line.isValid() || line.isComment || (line.visibility == visibility) || !isSelectorRespected) {
             if (callback) callback(line);
             return;
-        }
-
-        if (visibility === EVisibility.eFloor) {
-            if (!this.isLineParent(lineIdx))
-                visibility = EVisibility.eNormal;
         }
 
         const isVisibilityCompOptional = (visibility == EVisibility.eNormal) || (visibility == EVisibility.eUndefined);
@@ -205,7 +231,7 @@ export class DocumentManager {
     }
     
     foldLine(lineIdx: number | undefined, completionHandler: any | undefined = undefined) {
-        this.setVisibilityInDoc(lineIdx, EVisibility.eFloor);
+        this.setVisibilityInDoc(lineIdx, EVisibility.eFold);
     }
     
     unfoldLine(lineIdx: number | undefined, completionHandler: any | undefined = undefined) {
@@ -223,7 +249,7 @@ export class DocumentManager {
     updateFoldingChained(lineIdx: number, completionHandler: any | undefined = undefined) {
         if (lineIdx >= 0) {
             const line = this.parseLine(lineIdx);
-            if ([EVisibility.eFloor, EVisibility.eHide].includes(line.visibility) && line.isValid()) {
+            if ([EVisibility.eFold, EVisibility.eHide].includes(line.visibility) && line.isValid()) {
                 this.callFoldCommandIfPossible(lineIdx, () => { 
                     this.updateFoldingChained(lineIdx - 1, completionHandler);
                 });
@@ -284,7 +310,7 @@ export class DocumentManager {
     }
 
     foldAll(completionHandler: any | undefined = undefined) {
-        this.setVisibilityInDocChained(EVisibility.eFloor, 0, undefined, completionHandler);
+        this.setVisibilityInDocChained(EVisibility.eFold, 0, undefined, completionHandler);
     }
 
     unfoldAll(completionHandler: any | undefined = undefined) {
@@ -303,22 +329,27 @@ export class DocumentManager {
     foldChildren(lineIdx: number, completionHandler: any | undefined = undefined) {
         const nodeBullet = this.parseLine(lineIdx);
         let stopCriteria = (line: BulletLine) => { return line.depth <= nodeBullet.depth; };
-        this.setVisibilityInDocChained(EVisibility.eFloor, nodeBullet.index + 1, undefined, completionHandler, stopCriteria);
+        this.setVisibilityInDocChained(EVisibility.eFold, nodeBullet.index + 1, undefined, completionHandler, stopCriteria);
     }
 
     revealNode(lineIdx: number, completionHandler: any | undefined = undefined) {
         const line = this.parseLine(lineIdx);
 
-        // Fold children to make sure they are not hidden, to avoid missing underlying interactions.
-        this.foldChildren(lineIdx, () => {
-            if (line.visibility === EVisibility.eHide) { // special case when start line is hidden
-                this.setVisibilityInDoc(lineIdx, EVisibility.eFloor, undefined, () => {
-                    this.setVisibilityInDocChainedParentsReverse(EVisibility.eNormal, lineIdx, line.depth, completionHandler);
-                });
-            } else {
-                this.setVisibilityInDocChainedParentsReverse(EVisibility.eNormal, lineIdx, line.depth, completionHandler);
-            }
-        });
+        let completionHandlerPlus = () => {
+            // Fold children to make sure they are not hidden, to avoid missing underlying interactions.
+            // Do it at the end, to make sure the folded node visibility is up to date.
+            this.foldChildren(lineIdx, () => {
+                if (completionHandler) completionHandler();
+            })
+        };
+
+        if (line.visibility === EVisibility.eHide) { // special case when start line is hidden
+            this.setVisibilityInDoc(lineIdx, EVisibility.eFold, undefined, () => {
+                this.setVisibilityInDocChainedParentsReverse(EVisibility.eNormal, lineIdx, line.depth, completionHandlerPlus);
+            });
+        } else {
+            this.setVisibilityInDocChainedParentsReverse(EVisibility.eNormal, lineIdx, line.depth, completionHandlerPlus);
+        }
     }
 
     foldLevel(level: number, completionHandler: any | undefined = undefined) {
