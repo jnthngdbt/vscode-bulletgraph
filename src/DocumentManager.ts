@@ -308,22 +308,6 @@ export class DocumentManager {
         }
     }
 
-    // Bleh. Document edit promise must resolve before doing another. Should do this more cleanly.
-    setVisibilityInDocChainedParentsReverse(visibility: EVisibility, lineIdx: number, maxDepth: number, completionHandler: any | undefined = undefined) {
-        if (lineIdx >= 0) {
-            let selector = (lineManager: BulletLine) => {
-                return (maxDepth === undefined) || (lineManager.depth < maxDepth);
-            };
-            let callback = (lineManager: BulletLine) => {
-                let nextMaxDepth = (lineManager.depth >= 0 && lineManager.depth < maxDepth) ? lineManager.depth : maxDepth;
-                    this.setVisibilityInDocChainedParentsReverse(visibility, lineIdx - 1, nextMaxDepth, completionHandler);
-            };
-            this.setVisibilityInDoc(lineIdx, visibility, selector, callback);
-        } else {
-            if (completionHandler) completionHandler();
-        }
-    }
-
     foldAll(completionHandler: any | undefined = undefined) {
         this.setVisibilityInDocChained(EVisibility.eFold, 0, undefined, completionHandler);
     }
@@ -359,7 +343,7 @@ export class DocumentManager {
                 this.updateChildrenChained(lineIdx + 1, minDepth, completionHandler);
             });
         }
-        
+
         const line = this.parseLine(lineIdx);
 
         if (line.isValid()) {
@@ -367,6 +351,7 @@ export class DocumentManager {
                 if (this.isLineHiddenByParentHide(lineIdx)) call(EVisibility.eHide);
                 else if (this.isLineHiddenByFold(lineIdx)) call(EVisibility.eFoldHidden);
                 else if (line.visibility === EVisibility.eFoldHidden) call(EVisibility.eFold);
+                else this.updateChildrenChained(lineIdx + 1, minDepth, completionHandler);
             } else {
                 if (completionHandler !== undefined) completionHandler();
             }    
@@ -376,23 +361,45 @@ export class DocumentManager {
     }
 
     revealNode(lineIdx: number, completionHandler: any | undefined = undefined) {
-        const line = this.parseLine(lineIdx);
+        let linesToMakeVisible: Array<number> = [];
+
+        let line = this.parseLine(lineIdx);
+        let maxDepth = line.depth;
+        let firstLine = 0;
+
+        linesToMakeVisible.push(line.index);
+
+        for (let i = lineIdx - 1; i >= 0; i--) {
+            line = this.parseLine(i);
+
+            if (line.depth < maxDepth) {
+                linesToMakeVisible.push(line.index);
+                maxDepth = line.depth;
+            }
+
+            if (line.depth === 0) {
+                firstLine = i;
+                break;
+            }
+        }
 
         let completionHandlerPlus = () => {
-            // Fold children to make sure they are not hidden, to avoid missing underlying interactions.
-            // Do it at the end, to make sure the folded node visibility is up to date.
-            this.foldChildren(lineIdx, () => {
-                if (completionHandler) completionHandler();
-            })
+            this.setVisibilityInDoc(lineIdx, EVisibility.eFold, undefined, () => {
+                // Fold children to make sure they are not hidden, to avoid missing underlying interactions.
+                // Do it at the end, to make sure the folded node visibility is up to date.
+                this.foldChildren(lineIdx, () => {
+                    // Update to be in a valid state.
+                    this.updateChildren(firstLine, () => {
+                        if (completionHandler) completionHandler();
+                    })
+                })
+            });
         };
 
-        if (line.visibility === EVisibility.eHide) { // special case when start line is hidden
-            this.setVisibilityInDoc(lineIdx, EVisibility.eFold, undefined, () => {
-                this.setVisibilityInDocChainedParentsReverse(EVisibility.eNormal, lineIdx, line.depth, completionHandlerPlus);
-            });
-        } else {
-            this.setVisibilityInDocChainedParentsReverse(EVisibility.eNormal, lineIdx, line.depth, completionHandlerPlus);
-        }
+        let selector = (line: BulletLine) => { return linesToMakeVisible.includes(line.index); };
+        let stop = (line: BulletLine) => { return line.index >= lineIdx; };
+
+        this.setVisibilityInDocChained(EVisibility.eNormal, firstLine, selector, completionHandlerPlus, stop);
     }
 
     foldLevel(level: number, completionHandler: any | undefined = undefined) {
