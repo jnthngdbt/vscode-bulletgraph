@@ -13,6 +13,11 @@ export class DocumentManager {
     bulletLines: Array<DocumentLine> = [];
     scriptLines: Array<DocumentLine> = [];
 
+    clear() {
+        this.bulletLines = [];
+        this.scriptLines = [];
+    }
+
     isLineParent(lineIdx: number | undefined) {
         if (lineIdx === undefined) return false;
 
@@ -103,6 +108,8 @@ export class DocumentManager {
     
         const lines: Array<string> = text.split(/\r?\n/) ?? []; // new lines
         if (!lines) vscode.window.showErrorMessage('Bullet Graph: Could not parse current editor.');
+
+        this.clear();
 
         let lineIdx = 0;
         lines.forEach( line => {
