@@ -344,10 +344,15 @@ export class DocumentManager {
             });
         }
 
+        if (lineIdx >= this.getLineCount()) {
+            if (completionHandler !== undefined) completionHandler();
+            return;
+        }
+
         const line = this.parseLine(lineIdx);
 
         if (line.isValid()) {
-            if (line.depth > minDepth && lineIdx < this.getLineCount()) {
+            if (line.depth > minDepth) {
                 if (this.isLineHiddenByParentHide(lineIdx)) call(EVisibility.eHide);
                 else if (this.isLineHiddenByFold(lineIdx)) call(EVisibility.eFoldHidden);
                 else if (line.visibility === EVisibility.eFoldHidden) call(EVisibility.eFold);
@@ -371,6 +376,9 @@ export class DocumentManager {
 
         for (let i = lineIdx - 1; i >= 0; i--) {
             line = this.parseLine(i);
+
+            if (!line.isValid())
+                continue;
 
             if (line.depth < maxDepth) {
                 linesToMakeVisible.push(line.index);
@@ -465,7 +473,7 @@ export class DocumentManager {
             this.findLinesLinkedToNode(bullets, nodeBullet, linesToReveal);
 
             // Link all children of current node.
-            for (let i = nodeIdx; i < bullets.length; i++)
+            for (let i = nodeIdx + 1; i < bullets.length; i++)
                 if (bullets[i].depth > nodeBullet.depth)
                     this.findLinesLinkedToNode(bullets, bullets[i], linesToReveal);
                 else if (bullets[i].depth <= nodeBullet.depth)
