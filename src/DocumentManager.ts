@@ -456,7 +456,7 @@ export class DocumentManager {
         addLinkedNodeLines(nodeBullet.idsIn);
         addLinkedNodeLines(nodeBullet.idsOut);
 
-        // Add
+        // Add lines that directly link to the node.
         for (let bullet of bullets) {
             if (bullet.idsIn.includes(nodeBullet.id)) lines.push(bullet.index);
             if (bullet.idsOut.includes(nodeBullet.id)) lines.push(bullet.index);
