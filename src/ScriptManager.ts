@@ -51,11 +51,11 @@ export class ScriptManager {
                 } else { // current script commands
                     let items = line.split(/[ ,]+/); // split on any number of spaces
 
-                    if (items.length > 0) {
+                    if (items.length > 0) { // first word is the command
                         let command = new Command();
                         command.name = items[0].trim();
 
-                        if (items.length > 1) {
+                        if (items.length > 1) { // optional second word is the node name
                             command.argument.id = items[1].trim();
                             command.argument.lineIdx = this.findLineIdxOfNodeId(bullets, command.argument.id);
                         }
@@ -88,6 +88,9 @@ export class ScriptManager {
             else if (command.name === 'unhideNode'      ) { this.doc.unhideNode(command.argument.lineIdx, completionHandler); } 
             else if (command.name === 'foldNode'        ) { this.doc.foldLine(command.argument.lineIdx, completionHandler); } 
             else if (command.name === 'unfoldNode'      ) { this.doc.unfoldLine(command.argument.lineIdx, completionHandler); } 
+            else if (command.name === 'foldChildren'    ) { this.doc.foldChildren(command.argument.lineIdx, completionHandler); } 
+            else if (command.name === 'unfoldChildren'  ) { this.doc.unfoldChildren(command.argument.lineIdx, completionHandler); } 
+            else if (command.name === 'hideChildren'    ) { this.doc.hideChildren(command.argument.lineIdx, completionHandler); } 
             else if (command.name === 'revealNode'      ) { this.doc.revealNode(command.argument.lineIdx, completionHandler); } 
             else if (command.name === 'connectNode'     ) { this.doc.connectNode(command.argument.lineIdx, completionHandler); } 
             else if (command.name === 'updateFolding'   ) { this.doc.updateFolding(completionHandler); }

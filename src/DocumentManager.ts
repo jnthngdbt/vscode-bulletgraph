@@ -337,6 +337,20 @@ export class DocumentManager {
         let stopCriteria = (line: BulletLine) => { return line.depth <= nodeBullet.depth; };
         this.setVisibilityInDocChained(EVisibility.eFold, nodeBullet.index + 1, undefined, completionHandler, stopCriteria);
     }
+
+    unfoldChildren(lineIdx: number | undefined, completionHandler: any | undefined = undefined) {
+        const nodeBullet = this.parseLine(lineIdx);
+        let stopCriteria = (line: BulletLine) => { return line.depth <= nodeBullet.depth; };
+        this.setVisibilityInDoc(lineIdx, EVisibility.eNormal, undefined, () => {
+            this.setVisibilityInDocChained(EVisibility.eNormal, nodeBullet.index + 1, undefined, completionHandler, stopCriteria);
+        });
+    }
+
+    hideChildren(lineIdx: number | undefined, completionHandler: any | undefined = undefined) {
+        const nodeBullet = this.parseLine(lineIdx);
+        let stopCriteria = (line: BulletLine) => { return line.depth <= nodeBullet.depth; };
+        this.setVisibilityInDocChained(EVisibility.eHide, nodeBullet.index + 1, undefined, completionHandler, stopCriteria);
+    }
     
     updateChildren(lineIdx: number | undefined, completionHandler: any | undefined = undefined) {
         const line = this.parseLine(lineIdx);
