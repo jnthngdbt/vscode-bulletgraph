@@ -10,12 +10,6 @@
 	<string>Bullet</string>
 	<key>patterns</key>
 	<array>
-        <dict>
-            <key>match</key>
-            <string>\/\/</string>
-            <key>name</key>
-            <string>comment.line.separator.blt</string>
-        </dict>
 		<dict>
 			<key>begin</key>
 			<string>(^[ \t]+)?(?=\/\/)</string>
