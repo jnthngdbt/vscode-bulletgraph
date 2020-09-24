@@ -18,7 +18,7 @@
         </dict>
 		<dict>
 			<key>begin</key>
-			<string>(^[ \t]+)?(?=//)</string>
+			<string>(^[ \t]+)?(?=\/\/)</string>
 			<key>beginCaptures</key>
 			<dict>
 				<key>1</key>
@@ -33,7 +33,7 @@
 			<array>
 				<dict>
 					<key>begin</key>
-					<string>//</string>
+					<string>\/\/</string>
 					<key>beginCaptures</key>
 					<dict>
 						<key>0</key>
@@ -57,7 +57,7 @@
         </dict>
         <dict>
             <key>match</key>
-            <string>(.*\/\/[ \t]*)(\[-\])</string>
+            <string>(.*)(@@)[ \t]*(\[-\])</string>
             <key>captures</key>
 			<dict>
 				<key>1</key>
@@ -70,24 +70,30 @@
 					<key>name</key>
 					<string>storage.modifier.blt</string>
 				</dict>
+				<key>3</key>
+				<dict>
+					<key>name</key>
+					<string>entity.name.function.blt</string>
+				</dict>
 			</dict>
         </dict>
-        <dict>
+		<dict>
             <key>match</key>
-            <string>.*(\/\/).*(id_.*)</string>
-            <key>captures</key>
-			<dict>
-				<key>1</key>
-				<dict>
-					<key>name</key>
-					<string>comment.line.folded.blt</string>
-				</dict>
-				<key>2</key>
-				<dict>
-					<key>name</key>
-					<string>keyword.other.link.blt</string>
-				</dict>
-			</dict>
+            <string>@@</string>
+            <key>name</key>
+            <string>storage.modifier.blt</string>
+        </dict>
+		<dict>
+            <key>match</key>
+            <string>\[\+\]</string>
+            <key>name</key>
+            <string>keyword.other.link.blt</string>
+        </dict>
+		<dict>
+            <key>match</key>
+            <string>id_\w+</string>
+            <key>name</key>
+            <string>entity.name.type.blt</string>
         </dict>
 	</array>
 	<key>scopeName</key>

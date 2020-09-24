@@ -1,5 +1,5 @@
 export const COMMENT = "//";
-export const LABEL_ID_SEP = "//";
+export const LABEL_ID_SEP = "@@";
 export const HIGHLIGHT_TOKEN = "[*]";
 export const SCRIPT_LINE_TOKEN = '$';
 export const NEW_SCRIPT_CHAR = '[';
