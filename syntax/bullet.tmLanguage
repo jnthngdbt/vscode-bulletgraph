@@ -79,6 +79,18 @@
         </dict>
 		<dict>
             <key>match</key>
+            <string><<</string>
+            <key>name</key>
+            <string>keyword.other.link.blt</string>
+        </dict>
+		<dict>
+            <key>match</key>
+            <string>>></string>
+            <key>name</key>
+            <string>keyword.other.link.blt</string>
+        </dict>
+		<dict>
+            <key>match</key>
             <string>\[\+\]</string>
             <key>name</key>
             <string>keyword.other.link.blt</string>

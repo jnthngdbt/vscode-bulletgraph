@@ -174,7 +174,7 @@ export class DotFileManager {
                 str += this.printNodesHierarchy(node.children, indent + Strings.TAB);
                 str += indent + "} \n";
             } else if (!node.isLeaf()) {
-                const fontcolor = node.isProcess() ? "#555588" : "gray60"
+                const fontcolor = node.isProcess() ? "\"#8888bb\"" : "gray60"
                 str += indent + node.id + " [fontcolor = " + fontcolor + ", label=< <B>" + Strings.wordWrap(node.label, "<BR/>") + "</B> >]\n";
             } else {
                 str += indent + node.id + " [label=\"" + Strings.wordWrap(node.label) + "\"]\n";
