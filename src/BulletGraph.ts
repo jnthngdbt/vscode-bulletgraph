@@ -16,12 +16,16 @@ export class Node {
         return this.id.length > 0;
     }
 
-    isLeaf() {
+    isLeaf() { // has no children (visible or not)
         return this.dependencySize === 0;
     }
 
-    isSubgraph() {
+    isSubgraph() { // has visible children
         return this.children.length > 0;
+    }
+
+    isFolded() { // has children, but not visible
+        return !this.isLeaf() && !this.isSubgraph();
     }
 
     isProcess() {
@@ -186,17 +190,17 @@ export class BulletGraph {
 
                 node.fill(line, this.links, this.foldNodeIds, this.hideNodeIds);
 
-                // Create flow edges, if applicable
-                if (lastNode.id && (lastNode.bullet === EBullet.eFlow) && (node.bullet === EBullet.eFlow)) {
+                // Create flow edges, if applicable.
+                // Easier to create flow edges here, since line by line.
+                // Harder to create them when recursing on children, since always at children level.
+                if (lastNode.id && lastNode.isProcess() && node.isProcess()) {
                     this.links.addEdge(lastNode.id, node.id, EEdge.eFlow);
                 }
                 
                 // Fill hierarchy.
-                if (line.label.length > 0) { // this was added to give a way to not connect two subsequent flow nodes, but putting an empty node (no label) betweem
-                    const depth = line.depth;
-                    currentParentForIndent[depth].children.push(node)
-                    currentParentForIndent[depth + 1] = node
-                }
+                const depth = line.depth;
+                currentParentForIndent[depth].children.push(node)
+                currentParentForIndent[depth + 1] = node
 
                 lastNode = node
             }
@@ -206,6 +210,35 @@ export class BulletGraph {
     }
 
     createHierarchyEdges(node: Node) {
+        if (node.children.length <= 0) return;
+    
+        // Create hierarchy edges to children, and recurse.
+        let aFlowChildWasLinked = false;
+        let lastLeafChild = new Node();
+        node.children.forEach( child => {
+            if (child.isProcess()) { 
+                if (!node.isProcess() && !aFlowChildWasLinked) { // link subgraph parent to only first process child
+                    this.links.addEdge(node.id, child.id, EEdge.eHierarchy);
+                    aFlowChildWasLinked = true;
+                }
+            } else if (child.isSubgraph()) { // connect all subgraph children to parent
+                this.links.addEdge(node.id, child.id, EEdge.eHierarchy);
+            } else { // no visible children, so considered leaf
+                if (lastLeafChild.isValid()) { // link all leaf nodes together, in chain
+                    this.links.addEdge(lastLeafChild.id, child.id, EEdge.eHierarchy);
+                } else {
+                    this.links.addEdge(node.id, child.id, EEdge.eHierarchy);
+                }
+
+                lastLeafChild = child; // remember last leaf node for chaining
+            }
+    
+            // Recurse.
+            this.createHierarchyEdges(child);
+        })
+    }
+
+    reorderNodeChildren(node: Node) {
         if (node.children.length <= 0) return;
     
         // Reorder children to have all subgraphs first.
@@ -219,35 +252,10 @@ export class BulletGraph {
             if (!rhs.isLeaf() && lhs.isLeaf()) return 1; // we want subgraphs first
             return 0;
         });
-    
-        // Create hierarchy edges to children, and recurse.
-        let atLeastOneLeafLinked = false;
-        let aFlowChildWasLinked = false;
-        let lastLeafNode = new Node();
+
+        // Recurse.
         node.children.forEach( child => {
-            if (child.bullet === EBullet.eFlow) {
-                if (!aFlowChildWasLinked && (node.bullet !== EBullet.eFlow)) {
-                    this.links.addEdge(node.id, child.id, EEdge.eHierarchy);
-                    aFlowChildWasLinked = true;
-                }
-            } else {
-                // Create edge.
-                if (!atLeastOneLeafLinked) { // only link parent node to first leaf node
-                    this.links.addEdge(node.id, child.id, EEdge.eHierarchy);
-                } else if (lastLeafNode.isValid()) { // link all leaf nodes together, in chain
-                    this.links.addEdge(lastLeafNode.id, child.id, EEdge.eHierarchy);
-                }
-            }
-    
-            // Remember last leaf node for chaining.
-            const isLeaf = !child.isSubgraph();
-            if (isLeaf) {
-                lastLeafNode = child;
-            }
-            atLeastOneLeafLinked = isLeaf || atLeastOneLeafLinked;
-    
-            // Recurse.
-            this.createHierarchyEdges(child);
+            this.reorderNodeChildren(child);
         })
     }
 
