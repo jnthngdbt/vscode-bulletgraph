@@ -62,6 +62,15 @@ export class Node {
         this.children = [];
     }
 
+    copyFrom(other: Node) {
+        this.bullet = other.bullet;
+        this.label = other.label;
+        this.id = other.id;
+        this.isHighlight = other.isHighlight;
+        this.dependencySize = other.dependencySize;
+        this.children = other.children;
+    }
+
     fill(line: BulletLine, links: LinksMap, foldNodeIds: IdSet, hideNodeIds: IdSet) {
         this.bullet = line.bullet;
         this.label = line.label;
@@ -187,16 +196,8 @@ export class BulletGraph {
         bulletLines.forEach( line => {
             if (!line.isComment) {
                 let node = new Node();
-
                 node.fill(line, this.links, this.foldNodeIds, this.hideNodeIds);
 
-                // Create flow edges, if applicable.
-                // Easier to create flow edges here, since line by line.
-                // Harder to create them when recursing on children, since always at children level.
-                if (lastNode.id && lastNode.isProcess() && node.isProcess()) {
-                    this.links.addEdge(lastNode.id, node.id, EEdge.eFlow);
-                }
-                
                 // Fill hierarchy.
                 const depth = line.depth;
                 currentParentForIndent[depth].children.push(node)
@@ -235,6 +236,22 @@ export class BulletGraph {
     
             // Recurse.
             this.createHierarchyEdges(child);
+        })
+    }
+
+    createFlowEdges(node: Node, lastNode: Node | undefined = undefined) {
+        // Create a flow edge between 2 consecutive process nodes (can be parent -> child).
+        if (lastNode && node.isProcess() && lastNode.isProcess()) {
+            this.links.addEdge(lastNode.id, node.id, EEdge.eFlow);
+        }
+        
+        if (!lastNode) lastNode = new Node();
+        lastNode.copyFrom(node);
+
+        if (node.children.length <= 0) return;
+    
+        node.children.forEach( child => {
+            this.createFlowEdges(child, lastNode); // recurse
         })
     }
 
