@@ -82,6 +82,14 @@ export class DocumentManager {
         return vscode.window?.activeTextEditor?.selection?.active.line;
     }
 
+    getLineIdxForId(id: Id, bulletLines: Array<BulletLine>): number {
+        for (let bulletLine of bulletLines) {
+            if (bulletLine.id === id)
+                return bulletLine.index;
+        }
+        return -1;
+    }
+
     parseActiveLine(): BulletLine {
         return this.parseLine(this.getActiveLineIdx());
     }
@@ -102,6 +110,7 @@ export class DocumentManager {
         return line;
     }
 
+    // Extract text lines, without parsing them, classifying them script/bullet.
     extractLines() {
         let text = vscode.window.activeTextEditor?.document.getText() ?? "";
         if (!text) vscode.window.showErrorMessage('Bullet Graph: No editor is active.');
@@ -139,79 +148,6 @@ export class DocumentManager {
         });
 
         return bulletLines;
-    }
-
-    setVisibilityInDoc(lineIdx: number | undefined, visibility: EVisibility, selector: any | undefined = undefined, callback: any | undefined = undefined) {
-        const editor = vscode.window.activeTextEditor;
-        if ((lineIdx === undefined) || !editor) return;
-    
-        const line = this.parseLine(lineIdx);
-
-        // If node is hidden, make sure its visibility is hidden.
-        if (this.isLineHiddenByParentHide(lineIdx)) {
-            visibility = EVisibility.eHide;
-        }
-
-        // For a fold hidden node, the only visibility change possible is hide.
-        else if (this.isLineHiddenByFold(lineIdx) && (visibility !== EVisibility.eHide)) {
-            visibility = EVisibility.eFoldHidden;
-        }
-
-        // Do not set fold visibility on a leaf (no child), as useless.
-        else if (!this.isLineParent(lineIdx) && (visibility === EVisibility.eFold)) {
-            visibility = EVisibility.eNormal;
-        }
-
-        const isSelectorRespected = (selector === undefined) || selector(line);
-
-        if (isScriptLine(line.text) || !line.isValid() || line.isComment || (line.visibility == visibility) || !isSelectorRespected) {
-            if (callback) callback(line);
-            return;
-        }
-
-        const isVisibilityCompOptional = visibility === EVisibility.eNormal;
-        const hasVisibilityComp = line.visibility !== EVisibility.eNormal;
-
-        // Possible cases. They should be exclusive, so testing order is not important.
-        const mustRemoveComponentSection = line.hasComponentSection && !line.hasComponents && isVisibilityCompOptional;
-        const mustCreateComponentSection = !line.hasComponentSection && !isVisibilityCompOptional;
-        const mustInsertVisibilityComp = line.hasComponentSection && !hasVisibilityComp && !isVisibilityCompOptional;
-        const mustReplaceVisibilityComp = hasVisibilityComp && !isVisibilityCompOptional;
-        const mustRemoveVisibilityCompOnly = line.hasComponents && hasVisibilityComp && isVisibilityCompOptional;
-
-        editor.edit((editBuilder) => {
-            let replace = (strIn: string, strOut: string) => {
-                const pos = line.text.indexOf(strIn);
-                if (pos >= 0) {
-                    const range = new vscode.Range(
-                        new vscode.Position(lineIdx, pos),
-                        new vscode.Position(lineIdx, pos + strIn.length)
-                    );
-                    editBuilder.replace(range, strOut);
-                }
-            };
-
-            if (mustRemoveComponentSection) {
-                let compPos = line.text.indexOf(LABEL_ID_SEP);
-                if (compPos > 0) {
-                    if (line.text[compPos-1] === " ") compPos--; // remove trailing space if necessary
-                    replace(line.text, line.text.substr(0, compPos));
-                }
-            } else if (mustCreateComponentSection) {
-                editBuilder.insert(new vscode.Position(lineIdx, line.text.length), 
-                    " " + LABEL_ID_SEP + " " + visibility);
-            } else if (mustInsertVisibilityComp) {
-                replace(
-                    LABEL_ID_SEP, 
-                    LABEL_ID_SEP + " " + visibility)
-            } else if (mustReplaceVisibilityComp) {
-                replace(line.visibility, visibility);
-            } else if (mustRemoveVisibilityCompOnly) {
-                replace(" " + line.visibility, "");
-            }
-        }).then((success) => {
-            if (callback) callback(line);
-        });
     }
 
     callUnfoldCommand(lineIdx: number | undefined, completionHandler: any | undefined = undefined) {
@@ -268,53 +204,6 @@ export class DocumentManager {
         });
     }
 
-    updateFoldingChained(lineIdx: number, completionHandler: any | undefined = undefined) {
-        if (lineIdx >= 0) {
-            const line = this.parseLine(lineIdx);
-            if ([EVisibility.eFold, EVisibility.eHide].includes(line.visibility) && line.isValid()) {
-                this.callFoldCommandIfPossible(lineIdx, () => { 
-                    this.updateFoldingChained(lineIdx - 1, completionHandler);
-                });
-            } else {
-                this.updateFoldingChained(lineIdx - 1, completionHandler);
-            }
-        } else {
-            if (completionHandler) completionHandler();
-        }
-    }
-
-    updateFolding(completionHandler: any | undefined = undefined) {
-        for (let i = this.getLineCount() - 1; i >= 0; --i)
-            this.callUnfoldCommand(i);
-
-        this.updateFoldingChained(this.getLineCount(), completionHandler);
-    }
-
-    // Bleh. Document edit promise must resolve before doing another. Should do this more cleanly.
-    setVisibilityInDocChained(visibility: EVisibility, lineIdx: number, selector: any | undefined = undefined, completionHandler: any | undefined = undefined, stopCriteria: any | undefined = undefined) {
-        // Merge selector filter and stop criteria into a single selector, to not process line if it passes
-        // the selector, but triggers stop criteria.
-        let selectorMerged = (line: BulletLine) => {
-            let resultSelector = true;
-            let resultStopCriteria = false;
-            if (stopCriteria) resultStopCriteria = stopCriteria(line);
-            if (selector) resultSelector = selector(line);
-            return resultSelector && !resultStopCriteria;
-        };
-
-        if (lineIdx < this.getLineCount()) {
-            this.setVisibilityInDoc(lineIdx, visibility, selectorMerged, (bullet: BulletLine) => {
-                if (!stopCriteria || !stopCriteria(bullet))
-                        this.setVisibilityInDocChained(visibility, lineIdx + 1, selector, completionHandler, stopCriteria);
-                else if (completionHandler !== undefined) {
-                    completionHandler();
-                }
-                    });
-        } else if (completionHandler !== undefined) {
-            completionHandler();
-        }
-    }
-
     foldAll(completionHandler: any | undefined = undefined) {
         this.setVisibilityInDocChained(EVisibility.eFold, 0, undefined, completionHandler);
     }
@@ -350,6 +239,37 @@ export class DocumentManager {
         const nodeBullet = this.parseLine(lineIdx);
         let stopCriteria = (line: BulletLine) => { return line.depth <= nodeBullet.depth; };
         this.setVisibilityInDocChained(EVisibility.eHide, nodeBullet.index + 1, undefined, completionHandler, stopCriteria);
+    }
+
+    foldLevel(level: number, completionHandler: any | undefined = undefined) {
+        this.foldAll(() => {
+            let selector = (line: BulletLine) => { return line.depth <= level; };
+            this.setVisibilityInDocChained(EVisibility.eNormal, 0, selector, () => { // unfold
+                this.updateFolding(completionHandler);
+            });
+        });
+    }
+
+    updateFolding(completionHandler: any | undefined = undefined) {
+        for (let i = this.getLineCount() - 1; i >= 0; --i)
+            this.callUnfoldCommand(i);
+
+        this.updateFoldingChained(this.getLineCount(), completionHandler);
+    }
+
+    updateFoldingChained(lineIdx: number, completionHandler: any | undefined = undefined) {
+        if (lineIdx >= 0) {
+            const line = this.parseLine(lineIdx);
+            if ([EVisibility.eFold, EVisibility.eHide].includes(line.visibility) && line.isValid()) {
+                this.callFoldCommandIfPossible(lineIdx, () => { 
+                    this.updateFoldingChained(lineIdx - 1, completionHandler);
+                });
+            } else {
+                this.updateFoldingChained(lineIdx - 1, completionHandler);
+            }
+        } else {
+            if (completionHandler) completionHandler();
+        }
     }
     
     updateChildren(lineIdx: number | undefined, completionHandler: any | undefined = undefined) {
@@ -431,33 +351,6 @@ export class DocumentManager {
         this.setVisibilityInDocChained(EVisibility.eNormal, firstLine, selector, completionHandlerPlus, stop);
     }
 
-    foldLevel(level: number, completionHandler: any | undefined = undefined) {
-        this.foldAll(() => {
-            let selector = (line: BulletLine) => { return line.depth <= level; };
-            this.setVisibilityInDocChained(EVisibility.eNormal, 0, selector, () => { // unfold
-                this.updateFolding(completionHandler);
-            });
-        });
-    }
-
-    getLineIdxForId(id: Id, bulletLines: Array<BulletLine>): number {
-        for (let bulletLine of bulletLines) {
-            if (bulletLine.id === id)
-                return bulletLine.index;
-        }
-        return -1;
-    }
-
-    revealNodeChained(linesToReveal: Array<number>, idx: number, completionHandler: any | undefined = undefined) {
-        if (idx < linesToReveal.length) {
-            this.revealNode(linesToReveal[idx], () => {
-                this.revealNodeChained(linesToReveal, idx + 1, completionHandler);
-            })
-        } else {
-            if (completionHandler) completionHandler();
-        }
-    }
-
     findLinesLinkedToNode(bullets: Array<BulletLine>, nodeBullet: BulletLine, lines: Array<number>) {
         let addLinkedNodeLines = (linkedIds: Array<Id>) => {
             for (let id of linkedIds) {
@@ -516,5 +409,113 @@ export class DocumentManager {
         } else {
             if (completionHandler) completionHandler();
         }
+    }
+
+    revealNodeChained(linesToReveal: Array<number>, idx: number, completionHandler: any | undefined = undefined) {
+        if (idx < linesToReveal.length) {
+            this.revealNode(linesToReveal[idx], () => {
+                this.revealNodeChained(linesToReveal, idx + 1, completionHandler);
+            })
+        } else {
+            if (completionHandler) completionHandler();
+        }
+    }
+
+    // Bleh. Document edit promise must resolve before doing another. Should do this more cleanly.
+    setVisibilityInDocChained(visibility: EVisibility, lineIdx: number, selector: any | undefined = undefined, completionHandler: any | undefined = undefined, stopCriteria: any | undefined = undefined) {
+        // Merge selector filter and stop criteria into a single selector, to not process line if it passes
+        // the selector, but triggers stop criteria.
+        let selectorMerged = (line: BulletLine) => {
+            let resultSelector = true;
+            let resultStopCriteria = false;
+            if (stopCriteria) resultStopCriteria = stopCriteria(line);
+            if (selector) resultSelector = selector(line);
+            return resultSelector && !resultStopCriteria;
+        };
+
+        if (lineIdx < this.getLineCount()) {
+            this.setVisibilityInDoc(lineIdx, visibility, selectorMerged, (bullet: BulletLine) => {
+                if (!stopCriteria || !stopCriteria(bullet))
+                        this.setVisibilityInDocChained(visibility, lineIdx + 1, selector, completionHandler, stopCriteria);
+                else if (completionHandler !== undefined) {
+                    completionHandler();
+                }
+                    });
+        } else if (completionHandler !== undefined) {
+            completionHandler();
+        }
+    }
+    
+    setVisibilityInDoc(lineIdx: number | undefined, visibility: EVisibility, selector: any | undefined = undefined, callback: any | undefined = undefined) {
+        const editor = vscode.window.activeTextEditor;
+        if ((lineIdx === undefined) || !editor) return;
+    
+        const line = this.parseLine(lineIdx);
+
+        // If node is hidden, make sure its visibility is hidden.
+        if (this.isLineHiddenByParentHide(lineIdx)) {
+            visibility = EVisibility.eHide;
+        }
+
+        // For a fold hidden node, the only visibility change possible is hide.
+        else if (this.isLineHiddenByFold(lineIdx) && (visibility !== EVisibility.eHide)) {
+            visibility = EVisibility.eFoldHidden;
+        }
+
+        // Do not set fold visibility on a leaf (no child), as useless.
+        else if (!this.isLineParent(lineIdx) && (visibility === EVisibility.eFold)) {
+            visibility = EVisibility.eNormal;
+        }
+
+        const isSelectorRespected = (selector === undefined) || selector(line);
+
+        if (isScriptLine(line.text) || !line.isValid() || line.isComment || (line.visibility == visibility) || !isSelectorRespected) {
+            if (callback) callback(line);
+            return;
+        }
+
+        const isVisibilityCompOptional = visibility === EVisibility.eNormal;
+        const hasVisibilityComp = line.visibility !== EVisibility.eNormal;
+
+        // Possible cases. They should be exclusive, so testing order is not important.
+        const mustRemoveComponentSection = line.hasComponentSection && !line.hasComponents && isVisibilityCompOptional;
+        const mustCreateComponentSection = !line.hasComponentSection && !isVisibilityCompOptional;
+        const mustInsertVisibilityComp = line.hasComponentSection && !hasVisibilityComp && !isVisibilityCompOptional;
+        const mustReplaceVisibilityComp = hasVisibilityComp && !isVisibilityCompOptional;
+        const mustRemoveVisibilityCompOnly = line.hasComponents && hasVisibilityComp && isVisibilityCompOptional;
+
+        editor.edit((editBuilder) => {
+            let replace = (strIn: string, strOut: string) => {
+                const pos = line.text.indexOf(strIn);
+                if (pos >= 0) {
+                    const range = new vscode.Range(
+                        new vscode.Position(lineIdx, pos),
+                        new vscode.Position(lineIdx, pos + strIn.length)
+                    );
+                    editBuilder.replace(range, strOut);
+                }
+            };
+
+            if (mustRemoveComponentSection) {
+                let compPos = line.text.indexOf(LABEL_ID_SEP);
+                if (compPos > 0) {
+                    if (line.text[compPos-1] === " ") compPos--; // remove trailing space if necessary
+                    replace(line.text, line.text.substr(0, compPos));
+                }
+            } else if (mustCreateComponentSection) {
+                editBuilder.insert(new vscode.Position(lineIdx, line.text.length), 
+                    " " + LABEL_ID_SEP + " " + visibility);
+            } else if (mustInsertVisibilityComp) {
+                replace(
+                    LABEL_ID_SEP, 
+                    LABEL_ID_SEP + " " + visibility)
+            } else if (mustReplaceVisibilityComp) {
+                replace(line.visibility, visibility);
+            } else if (mustRemoveVisibilityCompOnly) {
+                replace(" " + line.visibility, "");
+            }
+        }).then((success) => {
+            if (callback) callback(line);
+        });
     }
 }
