@@ -181,13 +181,15 @@ export class DocumentManager {
     }
     
     foldLine(lineIdx: number | undefined, completionHandler: any | undefined = undefined) {
-        this.setVisibilityInDoc(lineIdx, EVisibility.eFold, undefined, (line: BulletLine) => {
+        let selector = (line: BulletLine) => { return line.visibility !== EVisibility.eHide; }; // must explicitely unhide to unhide
+        this.setVisibilityInDoc(lineIdx, EVisibility.eFold, selector, (line: BulletLine) => {
             this.updateChildren(lineIdx, completionHandler); // used to update children visibility
         });
     }
     
     unfoldLine(lineIdx: number | undefined, completionHandler: any | undefined = undefined) {
-        this.setVisibilityInDoc(lineIdx, EVisibility.eNormal, undefined, (line: BulletLine) => {
+        let selector = (line: BulletLine) => { return line.visibility !== EVisibility.eHide; }; // must explicitely unhide to unhide
+        this.setVisibilityInDoc(lineIdx, EVisibility.eNormal, selector, (line: BulletLine) => {
            this.updateChildren(lineIdx, completionHandler); // used to update children visibility
         });
     }
@@ -293,8 +295,9 @@ export class DocumentManager {
         const line = this.parseLine(lineIdx);
 
         if (line.isValid()) {
-            if (line.depth > minDepth) {
-                if (this.isLineHiddenByParentHide(lineIdx)) call(EVisibility.eHide);
+            if (line.depth > minDepth) { // only consider children
+                if (line.visibility === EVisibility.eHide) call(EVisibility.eHide);
+                else if (this.isLineHiddenByParentHide(lineIdx)) call(EVisibility.eHide);
                 else if (this.isLineHiddenByFold(lineIdx)) call(EVisibility.eFoldHidden);
                 else if (line.visibility === EVisibility.eFoldHidden) call(EVisibility.eFold);
                 else this.updateChildrenChained(lineIdx + 1, minDepth, completionHandler);
