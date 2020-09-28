@@ -20,6 +20,9 @@ function render() {
     // Render a Graphviz dot file.
     let dotFileManager = new DotFileManager();
     dotFileManager.render(depthBullet, ERenderingEngine.eGraphvizInteractive);
+
+    // Save document.
+    vscode.window.activeTextEditor?.document.save();
 }
 
 function renderScript() {
