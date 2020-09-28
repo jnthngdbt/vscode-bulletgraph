@@ -225,27 +225,36 @@ export class DocumentManager {
     
     foldChildren(lineIdx: number | undefined, completionHandler: any | undefined = undefined) {
         const nodeBullet = this.parseLine(lineIdx);
-        let stopCriteria = (line: BulletLine) => { return line.depth <= nodeBullet.depth; };
-        this.setVisibilityInDocChained(EVisibility.eFold, nodeBullet.index + 1, undefined, completionHandler, stopCriteria);
+        let selector = (line: BulletLine) => { return line.visibility !== EVisibility.eHide; }; // must explicitely unhide to unhide
+        let stopCriteria = (line: BulletLine) => { return line.isValid() && line.depth <= nodeBullet.depth; }; // only children
+        this.setVisibilityInDocChained(EVisibility.eFold, nodeBullet.index + 1, selector, completionHandler, stopCriteria);
     }
 
     unfoldChildren(lineIdx: number | undefined, completionHandler: any | undefined = undefined) {
         const nodeBullet = this.parseLine(lineIdx);
-        let stopCriteria = (line: BulletLine) => { return line.depth <= nodeBullet.depth; };
+        let selector = (line: BulletLine) => { return line.visibility !== EVisibility.eHide; }; // must explicitely unhide to unhide
+        let stopCriteria = (line: BulletLine) => { return line.isValid() && line.depth <= nodeBullet.depth; }; // only children
         this.setVisibilityInDoc(lineIdx, EVisibility.eNormal, undefined, () => {
-            this.setVisibilityInDocChained(EVisibility.eNormal, nodeBullet.index + 1, undefined, completionHandler, stopCriteria);
+            this.setVisibilityInDocChained(EVisibility.eNormal, nodeBullet.index + 1, selector, completionHandler, stopCriteria);
         });
     }
 
     hideChildren(lineIdx: number | undefined, completionHandler: any | undefined = undefined) {
         const nodeBullet = this.parseLine(lineIdx);
-        let stopCriteria = (line: BulletLine) => { return line.depth <= nodeBullet.depth; };
+        let stopCriteria = (line: BulletLine) => { return line.isValid() && line.depth <= nodeBullet.depth; }; // only children
         this.setVisibilityInDocChained(EVisibility.eHide, nodeBullet.index + 1, undefined, completionHandler, stopCriteria);
+    }
+
+    unhideChildren(lineIdx: number | undefined, completionHandler: any | undefined = undefined) {
+        const nodeBullet = this.parseLine(lineIdx);
+        let stopCriteria = (line: BulletLine) => { return line.isValid() && line.depth <= nodeBullet.depth; }; // only children
+        let whenDone = (line: BulletLine) => { this.updateChildren(lineIdx, completionHandler); }; // used to update children visibility
+        this.setVisibilityInDocChained(EVisibility.eNormal, nodeBullet.index + 1, undefined, whenDone, stopCriteria);
     }
 
     foldLevel(level: number, completionHandler: any | undefined = undefined) {
         this.foldAll(() => {
-            let selector = (line: BulletLine) => { return line.depth <= level; };
+            let selector = (line: BulletLine) => { return line.isValid() && line.depth <= level; };
             this.setVisibilityInDocChained(EVisibility.eNormal, 0, selector, () => { // unfold
                 this.updateFolding(completionHandler);
             });
@@ -337,9 +346,9 @@ export class DocumentManager {
 
         let completionHandlerPlus = () => {
             this.setVisibilityInDoc(lineIdx, EVisibility.eFold, undefined, () => {
-                // Fold children to make sure they are not hidden, to avoid missing underlying interactions.
+                // Make sure children are not hidden, to avoid missing underlying interactions.
                 // Do it at the end, to make sure the folded node visibility is up to date.
-                this.foldChildren(lineIdx, () => {
+                this.unhideChildren(lineIdx, () => {
                     // Update to be in a valid state.
                     this.updateChildren(firstLine, () => {
                         if (completionHandler) completionHandler();
@@ -391,18 +400,20 @@ export class DocumentManager {
 
             // Link all children of current node.
             for (let i = nodeIdx + 1; i < bullets.length; i++)
-                if (bullets[i].depth > nodeBullet.depth)
-                    this.findLinesLinkedToNode(bullets, bullets[i], linesToReveal);
-                else if (bullets[i].depth <= nodeBullet.depth)
-                    break; // stop when no longer a child
+                if (bullets[i].isValid())
+                    if (bullets[i].depth > nodeBullet.depth)
+                        this.findLinesLinkedToNode(bullets, bullets[i], linesToReveal);
+                    else if (bullets[i].depth <= nodeBullet.depth)
+                        break; // stop when no longer a child
 
             // Link all parents of current node.
             let maxDepth = nodeBullet.depth;
             for (let i = nodeIdx; i >= 0; i--)
-                if (bullets[i].depth < maxDepth) {
-                    this.findLinesLinkedToNode(bullets, bullets[i], linesToReveal);
-                    maxDepth = bullets[i].depth;
-                }
+                if (bullets[i].isValid())
+                    if (bullets[i].depth < maxDepth) {
+                        this.findLinesLinkedToNode(bullets, bullets[i], linesToReveal);
+                        maxDepth = bullets[i].depth;
+                    }
 
             // Remove duplicates and sort.
             linesToReveal = [...new Set(linesToReveal)];
