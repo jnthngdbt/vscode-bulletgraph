@@ -97,6 +97,12 @@
         </dict>
 		<dict>
             <key>match</key>
+            <string>\[\*\]</string>
+            <key>name</key>
+            <string>variable.other.highlight.blt</string>
+        </dict>
+		<dict>
+            <key>match</key>
             <string>id_\w+</string>
             <key>name</key>
             <string>entity.name.type.blt</string>
