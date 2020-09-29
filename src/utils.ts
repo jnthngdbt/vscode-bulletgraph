@@ -16,7 +16,7 @@ export namespace Strings {
     }
 
     export function removeSpecialCharacters(str: string): string {
-        return str.replace(/[-=&\/\\#,+()$~%.'":*?<>{}\[\]]/g, '');
+        return str.replace(/[-=&\/\\#,+()$~%.'":*?<>{}\[\]@]/g, '');
     }
 
     export function convertTabsToSpaces(str: string): string {

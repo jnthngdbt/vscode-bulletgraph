@@ -72,7 +72,7 @@ export class DotFileManager {
         str += "\n";
 
         str += indent + "// Edge style for type BIDIRECTIONAL LINK. \n";
-        str += indent + "edge [color=\"#ff77ff\", style=straight, dir=both, arrowtail=normal, arrowhead=normal] \n"; // known random bug with dir=both when splines=ortho
+        str += indent + "edge [color=\"#dd66dd\", style=straight, dir=both, arrowtail=normal, arrowhead=normal, penwidth=3] \n"; // known random bug with dir=both when splines=ortho
         str += this.printEdges(indent, bullet.links, EEdge.eBiLink);
         str += "\n";
         
