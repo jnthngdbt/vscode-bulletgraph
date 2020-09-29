@@ -3,6 +3,8 @@
 	"displayName": "vscode-bulletgraph",
 	"description": "Flow chart graph generation from bullet points structure",
 	"version": "0.0.1",
+	"publisher": "jnthgdbt",
+	"repository": "https://github.com/jnthngdbt/vscode-bulletgraph",
 	"engines": {
 		"vscode": "^1.45.0"
 	},
