@@ -1,4 +1,4 @@
-import { COMMENT, LABEL_ID_SEP, HIGHLIGHT_TOKEN, EBullet, ELink, EVisibility } from './constants'
+import { COMMENT_TOKENS, LABEL_ID_SEP, HIGHLIGHT_TOKEN, EBullet, ELink, EVisibility } from './constants'
 import { Strings, isScriptLine } from './utils'
 
 import { generateRandomId } from './NodeIdGenerator'
@@ -55,7 +55,8 @@ export class BulletLine {
         let line = Strings.ltrim(lineIn);
         const depth = lineIn.length - line.length;
     
-        this.isComment = line.startsWith(COMMENT);
+        this.isComment = false;
+        COMMENT_TOKENS.forEach( token => { this.isComment = this.isComment || line.startsWith(token); });
 
         if (!this.isComment) {
             this.depth = depth;
@@ -66,7 +67,7 @@ export class BulletLine {
             line = line.substr(1).trim() // remove bullet
         
             const split = line.split(LABEL_ID_SEP)
-            this.label = split[0].trim()
+            this.label = Strings.removeInvalidLabelCharacters(split[0].trim());
 
             this.hasComponentSection = split.length > 1;
 

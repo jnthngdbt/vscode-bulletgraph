@@ -1,4 +1,4 @@
-import { COMMENT, NEW_SCRIPT_CHAR } from './constants'
+import { NEW_SCRIPT_CHAR } from './constants'
 import { Strings } from './utils'
 
 import { DocumentManager } from './DocumentManager'

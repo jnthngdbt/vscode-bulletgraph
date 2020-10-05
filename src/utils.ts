@@ -19,6 +19,10 @@ export namespace Strings {
         return str.replace(/[-=&\/\\#,+()$~%.'":*?<>{}\[\]@]/g, '');
     }
 
+    export function removeInvalidLabelCharacters(str: string): string {
+        return str.replace(/[&<>]/g, '');
+    }
+
     export function convertTabsToSpaces(str: string): string {
         const tabSize = vscode.workspace.getConfiguration('editor').tabSize;
         const tabSpaces = " ".repeat(tabSize);

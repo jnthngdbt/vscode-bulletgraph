@@ -1,4 +1,4 @@
-export const COMMENT = "//";
+export const COMMENT_TOKENS = ["//", '#'];
 export const LABEL_ID_SEP = "@@";
 export const HIGHLIGHT_TOKEN = "[*]";
 export const SCRIPT_LINE_TOKEN = '$';
