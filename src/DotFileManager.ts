@@ -148,6 +148,11 @@ export class DotFileManager {
     printNodesHierarchy(children: Array<Node>, indent: string) {
         if (children.length <= 0) return "";
     
+        let getBoldLabel = (label: string) => {
+            if (label.length <= 0) return "\"\"";
+            return "< <B>" + Strings.wordWrap(label, "<BR/>") + "</B> >";
+        };
+
         let str = "";
         children.forEach( node => {
             if (node.isSubgraph()) {
@@ -170,12 +175,12 @@ export class DotFileManager {
                 str += "\n";
                 str += indent + "subgraph cluster" + node.id + " {\n";
                 str += indent + Strings.TAB + style + "\n";
-                str += indent + Strings.TAB + node.id + " [label=< <B>" + Strings.wordWrap(node.label, "<BR/>") + "</B> >] // subgraph name \n";
+                str += indent + Strings.TAB + node.id + " [label=" + getBoldLabel(node.label) + "] // subgraph name \n";
                 str += this.printNodesHierarchy(node.children, indent + Strings.TAB);
                 str += indent + "} \n";
             } else if (!node.isLeaf()) {
                 const fontcolor = node.isProcess() ? "\"#8888bb\"" : "gray60"
-                str += indent + node.id + " [fontcolor = " + fontcolor + ", label=< <B>" + Strings.wordWrap(node.label, "<BR/>") + "</B> >]\n";
+                str += indent + node.id + " [fontcolor = " + fontcolor + ", label=" + getBoldLabel(node.label) + "]\n";
             } else {
                 str += indent + node.id + " [label=\"" + Strings.wordWrap(node.label) + "\"]\n";
             }

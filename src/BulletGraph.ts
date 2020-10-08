@@ -189,7 +189,6 @@ export class BulletGraph {
     parse(bulletLines: Array<BulletLine>) {
         this.clear();
     
-        let lastNode = this.hierarchy;
         let currentParentForIndent: { [key:number]:Node; } = {};
         currentParentForIndent[0] = this.hierarchy;
     
@@ -202,8 +201,6 @@ export class BulletGraph {
                 const depth = line.depth;
                 currentParentForIndent[depth].children.push(node)
                 currentParentForIndent[depth + 1] = node
-
-                lastNode = node
             }
         })
 
@@ -244,7 +241,7 @@ export class BulletGraph {
         if (lastNode && node.isProcess() && lastNode.isProcess()) {
             this.links.addEdge(lastNode.id, node.id, EEdge.eFlow);
         }
-        
+
         if (!lastNode) lastNode = new Node();
         lastNode.copyFrom(node);
 
