@@ -2,7 +2,7 @@ import * as vscode from 'vscode';
 import * as fs from 'fs';
 
 import { BulletGraph, Node, LinksMap } from './BulletGraph'
-import { ENode, EEdge, ERenderingEngine, BASE_ARROWSIZE, BASE_FONTSIZE, BASE_PENWIDTH, FONTSIZE_FACTOR } from './constants'
+import { ENode, EEdge, ERenderingEngine, BASE_ARROWSIZE, BASE_FONTSIZE, BASE_PENWIDTH, FONTSIZE_FACTOR, EBullet } from './constants'
 import { Strings } from './utils'
 
 export class DotFileManager {
@@ -181,7 +181,7 @@ export class DotFileManager {
             } else if (!node.isLeaf()) {
                 const fontcolor = node.isProcess() ? "\"#8888bb\"" : "gray60"
                 str += indent + node.id + " [fontcolor = " + fontcolor + ", label=" + getBoldLabel(node.label) + "]\n";
-            } else {
+            } else if (!node.isFlowBreak()) { // do not show them
                 str += indent + node.id + " [label=\"" + Strings.wordWrap(node.label) + "\"]\n";
             }
         })

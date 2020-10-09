@@ -11,7 +11,7 @@ export const FONTSIZE_FACTOR = 2;
 
 export type Id = string;
 
-export enum ENode { eDefault, eProcess, eSubgraph, eSubgraphProcess, eFolded, eProcessFolded };
+export enum ENode { eDefault, eProcess, eSubgraph, eSubgraphProcess, eFolded, eProcessFolded, eFlowBreak };
 export enum EEdge { eHierarchy, eFlow, eLink, eBiLink };
 
 export enum ELink { 
@@ -21,7 +21,8 @@ export enum ELink {
 
 export enum EBullet {
     eDefault = '-',
-    eFlow = '>'
+    eFlow = '>',
+    eFlowBreak = '<'
 };
 
 export enum EVisibility {
