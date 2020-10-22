@@ -206,7 +206,11 @@ export class DotFileManager {
                 let callback = (webpanel: any) => this.interactivePreviewWebpanelCallback(webpanel);
                 vscode.workspace.openTextDocument(fullname).then( (document) => {
                     let args = { document, content, callback };
-                    vscode.commands.executeCommand("graphviz-interactive-preview.preview.beside", args);
+                    vscode.commands.executeCommand("graphviz-interactive-preview.preview.beside", args).then(() => {
+                        // Ugly hack. The above command does not resolve when completed. So using a timer to reset focus on the text file.
+                        // Also, only works if the text file is in the first group (top, left).
+                        setTimeout(() => { vscode.commands.executeCommand("workbench.action.focusFirstEditorGroup"); }, 1000);
+                    });
                 });
                 break;
             }

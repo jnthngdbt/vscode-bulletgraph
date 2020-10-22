@@ -173,12 +173,12 @@
 		],
         "keybindings": [
             {
-                "command": "vscode-bulletgraph.generateDotFile",
+                "command": "vscode-bulletgraph.renderPreview",
                 "key": "shift+alt+enter",
                 "mac": "shift+cmd+enter"
             },
             {
-                "command": "vscode-bulletgraph.generateScriptDotFile",
+                "command": "vscode-bulletgraph.renderScriptPreview",
                 "key": "ctrl+shift+alt+enter",
                 "mac": "ctrl+shift+cmd+enter"
             },
