@@ -26,9 +26,11 @@ function render(launchPreview: Boolean) {
 }
 
 function renderScript(launchPreview: Boolean) {
+    vscode.window.showInformationMessage('Applying script...');
     let script = new ScriptManager();
     script.runScriptIfSpecified( () => {
         render(launchPreview);
+        vscode.window.showInformationMessage('Finished applying script.');
     });
 }
 
