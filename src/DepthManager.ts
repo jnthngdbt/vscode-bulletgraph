@@ -128,7 +128,6 @@ export class DepthManager {
         this.rerouteLinks(bulletIn.links);
         this.bullet.createHierarchyEdges(this.bullet.hierarchy);
         this.bullet.createFlowEdges(this.bullet.hierarchy);
-        // this.bullet.reorderNodeChildren(this.bullet.hierarchy);
         this.removeDuplicateLinks();
         this.convertBackAndForthLinksToBidirectional();
         

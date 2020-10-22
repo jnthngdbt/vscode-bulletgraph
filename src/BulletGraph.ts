@@ -260,27 +260,6 @@ export class BulletGraph {
         })
     }
 
-    reorderNodeChildren(node: Node) {
-        if (node.children.length <= 0) return;
-    
-        // Reorder children to have all subgraphs first.
-        node.children.sort((lhs, rhs) => {
-            if (lhs.bullet !== rhs.bullet) return 0; // do not change order
-            if (lhs.bullet === EBullet.eFlow) return 0; // do not change order
-            if (lhs.getType() === rhs.getType()) return 0; // do not change order
-            if (lhs.isSubgraph() && !rhs.isSubgraph()) return -1; // we want subgraphs first
-            if (rhs.isSubgraph() && !lhs.isSubgraph()) return 1; // we want subgraphs first
-            if (!lhs.isLeaf() && rhs.isLeaf()) return -1; // we want subgraphs first
-            if (!rhs.isLeaf() && lhs.isLeaf()) return 1; // we want subgraphs first
-            return 0;
-        });
-
-        // Recurse.
-        node.children.forEach( child => {
-            this.reorderNodeChildren(child);
-        })
-    }
-
     computeDependencySize(node: Node) {
         if (node.children.length <= 0) return 0;
         
