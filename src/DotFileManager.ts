@@ -189,13 +189,14 @@ export class DotFileManager {
         return str
     }
 
-    render(bullet: BulletGraph, engine: ERenderingEngine) {
+    render(bullet: BulletGraph, engine: ERenderingEngine, launchPreview: Boolean) {
         const content = this.generate(bullet);
         const fullname = vscode.window.activeTextEditor?.document.fileName + ".dot";
-        fs.writeFile(fullname, content, () => this.writeCompletionHandler(fullname, content, engine));
+        const completionHandler = launchPreview ? () => this.preview(fullname, content, engine) : () => {};
+        fs.writeFile(fullname, content, completionHandler);
     }
 
-    writeCompletionHandler(fullname: string, content: string, engine: ERenderingEngine) {
+    preview(fullname: string, content: string, engine: ERenderingEngine) {
         switch (engine) {
             case ERenderingEngine.eGraphviz:{
                 vscode.commands.executeCommand('graphviz.previewToSide', vscode.Uri.file(fullname));

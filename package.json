@@ -14,6 +14,8 @@
 	"activationEvents": [
 		"onCommand:vscode-bulletgraph.renderPreview",
 		"onCommand:vscode-bulletgraph.renderScriptPreview",
+		"onCommand:vscode-bulletgraph.generateDotFile",
+		"onCommand:vscode-bulletgraph.generateScriptDotFile",
 		"onCommand:vscode-bulletgraph.insertId",
 		"onCommand:vscode-bulletgraph.foldLine",
 		"onCommand:vscode-bulletgraph.unfoldLine",
@@ -67,6 +69,14 @@
 			{
 				"command": "vscode-bulletgraph.renderScriptPreview",
 				"title": "Bullet Graph: Render Script Preview Beside"
+			},
+			{
+				"command": "vscode-bulletgraph.generateDotFile",
+				"title": "Bullet Graph: Generate Dot File"
+			},
+			{
+				"command": "vscode-bulletgraph.generateScriptDotFile",
+				"title": "Bullet Graph: Generate Script Dot File"
 			},
 			{
 				"command": "vscode-bulletgraph.insertId",
@@ -163,12 +173,12 @@
 		],
         "keybindings": [
             {
-                "command": "vscode-bulletgraph.renderPreview",
+                "command": "vscode-bulletgraph.generateDotFile",
                 "key": "shift+alt+enter",
                 "mac": "shift+cmd+enter"
             },
             {
-                "command": "vscode-bulletgraph.renderScriptPreview",
+                "command": "vscode-bulletgraph.generateScriptDotFile",
                 "key": "ctrl+shift+alt+enter",
                 "mac": "ctrl+shift+cmd+enter"
             },

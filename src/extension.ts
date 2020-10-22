@@ -8,7 +8,7 @@ import { insertNodeIdStringFromLineContent } from './NodeIdGenerator'
 import { DocumentManager } from './DocumentManager';
 import { ScriptManager } from './ScriptManager';
 
-function render() {
+function render(launchPreview: Boolean) {
     // Parsing the editor file to get the bullet graph structure.
     let bullet = new BulletGraph();
     bullet.parseEditorFile();
@@ -19,16 +19,16 @@ function render() {
 
     // Render a Graphviz dot file.
     let dotFileManager = new DotFileManager();
-    dotFileManager.render(depthBullet, ERenderingEngine.eGraphvizInteractive);
+    dotFileManager.render(depthBullet, ERenderingEngine.eGraphvizInteractive, launchPreview);
 
     // Save document.
     vscode.window.activeTextEditor?.document.save();
 }
 
-function renderScript() {
+function renderScript(launchPreview: Boolean) {
     let script = new ScriptManager();
     script.runScriptIfSpecified( () => {
-        render();
+        render(launchPreview);
     });
 }
 
@@ -36,11 +36,19 @@ export function activate(context: vscode.ExtensionContext) {
     let documentManager = new DocumentManager();
 
     context.subscriptions.push(
-        vscode.commands.registerCommand('vscode-bulletgraph.renderPreview', render)
+        vscode.commands.registerCommand('vscode-bulletgraph.renderPreview', () => render(true))
     );
 
     context.subscriptions.push(
-        vscode.commands.registerCommand('vscode-bulletgraph.renderScriptPreview', renderScript)
+        vscode.commands.registerCommand('vscode-bulletgraph.renderScriptPreview', () => renderScript(true))
+    );
+
+    context.subscriptions.push(
+        vscode.commands.registerCommand('vscode-bulletgraph.generateDotFile', () => render(false))
+    );
+
+    context.subscriptions.push(
+        vscode.commands.registerCommand('vscode-bulletgraph.generateScriptDotFile', () => renderScript(false))
     );
 
     context.subscriptions.push(
