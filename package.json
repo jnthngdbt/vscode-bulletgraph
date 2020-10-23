@@ -38,7 +38,11 @@
 		"onCommand:vscode-bulletgraph.foldLevel3",
 		"onCommand:vscode-bulletgraph.foldLevel4",
 		"onCommand:vscode-bulletgraph.foldLevel5",
-		"onCommand:vscode-bulletgraph.foldLevel6"
+		"onCommand:vscode-bulletgraph.foldLevel6",
+		"onCommand:vscode-bulletgraph.goNext",
+		"onCommand:vscode-bulletgraph.goBack",
+		"onCommand:vscode-bulletgraph.goUp",
+		"onCommand:vscode-bulletgraph.goDown"
 	],
 	"main": "./out/extension.js",
 	"contributes": {
@@ -169,6 +173,22 @@
 			{
 				"command": "vscode-bulletgraph.foldLevel6",
 				"title": "Bullet Graph: Fold Level 6"
+			},
+			{
+				"command": "vscode-bulletgraph.goNext",
+				"title": "Bullet Graph: Go Next"
+			},
+			{
+				"command": "vscode-bulletgraph.goBack",
+				"title": "Bullet Graph: Go Back"
+			},
+			{
+				"command": "vscode-bulletgraph.goUp",
+				"title": "Bullet Graph: Go Up"
+			},
+			{
+				"command": "vscode-bulletgraph.goDown",
+				"title": "Bullet Graph: Go Down"
 			}
 		],
         "keybindings": [
@@ -201,6 +221,26 @@
                 "command": "vscode-bulletgraph.unfoldLine",
                 "key": "shift+alt+right",
                 "mac": "shift+cmd+right"
+            },
+            {
+                "command": "vscode-bulletgraph.goNext",
+                "key": "shift+alt+l",
+                "mac": "shift+cmd+l"
+            },
+            {
+                "command": "vscode-bulletgraph.goBack",
+                "key": "shift+alt+j",
+                "mac": "shift+cmd+j"
+            },
+            {
+                "command": "vscode-bulletgraph.goUp",
+                "key": "shift+alt+i",
+                "mac": "shift+cmd+i"
+            },
+            {
+                "command": "vscode-bulletgraph.goDown",
+                "key": "shift+alt+k",
+                "mac": "shift+cmd+k"
             }
         ]
 	},

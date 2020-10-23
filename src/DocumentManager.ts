@@ -90,6 +90,21 @@ export class DocumentManager {
         return -1;
     }
 
+    focusLine(line: BulletLine) {
+        const editor = vscode.window.activeTextEditor;
+        if (editor) {
+            var newPosition = new vscode.Position(line.index, line.text.length);
+            var newSelection = new vscode.Selection(newPosition, newPosition);
+            editor.selection = newSelection;
+            this.centerEditorOnLine(line.index);
+        }
+    }
+
+    centerEditorOnLine(lineIdx: number | undefined) {
+        if (lineIdx === undefined) return;
+        vscode.commands.executeCommand("revealLine", { lineNumber: lineIdx, at: "center" });
+    }
+
     parseActiveLine(): BulletLine {
         return this.parseLine(this.getActiveLineIdx());
     }
@@ -259,6 +274,60 @@ export class DocumentManager {
                 this.updateFolding(completionHandler);
             });
         });
+    }
+
+    goUp(lineIdx: number | undefined, completionHandler: any | undefined = undefined) {
+        if (lineIdx === undefined) return;
+        let line = this.parseLine(lineIdx);
+        const depth = line.depth;
+        for (let i = lineIdx - 1; i >= 0; i--) {
+            line = this.parseLine(i);
+            if (line.isValid() && (line.depth < depth)) {
+                this.focusLine(line);
+                break;
+            }
+        }
+        if (completionHandler) completionHandler();
+    }
+
+    goDown(lineIdx: number | undefined, completionHandler: any | undefined = undefined) {
+        if (lineIdx === undefined) return;
+        let line = this.parseLine(lineIdx);
+        const depth = line.depth;
+        for (let i = lineIdx + 1; i < this.getLineCount(); i++) {
+            line = this.parseLine(i);
+            if (line.isValid()) {
+                if (line.depth > depth)
+                    this.focusLine(line);
+                break;
+            }
+        }
+        if (completionHandler) completionHandler();
+    }
+
+    goNext(lineIdx: number | undefined, completionHandler: any | undefined = undefined) {
+        if (lineIdx === undefined) return;
+        let line = this.parseLine(lineIdx);
+        for (let i = lineIdx + 1; i < this.getLineCount(); i++)
+            if (this.foundAndFocusedSibling(this.parseLine(i), line.depth))
+                break;
+        if (completionHandler) completionHandler();
+    }
+
+    goBack(lineIdx: number | undefined, completionHandler: any | undefined = undefined) {
+        if (lineIdx === undefined) return;
+        let line = this.parseLine(lineIdx);
+        for (let i = lineIdx - 1; i >= 0; i--)
+            if (this.foundAndFocusedSibling(this.parseLine(i), line.depth))
+                break;
+        if (completionHandler) completionHandler();
+    }
+
+    foundAndFocusedSibling(line: BulletLine, depth: Number) {
+        if (!line.isValid() || (line.depth > depth)) return false; // skip comments and children
+        if (line.depth < depth) return true; // reached higher level, stop
+        this.focusLine(line);
+        return true;
     }
 
     updateFolding(completionHandler: any | undefined = undefined) {
