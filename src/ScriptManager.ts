@@ -1,3 +1,5 @@
+import * as vscode from 'vscode';
+
 import { NEW_SCRIPT_CHAR } from './constants'
 import { Strings } from './utils'
 
@@ -11,17 +13,47 @@ class NodeArgument {
 
 class Command {
     name = "";
+    lineIdx = -1;
     argument = new NodeArgument();
 }
 
 class Script {
     name = "";
+    lineIdx = -1;
     commands: Array<Command> = [];
 }
 
 export class ScriptManager {
     scripts: Array<Script> = [];
     doc = new DocumentManager();
+
+    applyScript(lineIdx: number | undefined, completionHandler: any | undefined = undefined) {
+        if (lineIdx === undefined) return false;
+        this.parseScripts();
+
+        if (this.scripts.length > 0) {
+            const scriptIdx = this.findScriptIdxFromLineIdx(lineIdx);
+            if (scriptIdx >= 0) {
+                vscode.window.showInformationMessage(`Applying script [${this.scripts[scriptIdx].name}]...`);
+                this.runCommand(this.scripts[scriptIdx], 0, () => {
+                    vscode.window.showInformationMessage(`Finished applying script [${this.scripts[scriptIdx].name}].`);
+                    if (completionHandler) completionHandler();
+                });
+            } else {
+                vscode.window.showWarningMessage('Current line is not a script header.');
+            }
+        } else {
+            vscode.window.showWarningMessage('There is no script defined in the file.');
+            if (completionHandler) completionHandler();
+        }
+    }
+
+    findScriptIdxFromLineIdx(lineIdx: number): number {
+        for (let i = 0; i < this.scripts.length; ++i)
+            if (this.scripts[i].lineIdx === lineIdx)
+                return i;
+        return -1;
+    }
 
     runScriptIfSpecified(completionHandler: any) {
         this.parseScripts();
@@ -47,6 +79,7 @@ export class ScriptManager {
                 if (line[0] === NEW_SCRIPT_CHAR) { // new script definition
                     currentScript = new Script();
                     currentScript.name = Strings.removeSpecialCharacters(line);
+                    currentScript.lineIdx = lineWithToken.index;
                     this.scripts.push(currentScript);
                 } else { // current script commands
                     let items = line.split(/[ ,]+/); // split on any number of spaces
@@ -54,6 +87,7 @@ export class ScriptManager {
                     if (items.length > 0) { // first word is the command
                         let command = new Command();
                         command.name = items[0].trim();
+                        command.lineIdx = lineWithToken.index;
 
                         if (items.length > 1) { // optional second word is the node name
                             command.argument.id = items[1].trim();

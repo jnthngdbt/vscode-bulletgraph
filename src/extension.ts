@@ -25,15 +25,6 @@ function render(launchPreview: Boolean) {
     vscode.window.activeTextEditor?.document.save();
 }
 
-function renderScript(launchPreview: Boolean) {
-    vscode.window.showInformationMessage('Applying script...');
-    let script = new ScriptManager();
-    script.runScriptIfSpecified( () => {
-        render(launchPreview);
-        vscode.window.showInformationMessage('Finished applying script.');
-    });
-}
-
 export function activate(context: vscode.ExtensionContext) {
     let documentManager = new DocumentManager();
 
@@ -42,20 +33,18 @@ export function activate(context: vscode.ExtensionContext) {
     );
 
     context.subscriptions.push(
-        vscode.commands.registerCommand('vscode-bulletgraph.renderScriptPreview', () => renderScript(true))
-    );
-
-    context.subscriptions.push(
         vscode.commands.registerCommand('vscode-bulletgraph.generateDotFile', () => render(false))
-    );
-
-    context.subscriptions.push(
-        vscode.commands.registerCommand('vscode-bulletgraph.generateScriptDotFile', () => renderScript(false))
     );
 
     context.subscriptions.push(
         vscode.commands.registerCommand('vscode-bulletgraph.insertId', () => {
             insertNodeIdStringFromLineContent();
+        })
+    );
+
+    context.subscriptions.push(
+        vscode.commands.registerCommand('vscode-bulletgraph.applyScript', () => {
+            new ScriptManager().applyScript(documentManager.getActiveLineIdx());
         })
     );
 
