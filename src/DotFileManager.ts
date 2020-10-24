@@ -83,6 +83,7 @@ export class DotFileManager {
         str += indent + "// Subgraph node hierarchy. \n";
         str += indent + "subgraph clusterRoot { \n";
         indent += Strings.TAB;
+        str += "color = grey15 \n"
         str += this.printNodesHierarchy(root.children, indent);
         indent = indent.slice(0, -1);
         str += indent + "} \n";
