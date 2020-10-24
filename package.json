@@ -41,7 +41,9 @@
 		"onCommand:vscode-bulletgraph.goNext",
 		"onCommand:vscode-bulletgraph.goBack",
 		"onCommand:vscode-bulletgraph.goUp",
-		"onCommand:vscode-bulletgraph.goDown"
+		"onCommand:vscode-bulletgraph.goDown",
+		"onCommand:vscode-bulletgraph.goNextVisible",
+		"onCommand:vscode-bulletgraph.goBackVisible"
 	],
 	"main": "./out/extension.js",
 	"contributes": {
@@ -184,6 +186,14 @@
 			{
 				"command": "vscode-bulletgraph.goDown",
 				"title": "Bullet Graph: Go Down"
+			},
+			{
+				"command": "vscode-bulletgraph.goNextVisible",
+				"title": "Bullet Graph: Go Next Visible"
+			},
+			{
+				"command": "vscode-bulletgraph.goBackVisible",
+				"title": "Bullet Graph: Go Back Visible"
 			}
 		],
         "keybindings": [
@@ -236,6 +246,16 @@
                 "command": "vscode-bulletgraph.goDown",
                 "key": "shift+alt+k",
                 "mac": "shift+cmd+k"
+            },
+            {
+                "command": "vscode-bulletgraph.goNextVisible",
+                "key": "ctrl+shift+alt+l",
+                "mac": "ctrl+shift+cmd+l"
+            },
+            {
+                "command": "vscode-bulletgraph.goBackVisible",
+                "key": "ctrl+shift+alt+j",
+                "mac": "ctrl+shift+cmd+j"
             }
         ]
 	},

@@ -330,6 +330,31 @@ export class DocumentManager {
         return true;
     }
 
+    foundAndFocusedVisible(line: BulletLine) {
+        const found = line.isValid() && (line.visibility === EVisibility.eNormal || line.visibility === EVisibility.eFold);
+        if (found) {
+            this.focusLine(line);
+            return true;
+        }
+        return false;
+    }
+
+    goNextVisible(lineIdx: number | undefined, completionHandler: any | undefined = undefined) {
+        if (lineIdx === undefined) return;
+        for (let i = lineIdx + 1; i < this.getLineCount(); i++)
+            if (this.foundAndFocusedVisible(this.parseLine(i)))
+                break;
+        if (completionHandler) completionHandler();
+    }
+
+    goBackVisible(lineIdx: number | undefined, completionHandler: any | undefined = undefined) {
+        if (lineIdx === undefined) return;
+        for (let i = lineIdx - 1; i >= 0; i--)
+            if (this.foundAndFocusedVisible(this.parseLine(i)))
+                break;
+        if (completionHandler) completionHandler();
+    }
+
     updateFolding(completionHandler: any | undefined = undefined) {
         for (let i = this.getLineCount() - 1; i >= 0; --i)
             this.callUnfoldCommand(i);
