@@ -32,6 +32,7 @@
 		"onCommand:vscode-bulletgraph.updateChildren",
 		"onCommand:vscode-bulletgraph.revealNode",
 		"onCommand:vscode-bulletgraph.connectNode",
+		"onCommand:vscode-bulletgraph.connectNodeHierarchy",
 		"onCommand:vscode-bulletgraph.foldLevel1",
 		"onCommand:vscode-bulletgraph.foldLevel2",
 		"onCommand:vscode-bulletgraph.foldLevel3",
@@ -146,6 +147,10 @@
 			{
 				"command": "vscode-bulletgraph.connectNode",
 				"title": "Bullet Graph: Connect Node"
+			},
+			{
+				"command": "vscode-bulletgraph.connectNodeHierarchy",
+				"title": "Bullet Graph: Connect Node Hierarchy"
 			},
 			{
 				"command": "vscode-bulletgraph.foldLevel1",

@@ -476,7 +476,7 @@ export class DocumentManager {
         }
     }
 
-    connectNode(nodeLineIdx: number, completionHandler: any | undefined = undefined) {
+    connectNode(nodeLineIdx: number, connectHierarchy: Boolean, completionHandler: any | undefined = undefined) {
         const nodeBullet = this.parseLine(nodeLineIdx);
         if (nodeBullet.isValid()) {
             this.extractLines();
@@ -501,13 +501,15 @@ export class DocumentManager {
                         break; // stop when no longer a child
 
             // Link all parents of current node.
-            let maxDepth = nodeBullet.depth;
-            for (let i = nodeIdx; i >= 0; i--)
-                if (bullets[i].isValid())
-                    if (bullets[i].depth < maxDepth) {
-                        this.findLinesLinkedToNode(bullets, bullets[i], linesToReveal);
-                        maxDepth = bullets[i].depth;
-                    }
+            if (connectHierarchy) {
+                let maxDepth = nodeBullet.depth;
+                for (let i = nodeIdx; i >= 0; i--)
+                    if (bullets[i].isValid())
+                        if (bullets[i].depth < maxDepth) {
+                            this.findLinesLinkedToNode(bullets, bullets[i], linesToReveal);
+                            maxDepth = bullets[i].depth;
+                        }
+            }
 
             // Remove duplicates and sort.
             linesToReveal = [...new Set(linesToReveal)];

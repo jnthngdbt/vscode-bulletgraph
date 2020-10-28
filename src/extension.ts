@@ -140,7 +140,13 @@ export function activate(context: vscode.ExtensionContext) {
 
     context.subscriptions.push(
         vscode.commands.registerCommand('vscode-bulletgraph.connectNode', () => {
-            documentManager.connectNode(documentManager.getActiveLineIdx() ?? -1);
+            documentManager.connectNode(documentManager.getActiveLineIdx() ?? -1, false);
+        })
+    );
+
+    context.subscriptions.push(
+        vscode.commands.registerCommand('vscode-bulletgraph.connectNodeHierarchy', () => {
+            documentManager.connectNode(documentManager.getActiveLineIdx() ?? -1, true);
         })
     );
 
