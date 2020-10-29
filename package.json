@@ -214,53 +214,53 @@
             },
             {
                 "command": "vscode-bulletgraph.hideNode",
-                "key": "ctrl+shift+alt+left",
-                "mac": "ctrl+shift+cmd+left"
+                "key": "ctrl+shift+alt+u",
+                "mac": "ctrl+shift+cmd+u"
             },
             {
                 "command": "vscode-bulletgraph.unhideNode",
-                "key": "ctrl+shift+alt+right",
-                "mac": "ctrl+shift+cmd+right"
+                "key": "ctrl+shift+alt+o",
+                "mac": "ctrl+shift+cmd+o"
             },
             {
                 "command": "vscode-bulletgraph.foldLine",
-                "key": "shift+alt+left",
-                "mac": "shift+cmd+left"
+                "key": "shift+alt+u",
+                "mac": "shift+cmd+u"
             },
             {
                 "command": "vscode-bulletgraph.unfoldLine",
-                "key": "shift+alt+right",
-                "mac": "shift+cmd+right"
+                "key": "shift+alt+o",
+                "mac": "shift+cmd+o"
             },
             {
                 "command": "vscode-bulletgraph.goNext",
-                "key": "shift+alt+l",
-                "mac": "shift+cmd+l"
-            },
-            {
-                "command": "vscode-bulletgraph.goBack",
-                "key": "shift+alt+j",
-                "mac": "shift+cmd+j"
-            },
-            {
-                "command": "vscode-bulletgraph.goUp",
-                "key": "shift+alt+i",
-                "mac": "shift+cmd+i"
-            },
-            {
-                "command": "vscode-bulletgraph.goDown",
-                "key": "shift+alt+k",
-                "mac": "shift+cmd+k"
-            },
-            {
-                "command": "vscode-bulletgraph.goNextVisible",
                 "key": "ctrl+shift+alt+l",
                 "mac": "ctrl+shift+cmd+l"
             },
             {
-                "command": "vscode-bulletgraph.goBackVisible",
+                "command": "vscode-bulletgraph.goBack",
                 "key": "ctrl+shift+alt+j",
                 "mac": "ctrl+shift+cmd+j"
+            },
+            {
+                "command": "vscode-bulletgraph.goUp",
+                "key": "ctrl+shift+alt+i",
+                "mac": "ctrl+shift+cmd+i"
+            },
+            {
+                "command": "vscode-bulletgraph.goDown",
+                "key": "ctrl+shift+alt+k",
+                "mac": "ctrl+shift+cmd+k"
+            },
+            {
+                "command": "vscode-bulletgraph.goNextVisible",
+                "key": "shift+alt+l",
+                "mac": "shift+cmd+l"
+            },
+            {
+                "command": "vscode-bulletgraph.goBackVisible",
+                "key": "shift+alt+j",
+                "mac": "shift+cmd+j"
             }
         ]
 	},
