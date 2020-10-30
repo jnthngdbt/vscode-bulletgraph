@@ -164,6 +164,8 @@ export function activate(context: vscode.ExtensionContext) {
     
     context.subscriptions.push( vscode.commands.registerCommand('vscode-bulletgraph.goNextVisible', () => { documentManager.goNextVisible(documentManager.getActiveLineIdx() ?? -1); }) );
     context.subscriptions.push( vscode.commands.registerCommand('vscode-bulletgraph.goBackVisible', () => { documentManager.goBackVisible(documentManager.getActiveLineIdx() ?? -1); }) );
+    
+    context.subscriptions.push( vscode.commands.registerCommand('vscode-bulletgraph.goToLine', () => { documentManager.goToLine(); }) );
 }
 
 export function deactivate() {}

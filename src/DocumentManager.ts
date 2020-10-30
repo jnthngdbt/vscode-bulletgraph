@@ -1,7 +1,7 @@
 import * as vscode from 'vscode';
 
 import { Id, LABEL_ID_SEP, EVisibility, SCRIPT_LINE_TOKEN } from './constants'
-import { isScriptLine } from './utils'
+import { isScriptLine, Strings } from './utils'
 import { BulletLine } from './BulletLine';
 
 export class DocumentLine {
@@ -91,12 +91,17 @@ export class DocumentManager {
     }
 
     focusLine(line: BulletLine) {
+        const pos = line.text.length - Strings.ltrim(line.text).length + 2;
+        this.focusLineIdx(line.index, pos);
+    }
+
+    focusLineIdx(lineIdx: number, pos: number) {
         const editor = vscode.window.activeTextEditor;
         if (editor) {
-            var newPosition = new vscode.Position(line.index, line.text.length);
+            var newPosition = new vscode.Position(lineIdx, pos);
             var newSelection = new vscode.Selection(newPosition, newPosition);
             editor.selection = newSelection;
-            this.centerEditorOnLine(line.index);
+            this.centerEditorOnLine(lineIdx);
         }
     }
 
@@ -353,6 +358,17 @@ export class DocumentManager {
             if (this.foundAndFocusedVisible(this.parseLine(i)))
                 break;
         if (completionHandler) completionHandler();
+    }
+
+    goToLine(completionHandler: any | undefined = undefined) {
+        const strings = vscode.window.activeTextEditor?.document.getText().split(/\r?\n/);
+        const quickItems = strings?.map( (label, index) => { return { label, index };}); // can be any object with label property
+        vscode.window.showQuickPick(quickItems ?? []).then( (input) => {
+            if (input) {
+                this.focusLine(this.parseLine(input.index));
+            }
+            if (completionHandler) completionHandler();
+        });
     }
 
     updateFolding(completionHandler: any | undefined = undefined) {
