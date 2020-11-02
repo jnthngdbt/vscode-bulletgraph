@@ -4,9 +4,10 @@ import { BulletGraph } from './BulletGraph'
 import { DepthManager } from './DepthManager'
 import { ERenderingEngine } from './constants'
 import { DotFileManager } from './DotFileManager'
-import { insertNodeIdStringFromLineContent } from './NodeIdGenerator'
+import { generateIdFromLineContent } from './NodeIdGenerator'
 import { DocumentManager } from './DocumentManager';
 import { ScriptManager } from './ScriptManager';
+import { Editor } from './utils';
 
 function render(launchPreview: Boolean) {
     // Parsing the editor file to get the bullet graph structure.
@@ -38,37 +39,39 @@ export function activate(context: vscode.ExtensionContext) {
 
     context.subscriptions.push(
         vscode.commands.registerCommand('vscode-bulletgraph.insertId', () => {
-            insertNodeIdStringFromLineContent();
+            const text = Editor.getLine(Editor.getActiveLineIdx());
+            const id = generateIdFromLineContent(text);
+            Editor.insertTextAtActivePosition(id);
         })
     );
 
     context.subscriptions.push(
         vscode.commands.registerCommand('vscode-bulletgraph.applyScript', () => {
-            new ScriptManager().applyScript(documentManager.getActiveLineIdx());
+            new ScriptManager().applyScript(Editor.getActiveLineIdx());
         })
     );
 
     context.subscriptions.push(
         vscode.commands.registerCommand('vscode-bulletgraph.foldLine', () => {
-            documentManager.foldLine(documentManager.getActiveLineIdx());
+            documentManager.foldLine(Editor.getActiveLineIdx());
         })
     );
 
     context.subscriptions.push(
         vscode.commands.registerCommand('vscode-bulletgraph.unfoldLine', () => {
-            documentManager.unfoldLine(documentManager.getActiveLineIdx());
+            documentManager.unfoldLine(Editor.getActiveLineIdx());
         })
     );
 
     context.subscriptions.push(
         vscode.commands.registerCommand('vscode-bulletgraph.hideNode', () => {
-            documentManager.hideNode(documentManager.getActiveLineIdx());
+            documentManager.hideNode(Editor.getActiveLineIdx());
         })
     );
 
     context.subscriptions.push(
         vscode.commands.registerCommand('vscode-bulletgraph.unhideNode', () => {
-            documentManager.unhideNode(documentManager.getActiveLineIdx());
+            documentManager.unhideNode(Editor.getActiveLineIdx());
         })
     );
 
@@ -104,49 +107,49 @@ export function activate(context: vscode.ExtensionContext) {
 
     context.subscriptions.push(
         vscode.commands.registerCommand('vscode-bulletgraph.foldChildren', () => {
-            documentManager.foldChildren(documentManager.getActiveLineIdx() ?? -1);
+            documentManager.foldChildren(Editor.getActiveLineIdx() ?? -1);
         })
     );
 
     context.subscriptions.push(
         vscode.commands.registerCommand('vscode-bulletgraph.unfoldChildren', () => {
-            documentManager.unfoldChildren(documentManager.getActiveLineIdx() ?? -1);
+            documentManager.unfoldChildren(Editor.getActiveLineIdx() ?? -1);
         })
     );
 
     context.subscriptions.push(
         vscode.commands.registerCommand('vscode-bulletgraph.hideChildren', () => {
-            documentManager.hideChildren(documentManager.getActiveLineIdx() ?? -1);
+            documentManager.hideChildren(Editor.getActiveLineIdx() ?? -1);
         })
     );
 
     context.subscriptions.push(
         vscode.commands.registerCommand('vscode-bulletgraph.unhideChildren', () => {
-            documentManager.unhideChildren(documentManager.getActiveLineIdx() ?? -1);
+            documentManager.unhideChildren(Editor.getActiveLineIdx() ?? -1);
         })
     );
 
     context.subscriptions.push(
         vscode.commands.registerCommand('vscode-bulletgraph.updateChildren', () => {
-            documentManager.updateChildren(documentManager.getActiveLineIdx() ?? -1);
+            documentManager.updateChildren(Editor.getActiveLineIdx() ?? -1);
         })
     );
 
     context.subscriptions.push(
         vscode.commands.registerCommand('vscode-bulletgraph.revealNode', () => {
-            documentManager.revealNode(documentManager.getActiveLineIdx() ?? -1);
+            documentManager.revealNode(Editor.getActiveLineIdx() ?? -1);
         })
     );
 
     context.subscriptions.push(
         vscode.commands.registerCommand('vscode-bulletgraph.connectNode', () => {
-            documentManager.connectNode(documentManager.getActiveLineIdx() ?? -1, false);
+            documentManager.connectNode(Editor.getActiveLineIdx() ?? -1, false);
         })
     );
 
     context.subscriptions.push(
         vscode.commands.registerCommand('vscode-bulletgraph.connectNodeHierarchy', () => {
-            documentManager.connectNode(documentManager.getActiveLineIdx() ?? -1, true);
+            documentManager.connectNode(Editor.getActiveLineIdx() ?? -1, true);
         })
     );
 
@@ -157,13 +160,13 @@ export function activate(context: vscode.ExtensionContext) {
     context.subscriptions.push( vscode.commands.registerCommand('vscode-bulletgraph.foldLevel5', () => { documentManager.foldLevel(5); }) );
     context.subscriptions.push( vscode.commands.registerCommand('vscode-bulletgraph.foldLevel6', () => { documentManager.foldLevel(6); }) );
 
-    context.subscriptions.push( vscode.commands.registerCommand('vscode-bulletgraph.goNext', () => { documentManager.goNext(documentManager.getActiveLineIdx() ?? -1); }) );
-    context.subscriptions.push( vscode.commands.registerCommand('vscode-bulletgraph.goBack', () => { documentManager.goBack(documentManager.getActiveLineIdx() ?? -1); }) );
-    context.subscriptions.push( vscode.commands.registerCommand('vscode-bulletgraph.goUp', () => { documentManager.goUp(documentManager.getActiveLineIdx() ?? -1); }) );
-    context.subscriptions.push( vscode.commands.registerCommand('vscode-bulletgraph.goDown', () => { documentManager.goDown(documentManager.getActiveLineIdx() ?? -1); }) );
+    context.subscriptions.push( vscode.commands.registerCommand('vscode-bulletgraph.goNext', () => { documentManager.goNext(Editor.getActiveLineIdx() ?? -1); }) );
+    context.subscriptions.push( vscode.commands.registerCommand('vscode-bulletgraph.goBack', () => { documentManager.goBack(Editor.getActiveLineIdx() ?? -1); }) );
+    context.subscriptions.push( vscode.commands.registerCommand('vscode-bulletgraph.goUp', () => { documentManager.goUp(Editor.getActiveLineIdx() ?? -1); }) );
+    context.subscriptions.push( vscode.commands.registerCommand('vscode-bulletgraph.goDown', () => { documentManager.goDown(Editor.getActiveLineIdx() ?? -1); }) );
     
-    context.subscriptions.push( vscode.commands.registerCommand('vscode-bulletgraph.goNextVisible', () => { documentManager.goNextVisible(documentManager.getActiveLineIdx() ?? -1); }) );
-    context.subscriptions.push( vscode.commands.registerCommand('vscode-bulletgraph.goBackVisible', () => { documentManager.goBackVisible(documentManager.getActiveLineIdx() ?? -1); }) );
+    context.subscriptions.push( vscode.commands.registerCommand('vscode-bulletgraph.goNextVisible', () => { documentManager.goNextVisible(Editor.getActiveLineIdx() ?? -1); }) );
+    context.subscriptions.push( vscode.commands.registerCommand('vscode-bulletgraph.goBackVisible', () => { documentManager.goBackVisible(Editor.getActiveLineIdx() ?? -1); }) );
     
     context.subscriptions.push( vscode.commands.registerCommand('vscode-bulletgraph.goToLine', () => { documentManager.goToLine(); }) );
 }

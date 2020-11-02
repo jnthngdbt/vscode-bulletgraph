@@ -6,6 +6,52 @@ export function isScriptLine(text: string): Boolean {
     return text.trim().startsWith(SCRIPT_LINE_TOKEN);
 }
 
+export namespace Editor {
+    
+    export function getLineCount(): number {
+        return vscode.window.activeTextEditor?.document.lineCount ?? 0;
+    }
+
+    export function getActiveLineIdx(): number | undefined {
+        return vscode.window?.activeTextEditor?.selection?.active.line;
+    }
+
+    export function getLine(lineIdx: number | undefined): string {
+        let line = "";
+
+        if (lineIdx === undefined) return line;
+        if (lineIdx < 0) return line;
+
+        const editor = vscode.window.activeTextEditor;
+        if (!editor) return line;
+
+        if (lineIdx >= editor.document.lineCount) return line;
+
+        line = editor.document.lineAt(lineIdx).text;
+
+        return line;
+    }
+
+    export function getAllLines(): Array<string> {
+        let text = vscode.window.activeTextEditor?.document.getText() ?? "";
+        if (!text) vscode.window.showErrorMessage('Bullet Graph: No editor is active.');
+        return text.split(/\r?\n/) ?? []; // new lines
+    }
+
+    export function insertTextAtActivePosition(text: string): void {
+        const editor = vscode.window.activeTextEditor;
+        const selections = editor?.selections;
+    
+        editor?.edit((editBuilder) => {
+            selections?.forEach((selection) => {
+                const line = selection.active.line;
+                const character = selection.active.character;
+                editBuilder.insert(new vscode.Position(line, character), text);
+            });
+        });
+    }
+}
+
 export namespace Strings {
     export const TAB = "\t";
 

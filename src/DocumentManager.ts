@@ -1,7 +1,7 @@
 import * as vscode from 'vscode';
 
 import { Id, LABEL_ID_SEP, EVisibility, SCRIPT_LINE_TOKEN } from './constants'
-import { isScriptLine, Strings } from './utils'
+import { Editor, isScriptLine, Strings } from './utils'
 import { BulletLine } from './BulletLine';
 
 export class DocumentLine {
@@ -24,7 +24,7 @@ export class DocumentManager {
         let line = this.parseLine(lineIdx);
         if (!line.isValid()) return false;
 
-        for (let i = lineIdx + 1; i < this.getLineCount(); i++) {
+        for (let i = lineIdx + 1; i < Editor.getLineCount(); i++) {
             let next = this.parseLine(i);
             if (next.isValid()) {
                 if (next.depth > line.depth)
@@ -74,14 +74,6 @@ export class DocumentManager {
         return undefined;
     }
 
-    getLineCount(): number {
-        return vscode.window.activeTextEditor?.document.lineCount ?? 0;
-    }
-
-    getActiveLineIdx(): number | undefined {
-        return vscode.window?.activeTextEditor?.selection?.active.line;
-    }
-
     getLineIdxForId(id: Id, bulletLines: Array<BulletLine>): number {
         for (let bulletLine of bulletLines) {
             if (bulletLine.id === id)
@@ -111,31 +103,19 @@ export class DocumentManager {
     }
 
     parseActiveLine(): BulletLine {
-        return this.parseLine(this.getActiveLineIdx());
+        return this.parseLine(Editor.getActiveLineIdx());
     }
 
     parseLine(lineIdx: number | undefined): BulletLine {
         let line = new BulletLine();
-
-        if (lineIdx === undefined) return line;
-        if (lineIdx < 0) return line;
-
-        const editor = vscode.window.activeTextEditor;
-        if (!editor) return line;
-
-        if (lineIdx >= editor.document.lineCount) return line;
-
-        line.parse(editor.document.lineAt(lineIdx).text, lineIdx);
-
+        if (lineIdx !== undefined)
+            line.parse(Editor.getLine(lineIdx), lineIdx);
         return line;
     }
 
     // Extract text lines, without parsing them, classifying them script/bullet.
     extractLines() {
-        let text = vscode.window.activeTextEditor?.document.getText() ?? "";
-        if (!text) vscode.window.showErrorMessage('Bullet Graph: No editor is active.');
-    
-        const lines: Array<string> = text.split(/\r?\n/) ?? []; // new lines
+        const lines = Editor.getAllLines();
         if (!lines) vscode.window.showErrorMessage('Bullet Graph: Could not parse current editor.');
 
         this.clear();
@@ -299,7 +279,7 @@ export class DocumentManager {
         if (lineIdx === undefined) return;
         let line = this.parseLine(lineIdx);
         const depth = line.depth;
-        for (let i = lineIdx + 1; i < this.getLineCount(); i++) {
+        for (let i = lineIdx + 1; i < Editor.getLineCount(); i++) {
             line = this.parseLine(i);
             if (line.isValid()) {
                 if (line.depth > depth)
@@ -313,7 +293,7 @@ export class DocumentManager {
     goNext(lineIdx: number | undefined, completionHandler: any | undefined = undefined) {
         if (lineIdx === undefined) return;
         let line = this.parseLine(lineIdx);
-        for (let i = lineIdx + 1; i < this.getLineCount(); i++)
+        for (let i = lineIdx + 1; i < Editor.getLineCount(); i++)
             if (this.foundAndFocusedSibling(this.parseLine(i), line.depth))
                 break;
         if (completionHandler) completionHandler();
@@ -346,7 +326,7 @@ export class DocumentManager {
 
     goNextVisible(lineIdx: number | undefined, completionHandler: any | undefined = undefined) {
         if (lineIdx === undefined) return;
-        for (let i = lineIdx + 1; i < this.getLineCount(); i++)
+        for (let i = lineIdx + 1; i < Editor.getLineCount(); i++)
             if (this.foundAndFocusedVisible(this.parseLine(i)))
                 break;
         if (completionHandler) completionHandler();
@@ -361,7 +341,7 @@ export class DocumentManager {
     }
 
     goToLine(completionHandler: any | undefined = undefined) {
-        const strings = vscode.window.activeTextEditor?.document.getText().split(/\r?\n/);
+        const strings = Editor.getAllLines();
         const quickItems = strings?.map( (label, index) => { return { label, index };}); // can be any object with label property
         vscode.window.showQuickPick(quickItems ?? []).then( (input) => {
             if (input) {
@@ -372,10 +352,10 @@ export class DocumentManager {
     }
 
     updateFolding(completionHandler: any | undefined = undefined) {
-        for (let i = this.getLineCount() - 1; i >= 0; --i)
+        for (let i = Editor.getLineCount() - 1; i >= 0; --i)
             this.callUnfoldCommand(i);
 
-        this.updateFoldingChained(this.getLineCount(), completionHandler);
+        this.updateFoldingChained(Editor.getLineCount(), completionHandler);
     }
 
     updateFoldingChained(lineIdx: number, completionHandler: any | undefined = undefined) {
@@ -406,7 +386,7 @@ export class DocumentManager {
             });
         }
 
-        if (lineIdx >= this.getLineCount()) {
+        if (lineIdx >= Editor.getLineCount()) {
             if (completionHandler !== undefined) completionHandler();
             return;
         }
@@ -559,7 +539,7 @@ export class DocumentManager {
             return resultSelector && !resultStopCriteria;
         };
 
-        if (lineIdx < this.getLineCount()) {
+        if (lineIdx < Editor.getLineCount()) {
             this.setVisibilityInDoc(lineIdx, visibility, selectorMerged, (bullet: BulletLine) => {
                 if (!stopCriteria || !stopCriteria(bullet))
                         this.setVisibilityInDocChained(visibility, lineIdx + 1, selector, completionHandler, stopCriteria);
@@ -573,9 +553,7 @@ export class DocumentManager {
     }
     
     setVisibilityInDoc(lineIdx: number | undefined, visibility: EVisibility, selector: any | undefined = undefined, callback: any | undefined = undefined) {
-        const editor = vscode.window.activeTextEditor;
-        if ((lineIdx === undefined) || !editor) return;
-    
+        if (lineIdx === undefined) return;
         const line = this.parseLine(lineIdx);
 
         // If node is hidden, make sure its visibility is hidden.
