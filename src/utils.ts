@@ -50,6 +50,25 @@ export namespace Editor {
             });
         });
     }
+
+    export function showLineQuickPick(completionHandler: any | undefined = undefined) {
+        const strings = Editor.getAllLines();
+        if (!strings || strings.length <= 0) return;
+
+        const activeLineIdx = Editor.getActiveLineIdx() ?? 0;
+        const quickItems = strings?.map( (label, index) => { return { label, index };}); // can be any object with label property
+
+        let quickPick = vscode.window.createQuickPick();
+        quickPick.items = quickItems;
+        quickPick.activeItems = [ quickItems[activeLineIdx] ];
+        quickPick.onDidHide(() => quickPick.dispose());
+        quickPick.onDidAccept(() => {
+            if (completionHandler) completionHandler(quickPick.activeItems[0]);
+            quickPick.hide();
+        });
+
+        quickPick.show();
+    }
 }
 
 export namespace Strings {

@@ -341,11 +341,9 @@ export class DocumentManager {
     }
 
     goToLine(completionHandler: any | undefined = undefined) {
-        const strings = Editor.getAllLines();
-        const quickItems = strings?.map( (label, index) => { return { label, index };}); // can be any object with label property
-        vscode.window.showQuickPick(quickItems ?? []).then( (input) => {
-            if (input) {
-                this.focusLine(this.parseLine(input.index));
+        Editor.showLineQuickPick((selectedLine: any) => {
+            if (selectedLine) {
+                this.focusLine(this.parseLine(selectedLine.index));
             }
             if (completionHandler) completionHandler();
         });
