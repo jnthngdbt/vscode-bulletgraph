@@ -600,46 +600,32 @@ export class DocumentManager {
             return;
         }
 
-        const isVisibilityCompOptional = visibility === EVisibility.eNormal;
-        const hasVisibilityComp = line.visibility !== EVisibility.eNormal;
+        line.visibility = visibility;
+        this.writeComponentSection(line, callback);
+    }
 
-        // Possible cases. They should be exclusive, so testing order is not important.
-        const mustRemoveComponentSection = line.hasComponentSection && !line.hasComponents && isVisibilityCompOptional;
-        const mustCreateComponentSection = !line.hasComponentSection && !isVisibilityCompOptional;
-        const mustInsertVisibilityComp = line.hasComponentSection && !hasVisibilityComp && !isVisibilityCompOptional;
-        const mustReplaceVisibilityComp = hasVisibilityComp && !isVisibilityCompOptional;
-        const mustRemoveVisibilityCompOnly = line.hasComponents && hasVisibilityComp && isVisibilityCompOptional;
+    writeComponentSection(line: BulletLine, callback: any | undefined = undefined) {
+        let newCompString = line.generateComponentSectionString();
+
+        let pos = line.text.indexOf(LABEL_ID_SEP);
+        if (pos < 0 && newCompString.length === 0) return; // nothing to do
+
+        if (pos < 0) {
+            if (line.text[line.text.length - 1] !== " ")
+                newCompString = " " + newCompString; // add a space if not already ending with a space
+            pos = line.text.length;
+        }
+
+        const editor = vscode.window.activeTextEditor;
+        if (!editor) return;
 
         editor.edit((editBuilder) => {
-            let replace = (strIn: string, strOut: string) => {
-                const pos = line.text.indexOf(strIn);
-                if (pos >= 0) {
-                    const range = new vscode.Range(
-                        new vscode.Position(lineIdx, pos),
-                        new vscode.Position(lineIdx, pos + strIn.length)
-                    );
-                    editBuilder.replace(range, strOut);
-                }
-            };
+            const range = new vscode.Range(
+                new vscode.Position(line.index, pos),
+                new vscode.Position(line.index, line.text.length)
+            );
+            editBuilder.replace(range, newCompString);
 
-            if (mustRemoveComponentSection) {
-                let compPos = line.text.indexOf(LABEL_ID_SEP);
-                if (compPos > 0) {
-                    if (line.text[compPos-1] === " ") compPos--; // remove trailing space if necessary
-                    replace(line.text, line.text.substr(0, compPos));
-                }
-            } else if (mustCreateComponentSection) {
-                editBuilder.insert(new vscode.Position(lineIdx, line.text.length), 
-                    " " + LABEL_ID_SEP + " " + visibility);
-            } else if (mustInsertVisibilityComp) {
-                replace(
-                    LABEL_ID_SEP, 
-                    LABEL_ID_SEP + " " + visibility)
-            } else if (mustReplaceVisibilityComp) {
-                replace(line.visibility, visibility);
-            } else if (mustRemoveVisibilityCompOnly) {
-                replace(" " + line.visibility, "");
-            }
         }).then((success) => {
             if (callback) callback(line);
         });

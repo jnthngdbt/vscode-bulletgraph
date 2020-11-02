@@ -13,9 +13,9 @@ export class BulletLine {
     visibility = EVisibility.eNormal;
     isHighlight = false;
     id = "";
+    isRandomId = false;
     idsIn: Array<string> = [];
     idsOut: Array<string> = [];
-    hasComponents = false;
     hasComponentSection = false;
 
     clear() {
@@ -28,14 +28,30 @@ export class BulletLine {
         this.visibility = EVisibility.eNormal;
         this.isHighlight = false;
         this.id = "";
+        this.isRandomId = false;
         this.idsIn = [];
         this.idsOut = [];
-        this.hasComponents = false;
         this.hasComponentSection = false;
     }
 
     isValid(): Boolean {
         return !this.isComment && (this.depth >= 0) && !isScriptLine(this.text);
+    }
+
+    generateComponentSectionString(): string {
+        let str = LABEL_ID_SEP;
+
+        if (this.visibility !== EVisibility.eNormal) str = str + " " + this.visibility;
+        if (this.isHighlight) str = str + " " + HIGHLIGHT_TOKEN;
+        if (this.id.length > 0 && !this.isRandomId) str = str + " " + this.id;
+
+        this.idsIn.forEach( id => { str = str + " " + ELink.eIn + ELink.eIn + id; });
+        this.idsOut.forEach( id => { str = str + " " + ELink.eOut + ELink.eOut + id; });
+
+        if (str === LABEL_ID_SEP) // if nothing was added, just do not put components section
+            str = "";
+
+        return str;
     }
 
     parse(lineIn: string | undefined, lineIdx: number) {
@@ -72,10 +88,9 @@ export class BulletLine {
             this.hasComponentSection = split.length > 1;
 
             this.id = generateRandomId();
+            this.isRandomId = true;
         
-            if (!this.hasComponentSection) {
-                this.hasComponents = false;
-            } else {
+            if (this.hasComponentSection) {
                 let components = split[1].trim().split(' ');
 
                 // Extract visibility, if present.
@@ -99,16 +114,13 @@ export class BulletLine {
                                         this.idsIn.push(id);
                                     } else { // no link type char, or no at all
                                         this.id = id // assume it is the current node id
+                                        this.isRandomId = false;
                                     }
                                 }
                             }
                         }
                     }
                 }
-
-                // True if the component section contains something other than a visibility token.
-                let hasVisibility = this.visibility != EVisibility.eNormal;
-                this.hasComponents = (components.length > 1) || !hasVisibility; // being here, we know we have at least 1 component, may be visibility
             }
         }
     }
