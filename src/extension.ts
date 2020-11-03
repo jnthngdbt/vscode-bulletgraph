@@ -2,7 +2,7 @@ import * as vscode from 'vscode';
 
 import { BulletGraph } from './BulletGraph'
 import { DepthManager } from './DepthManager'
-import { ERenderingEngine } from './constants'
+import { ELink, ERenderingEngine } from './constants'
 import { DotFileManager } from './DotFileManager'
 import { generateIdFromLineContent } from './NodeIdGenerator'
 import { DocumentManager } from './DocumentManager';
@@ -169,6 +169,9 @@ export function activate(context: vscode.ExtensionContext) {
     context.subscriptions.push( vscode.commands.registerCommand('vscode-bulletgraph.goBackVisible', () => { documentManager.goBackVisible(Editor.getActiveLineIdx() ?? -1); }) );
     
     context.subscriptions.push( vscode.commands.registerCommand('vscode-bulletgraph.goToLine', () => { documentManager.goToLine(); }) );
+
+    context.subscriptions.push( vscode.commands.registerCommand('vscode-bulletgraph.addLinkIn', () => { documentManager.addLink(ELink.eIn); }) );
+    context.subscriptions.push( vscode.commands.registerCommand('vscode-bulletgraph.addLinkOut', () => { documentManager.addLink(ELink.eOut); }) );
 }
 
 export function deactivate() {}

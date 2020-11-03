@@ -1,5 +1,5 @@
 import { COMMENT_TOKENS, LABEL_ID_SEP, HIGHLIGHT_TOKEN, EBullet, ELink, EVisibility } from './constants'
-import { Strings, isScriptLine } from './utils'
+import { Editor, Strings, isScriptLine } from './utils'
 
 import { generateRandomId } from './NodeIdGenerator'
 
@@ -52,6 +52,14 @@ export class BulletLine {
             str = "";
 
         return str;
+    }
+
+    parseActiveLine() {
+        const lineIdx = Editor.getActiveLineIdx();
+        const lineText = Editor.getLine(lineIdx);
+        if (lineText === undefined || lineIdx === undefined || lineIdx < 0) return;
+
+        this.parse(lineText, lineIdx);
     }
 
     parse(lineIn: string | undefined, lineIdx: number) {

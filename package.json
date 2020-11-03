@@ -45,7 +45,9 @@
 		"onCommand:vscode-bulletgraph.goDown",
 		"onCommand:vscode-bulletgraph.goNextVisible",
 		"onCommand:vscode-bulletgraph.goBackVisible",
-		"onCommand:vscode-bulletgraph.goToLine"
+		"onCommand:vscode-bulletgraph.goToLine",
+		"onCommand:vscode-bulletgraph.addLinkIn",
+		"onCommand:vscode-bulletgraph.addLinkOut"
 	],
 	"main": "./out/extension.js",
 	"contributes": {
@@ -204,6 +206,14 @@
 			{
 				"command": "vscode-bulletgraph.goToLine",
 				"title": "Bullet Graph: Go To Line"
+			},
+			{
+				"command": "vscode-bulletgraph.addLinkIn",
+				"title": "Bullet Graph: Add Link In"
+			},
+			{
+				"command": "vscode-bulletgraph.addLinkOut",
+				"title": "Bullet Graph: Add Link Out"
 			}
 		],
         "keybindings": [

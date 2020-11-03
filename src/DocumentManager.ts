@@ -1,8 +1,9 @@
 import * as vscode from 'vscode';
 
-import { Id, LABEL_ID_SEP, EVisibility, SCRIPT_LINE_TOKEN } from './constants'
+import { Id, LABEL_ID_SEP, EVisibility, SCRIPT_LINE_TOKEN, ELink } from './constants'
 import { Editor, isScriptLine, Strings } from './utils'
 import { BulletLine } from './BulletLine';
+import { generateCompactRandomId } from './NodeIdGenerator';
 
 export class DocumentLine {
     text = "";
@@ -347,6 +348,38 @@ export class DocumentManager {
             }
             if (completionHandler) completionHandler();
         });
+    }
+
+    addLink(link: ELink, completionHandler: any | undefined = undefined) {
+        let addLinkToSelectedLineId = (id: string) => {
+            let line = new BulletLine();
+            line.parseActiveLine();
+
+            switch (link) {
+                case ELink.eIn: line.idsIn.push(id); break;
+                case ELink.eOut: line.idsOut.push(id); break;
+                default: break;
+            }
+            
+            this.writeComponentSection(line, completionHandler);
+        };
+
+        let processSelectedLine = (selectedLine: any) => {
+            if (selectedLine) {
+                let line = new BulletLine();
+                line.parse(selectedLine.label, selectedLine.index);
+
+                if (line.isRandomId) {
+                    line.id = generateCompactRandomId();
+                    line.isRandomId = false;
+                    this.writeComponentSection(line, () => addLinkToSelectedLineId(line.id));
+                } else {
+                    addLinkToSelectedLineId(line.id);
+                }
+            }
+        }
+
+        Editor.showLineQuickPick(processSelectedLine);
     }
 
     updateFolding(completionHandler: any | undefined = undefined) {
