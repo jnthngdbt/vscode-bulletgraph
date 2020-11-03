@@ -55,9 +55,14 @@ export class BulletLine {
     }
 
     parseActiveLine() {
-        const lineIdx = Editor.getActiveLineIdx();
+        this.parseLine(Editor.getActiveLineIdx());
+    }
+
+    parseLine(lineIdx: number | undefined) {
+        if (lineIdx === undefined || lineIdx < 0) return;
+
         const lineText = Editor.getLine(lineIdx);
-        if (lineText === undefined || lineIdx === undefined || lineIdx < 0) return;
+        if (lineText === undefined) return;
 
         this.parse(lineText, lineIdx);
     }

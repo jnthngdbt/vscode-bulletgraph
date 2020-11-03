@@ -350,8 +350,25 @@ export class DocumentManager {
         });
     }
 
+    getQuickPickLineIdAndCreateOneIfNecessary(callback: (id: string) => void) {
+        Editor.showLineQuickPick((selectedLine: any) => {
+            if (selectedLine) {
+                let line = new BulletLine();
+                line.parse(selectedLine.label, selectedLine.index);
+
+                if (line.isRandomId) {
+                    line.id = generateCompactRandomId();
+                    line.isRandomId = false;
+                    this.writeComponentSection(line, () => callback(line.id));
+                } else {
+                    callback(line.id);
+                }
+            }
+        });
+    }
+
     addLink(link: ELink, completionHandler: any | undefined = undefined) {
-        let addLinkToSelectedLineId = (id: string) => {
+        this.getQuickPickLineIdAndCreateOneIfNecessary((id: string) => {
             let line = new BulletLine();
             line.parseActiveLine();
 
@@ -362,24 +379,13 @@ export class DocumentManager {
             }
             
             this.writeComponentSection(line, completionHandler);
-        };
+        });
+    }
 
-        let processSelectedLine = (selectedLine: any) => {
-            if (selectedLine) {
-                let line = new BulletLine();
-                line.parse(selectedLine.label, selectedLine.index);
-
-                if (line.isRandomId) {
-                    line.id = generateCompactRandomId();
-                    line.isRandomId = false;
-                    this.writeComponentSection(line, () => addLinkToSelectedLineId(line.id));
-                } else {
-                    addLinkToSelectedLineId(line.id);
-                }
-            }
-        }
-
-        Editor.showLineQuickPick(processSelectedLine);
+    insertIdFromOtherLine(lineIdx: number | undefined, completionHandler: any | undefined = undefined) {
+        this.getQuickPickLineIdAndCreateOneIfNecessary((id: string) => {
+            Editor.insertTextAtActivePosition(id);
+        });
     }
 
     updateFolding(completionHandler: any | undefined = undefined) {

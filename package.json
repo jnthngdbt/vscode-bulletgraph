@@ -47,7 +47,8 @@
 		"onCommand:vscode-bulletgraph.goBackVisible",
 		"onCommand:vscode-bulletgraph.goToLine",
 		"onCommand:vscode-bulletgraph.addLinkIn",
-		"onCommand:vscode-bulletgraph.addLinkOut"
+		"onCommand:vscode-bulletgraph.addLinkOut",
+		"onCommand:vscode-bulletgraph.insertIdFromOtherLine"
 	],
 	"main": "./out/extension.js",
 	"contributes": {
@@ -214,6 +215,10 @@
 			{
 				"command": "vscode-bulletgraph.addLinkOut",
 				"title": "Bullet Graph: Add Link Out"
+			},
+			{
+				"command": "vscode-bulletgraph.insertIdFromOtherLine",
+				"title": "Bullet Graph: Insert ID from other line"
 			}
 		],
         "keybindings": [
