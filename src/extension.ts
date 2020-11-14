@@ -142,6 +142,12 @@ export function activate(context: vscode.ExtensionContext) {
     );
 
     context.subscriptions.push(
+        vscode.commands.registerCommand('vscode-bulletgraph.highlightNode', () => {
+            documentManager.highlightNode(Editor.getActiveLineIdx() ?? -1, true);
+        })
+    );
+
+    context.subscriptions.push(
         vscode.commands.registerCommand('vscode-bulletgraph.connectNode', () => {
             documentManager.connectNode(Editor.getActiveLineIdx() ?? -1, false);
         })

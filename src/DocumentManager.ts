@@ -445,6 +445,13 @@ export class DocumentManager {
         }
     }
 
+    highlightNode(lineIdx: number, toggle: Boolean, completionHandler: any | undefined = undefined) {
+        if (lineIdx === undefined) return;
+        const line = this.parseLine(lineIdx);
+        line.isHighlight = toggle ? !line.isHighlight : true;
+        this.writeComponentSection(line, completionHandler);
+    }
+
     revealNode(lineIdx: number, completionHandler: any | undefined = undefined) {
         let linesToMakeVisible: Array<number> = [];
 
@@ -614,6 +621,9 @@ export class DocumentManager {
             if (callback) callback(line);
             return;
         }
+
+        if (visibility === EVisibility.eHide)
+            line.isHighlight = false;
 
         line.visibility = visibility;
         this.writeComponentSection(line, callback);
