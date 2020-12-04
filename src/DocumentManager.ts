@@ -184,44 +184,64 @@ export class DocumentManager {
     foldLine(lineIdx: number | undefined, completionHandler: any | undefined = undefined) {
         let selector = (line: BulletLine) => { return line.visibility !== EVisibility.eHide; }; // must explicitely unhide to unhide
         this.setVisibilityInDoc(lineIdx, EVisibility.eFold, selector, (line: BulletLine) => {
-            this.updateChildren(lineIdx, completionHandler); // used to update children visibility
+            this.updateChildren(lineIdx, () => { // used to update children visibility
+                this.callFoldCommandIfPossible(lineIdx, completionHandler);
+            });
         });
     }
     
     unfoldLine(lineIdx: number | undefined, completionHandler: any | undefined = undefined) {
         let selector = (line: BulletLine) => { return line.visibility !== EVisibility.eHide; }; // must explicitely unhide to unhide
         this.setVisibilityInDoc(lineIdx, EVisibility.eNormal, selector, (line: BulletLine) => {
-           this.updateChildren(lineIdx, completionHandler); // used to update children visibility
+            this.updateChildren(lineIdx, () => { // used to update children visibility
+                this.callUnfoldCommand(lineIdx, completionHandler);
+            });
         });
     }
 
     hideNode(lineIdx: number | undefined, completionHandler: any | undefined = undefined) {
         this.setVisibilityInDoc(lineIdx, EVisibility.eHide, undefined, (line: BulletLine) => {
-            this.updateChildren(lineIdx, completionHandler); // used to update children visibility
+            this.updateChildren(lineIdx, () => { // used to update children visibility
+                this.callFoldCommandIfPossible(lineIdx, completionHandler);
+            });
         });
     }
     
     unhideNode(lineIdx: number | undefined, completionHandler: any | undefined = undefined) {
         this.setVisibilityInDoc(lineIdx, EVisibility.eNormal, undefined, (line: BulletLine) => {
-            this.updateChildren(lineIdx, completionHandler); // used to update children visibility
+            this.updateChildren(lineIdx, () => { // used to update children visibility
+                this.callUnfoldCommand(lineIdx, completionHandler);
+            });
         });
     }
 
     foldAll(completionHandler: any | undefined = undefined) {
-        this.setVisibilityInDocChained(EVisibility.eFold, 0, undefined, completionHandler);
+        this.setVisibilityInDocChained(EVisibility.eFold, 0, undefined, () => {
+            vscode.commands.executeCommand("editor.foldAll").then(() => { 
+                if (completionHandler) completionHandler(); });
+        });
     }
 
     unfoldAll(completionHandler: any | undefined = undefined) {
-        this.setVisibilityInDocChained(EVisibility.eNormal, 0, undefined, completionHandler);
+        this.setVisibilityInDocChained(EVisibility.eNormal, 0, undefined, () => {
+            vscode.commands.executeCommand("editor.unfoldAll").then(() => { 
+                if (completionHandler) completionHandler(); });
+        });
     }
 
     hideAll(completionHandler: any | undefined = undefined) {
-        this.setVisibilityInDocChained(EVisibility.eHide, 0, undefined, completionHandler);
+        this.setVisibilityInDocChained(EVisibility.eHide, 0, undefined, () => {
+            vscode.commands.executeCommand("editor.foldAll").then(() => { 
+                if (completionHandler) completionHandler(); });
+        });
     }
 
     unhideAll(completionHandler: any | undefined = undefined) {
         let selector = (line: BulletLine) => { return line.visibility === EVisibility.eHide; }; // only unhide hidden nodes
-        this.setVisibilityInDocChained(EVisibility.eNormal, 0, selector, completionHandler);
+        this.setVisibilityInDocChained(EVisibility.eNormal, 0, selector, () => {
+            vscode.commands.executeCommand("editor.unfoldAll").then(() => { 
+                if (completionHandler) completionHandler(); });
+        });
     }
     
     foldChildren(lineIdx: number | undefined, completionHandler: any | undefined = undefined) {
