@@ -187,6 +187,8 @@ export class DocumentManager {
             this.updateChildren(lineIdx, () => { // used to update children visibility
                 if (ENABLE_EDITOR_FOLDING)
                     this.callFoldCommandIfPossible(lineIdx, completionHandler);
+                else 
+                    if (completionHandler) completionHandler();
             });
         });
     }
@@ -197,6 +199,8 @@ export class DocumentManager {
             this.updateChildren(lineIdx, () => { // used to update children visibility
                 if (ENABLE_EDITOR_FOLDING)
                     this.callUnfoldCommand(lineIdx, completionHandler);
+                else 
+                    if (completionHandler) completionHandler();
             });
         });
     }
@@ -206,6 +210,8 @@ export class DocumentManager {
             this.updateChildren(lineIdx, () => { // used to update children visibility
                 if (ENABLE_EDITOR_FOLDING)
                     this.callFoldCommandIfPossible(lineIdx, completionHandler);
+                else 
+                    if (completionHandler) completionHandler();
             });
         });
     }
@@ -215,6 +221,8 @@ export class DocumentManager {
             this.updateChildren(lineIdx, () => { // used to update children visibility
                 if (ENABLE_EDITOR_FOLDING)
                     this.callUnfoldCommand(lineIdx, completionHandler);
+                else 
+                    if (completionHandler) completionHandler();
             });
         });
     }
