@@ -1,6 +1,6 @@
 import * as vscode from 'vscode';
 
-import { Id, LABEL_ID_SEP, EVisibility, SCRIPT_LINE_TOKEN, ELink } from './constants'
+import { Id, LABEL_ID_SEP, EVisibility, SCRIPT_LINE_TOKEN, ELink, ENABLE_EDITOR_FOLDING } from './constants'
 import { Editor, isScriptLine, Strings } from './utils'
 import { BulletLine } from './BulletLine';
 import { generateCompactRandomId } from './NodeIdGenerator';
@@ -185,7 +185,8 @@ export class DocumentManager {
         let selector = (line: BulletLine) => { return line.visibility !== EVisibility.eHide; }; // must explicitely unhide to unhide
         this.setVisibilityInDoc(lineIdx, EVisibility.eFold, selector, (line: BulletLine) => {
             this.updateChildren(lineIdx, () => { // used to update children visibility
-                this.callFoldCommandIfPossible(lineIdx, completionHandler);
+                if (ENABLE_EDITOR_FOLDING)
+                    this.callFoldCommandIfPossible(lineIdx, completionHandler);
             });
         });
     }
@@ -194,7 +195,8 @@ export class DocumentManager {
         let selector = (line: BulletLine) => { return line.visibility !== EVisibility.eHide; }; // must explicitely unhide to unhide
         this.setVisibilityInDoc(lineIdx, EVisibility.eNormal, selector, (line: BulletLine) => {
             this.updateChildren(lineIdx, () => { // used to update children visibility
-                this.callUnfoldCommand(lineIdx, completionHandler);
+                if (ENABLE_EDITOR_FOLDING)
+                    this.callUnfoldCommand(lineIdx, completionHandler);
             });
         });
     }
@@ -202,7 +204,8 @@ export class DocumentManager {
     hideNode(lineIdx: number | undefined, completionHandler: any | undefined = undefined) {
         this.setVisibilityInDoc(lineIdx, EVisibility.eHide, undefined, (line: BulletLine) => {
             this.updateChildren(lineIdx, () => { // used to update children visibility
-                this.callFoldCommandIfPossible(lineIdx, completionHandler);
+                if (ENABLE_EDITOR_FOLDING)
+                    this.callFoldCommandIfPossible(lineIdx, completionHandler);
             });
         });
     }
@@ -210,37 +213,46 @@ export class DocumentManager {
     unhideNode(lineIdx: number | undefined, completionHandler: any | undefined = undefined) {
         this.setVisibilityInDoc(lineIdx, EVisibility.eNormal, undefined, (line: BulletLine) => {
             this.updateChildren(lineIdx, () => { // used to update children visibility
-                this.callUnfoldCommand(lineIdx, completionHandler);
+                if (ENABLE_EDITOR_FOLDING)
+                    this.callUnfoldCommand(lineIdx, completionHandler);
             });
         });
     }
 
     foldAll(completionHandler: any | undefined = undefined) {
         this.setVisibilityInDocChained(EVisibility.eFold, 0, undefined, () => {
-            vscode.commands.executeCommand("editor.foldAll").then(() => { 
-                if (completionHandler) completionHandler(); });
-        });
+            if (ENABLE_EDITOR_FOLDING)
+                vscode.commands.executeCommand("editor.foldAll").then(() => { if (completionHandler) completionHandler(); });
+            else
+                if (completionHandler) completionHandler();
+            });
     }
 
     unfoldAll(completionHandler: any | undefined = undefined) {
         this.setVisibilityInDocChained(EVisibility.eNormal, 0, undefined, () => {
-            vscode.commands.executeCommand("editor.unfoldAll").then(() => { 
-                if (completionHandler) completionHandler(); });
+            if (ENABLE_EDITOR_FOLDING)
+                vscode.commands.executeCommand("editor.unfoldAll").then(() => { if (completionHandler) completionHandler(); });
+            else 
+                if (completionHandler) completionHandler();
         });
     }
 
     hideAll(completionHandler: any | undefined = undefined) {
         this.setVisibilityInDocChained(EVisibility.eHide, 0, undefined, () => {
-            vscode.commands.executeCommand("editor.foldAll").then(() => { 
-                if (completionHandler) completionHandler(); });
+            if (ENABLE_EDITOR_FOLDING)
+                vscode.commands.executeCommand("editor.foldAll").then(() => { if (completionHandler) completionHandler(); });
+            else 
+                if (completionHandler) completionHandler();
         });
     }
 
     unhideAll(completionHandler: any | undefined = undefined) {
         let selector = (line: BulletLine) => { return line.visibility === EVisibility.eHide; }; // only unhide hidden nodes
         this.setVisibilityInDocChained(EVisibility.eNormal, 0, selector, () => {
-            vscode.commands.executeCommand("editor.unfoldAll").then(() => { 
-                if (completionHandler) completionHandler(); });
+            if (ENABLE_EDITOR_FOLDING)
+                vscode.commands.executeCommand("editor.unfoldAll").then(() => { if (completionHandler) completionHandler(); });
+            else 
+                if (completionHandler) completionHandler();
         });
     }
     
@@ -481,23 +493,27 @@ export class DocumentManager {
 
         linesToMakeVisible.push(line.index);
 
+        // Backtrack and node's parents.
         for (let i = lineIdx - 1; i >= 0; i--) {
             line = this.parseLine(i);
 
-            if (!line.isValid())
+            if (!line.isValid()) // skip comments and invalid lines
                 continue;
 
+            // Found a parent of current level.
             if (line.depth < maxDepth) {
                 linesToMakeVisible.push(line.index);
                 maxDepth = line.depth;
             }
 
+            // Reached highest level. Stop.
             if (line.depth === 0) {
                 firstLine = i;
                 break;
             }
         }
 
+        // When done setting determined parent nodes (down below), finish by updating node's children.
         let completionHandlerPlus = () => {
             this.setVisibilityInDoc(lineIdx, EVisibility.eFold, undefined, () => {
                 // Make sure children are not hidden, to avoid missing underlying interactions.
