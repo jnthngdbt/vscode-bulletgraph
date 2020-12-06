@@ -1,9 +1,9 @@
 import { Id, EBullet, EEdge, ENode, EVisibility } from './constants'
 import { DocumentManager } from './DocumentManager'
-import { BulletLine } from './BulletLine'
+import { Bullet } from './Bullet'
 
 export class Node {
-    bullet: EBullet = EBullet.eDefault;
+    bulletType: EBullet = EBullet.eDefault;
     label: string = "";
     id: Id = "";
     isHighlight = false;
@@ -29,15 +29,15 @@ export class Node {
     }
 
     isProcess() {
-        return this.bullet === EBullet.eFlow;
+        return this.bulletType === EBullet.eFlow;
     }
 
     isFlowBreak() {
-        return this.bullet === EBullet.eFlowBreak;
+        return this.bulletType === EBullet.eFlowBreak;
     }
 
     getType(): ENode {
-        if (this.bullet === EBullet.eDefault) {
+        if (this.bulletType === EBullet.eDefault) {
             if (this.children.length > 0) {
                 return ENode.eSubgraph;
             } else if (this.dependencySize > 0) {
@@ -45,7 +45,7 @@ export class Node {
             } else {
                 return ENode.eDefault;
             }
-        } else if (this.bullet === EBullet.eFlow) {
+        } else if (this.bulletType === EBullet.eFlow) {
             if (this.children.length > 0) {
                 return ENode.eSubgraphProcess;
             } else if (this.dependencySize > 0) {
@@ -53,14 +53,14 @@ export class Node {
             } else {
                 return ENode.eProcess;
             }
-        } else if (this.bullet === EBullet.eFlowBreak) {
+        } else if (this.bulletType === EBullet.eFlowBreak) {
             return ENode.eFlowBreak;
         }
         return ENode.eDefault;
     }
 
     clear() {
-        this.bullet = EBullet.eDefault;
+        this.bulletType = EBullet.eDefault;
         this.label = "";
         this.id = "";
         this.isHighlight = false;
@@ -69,7 +69,7 @@ export class Node {
     }
 
     copyFrom(other: Node) {
-        this.bullet = other.bullet;
+        this.bulletType = other.bulletType;
         this.label = other.label;
         this.id = other.id;
         this.isHighlight = other.isHighlight;
@@ -77,16 +77,16 @@ export class Node {
         this.children = other.children;
     }
 
-    fill(line: BulletLine, links: LinksMap, foldNodeIds: IdSet, hideNodeIds: IdSet) {
-        this.bullet = line.bullet;
-        this.label = line.label;
-        this.id = line.id;
-        this.isHighlight = line.isHighlight;
+    fill(bullet: Bullet, links: LinksMap, foldNodeIds: IdSet, hideNodeIds: IdSet) {
+        this.bulletType = bullet.bulletType;
+        this.label = bullet.label;
+        this.id = bullet.id;
+        this.isHighlight = bullet.isHighlight;
 
-        line.idsIn.forEach( id => { links.addEdge(id, this.id, EEdge.eLink) });
-        line.idsOut.forEach( id => { links.addEdge(this.id, id, EEdge.eLink) });
+        bullet.idsIn.forEach( id => { links.addEdge(id, this.id, EEdge.eLink) });
+        bullet.idsOut.forEach( id => { links.addEdge(this.id, id, EEdge.eLink) });
 
-        switch (line.visibility) {
+        switch (bullet.visibility) {
             case EVisibility.eFold: foldNodeIds.add(this.id); break;
             case EVisibility.eHide: hideNodeIds.add(this.id); break;
         }
@@ -192,13 +192,13 @@ export class BulletGraph {
         this.parse(bulletLines);
     }
 
-    parse(bulletLines: Array<BulletLine>) {
+    parse(bullets: Array<Bullet>) {
         this.clear();
     
         let currentParentForIndent: { [key:number]:Node; } = {};
         currentParentForIndent[0] = this.hierarchy;
     
-        bulletLines.forEach( line => {
+        bullets.forEach( line => {
             if (!line.isComment) {
                 let node = new Node();
                 node.fill(line, this.links, this.foldNodeIds, this.hideNodeIds);

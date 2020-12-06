@@ -4,7 +4,7 @@ import { NEW_SCRIPT_CHAR } from './constants'
 import { Strings } from './utils'
 
 import { DocumentManager } from './DocumentManager'
-import { BulletLine } from './BulletLine';
+import { Bullet } from './Bullet';
 
 class NodeArgument {
     id = "";
@@ -101,7 +101,7 @@ export class ScriptManager {
         });
     }
 
-    findLineIdxOfNodeId(bullets: Array<BulletLine>, nodeId: string): number {
+    findLineIdxOfNodeId(bullets: Array<Bullet>, nodeId: string): number {
         for (let i = 0; i < bullets.length; i++)
             if (bullets[i].id === nodeId)
                     return bullets[i].index;

@@ -2,7 +2,7 @@ import * as vscode from 'vscode';
 
 import { Id, LABEL_ID_SEP, EVisibility, SCRIPT_LINE_TOKEN, ELink, ENABLE_EDITOR_FOLDING } from './constants'
 import { Editor, isScriptLine, Strings } from './utils'
-import { BulletLine } from './BulletLine';
+import { Bullet } from './Bullet';
 import { generateCompactRandomId } from './NodeIdGenerator';
 
 export class DocumentLine {
@@ -59,7 +59,7 @@ export class DocumentManager {
         return parent && parent.visibility === EVisibility.eHide;
     }
 
-    getParentLine(lineIdx: number | undefined): BulletLine | undefined {
+    getParentLine(lineIdx: number | undefined): Bullet | undefined {
         if (lineIdx === undefined) return undefined;
 
         let line = this.parseLine(lineIdx);
@@ -75,7 +75,7 @@ export class DocumentManager {
         return undefined;
     }
 
-    getLineIdxForId(id: Id, bulletLines: Array<BulletLine>): number {
+    getLineIdxForId(id: Id, bulletLines: Array<Bullet>): number {
         for (let bulletLine of bulletLines) {
             if (bulletLine.id === id)
                 return bulletLine.index;
@@ -83,7 +83,7 @@ export class DocumentManager {
         return -1;
     }
 
-    focusLine(line: BulletLine) {
+    focusLine(line: Bullet) {
         const pos = line.text.length - Strings.ltrim(line.text).length + 2;
         this.focusLineIdx(line.index, pos);
     }
@@ -103,18 +103,19 @@ export class DocumentManager {
         vscode.commands.executeCommand("revealLine", { lineNumber: lineIdx, at: "center" });
     }
 
-    parseActiveLine(): BulletLine {
+    parseActiveLine(): Bullet {
         return this.parseLine(Editor.getActiveLineIdx());
     }
 
-    parseLine(lineIdx: number | undefined): BulletLine {
-        let line = new BulletLine();
+    parseLine(lineIdx: number | undefined): Bullet {
+        let line = new Bullet();
         if (lineIdx !== undefined)
             line.parse(Editor.getLine(lineIdx), lineIdx);
         return line;
     }
 
     // Extract text lines, without parsing them, classifying them script/bullet.
+    // Does not contain empty lines, but contains comments.
     extractLines() {
         const lines = Editor.getAllLines();
         if (!lines) vscode.window.showErrorMessage('Bullet Graph: Could not parse current editor.');
@@ -139,11 +140,11 @@ export class DocumentManager {
         });
     }
 
-    parseBulletsLines(): Array<BulletLine> {
-        let bulletLines: Array<BulletLine> = [];
+    parseBulletsLines(): Array<Bullet> {
+        let bulletLines: Array<Bullet> = [];
 
         this.bulletLines.forEach( line => {
-            let bulletLine = new BulletLine();
+            let bulletLine = new Bullet();
             bulletLine.parse(line.text, line.index);
             bulletLines.push(bulletLine);
         });
@@ -182,8 +183,8 @@ export class DocumentManager {
     }
     
     foldLine(lineIdx: number | undefined, completionHandler: any | undefined = undefined) {
-        let selector = (line: BulletLine) => { return line.visibility !== EVisibility.eHide; }; // must explicitely unhide to unhide
-        this.setVisibilityInDoc(lineIdx, EVisibility.eFold, selector, (line: BulletLine) => {
+        let selector = (line: Bullet) => { return line.visibility !== EVisibility.eHide; }; // must explicitely unhide to unhide
+        this.setVisibilityInDoc(lineIdx, EVisibility.eFold, selector, (line: Bullet) => {
             this.updateChildren(lineIdx, () => { // used to update children visibility
                 if (ENABLE_EDITOR_FOLDING)
                     this.callFoldCommandIfPossible(lineIdx, completionHandler);
@@ -194,8 +195,8 @@ export class DocumentManager {
     }
     
     unfoldLine(lineIdx: number | undefined, completionHandler: any | undefined = undefined) {
-        let selector = (line: BulletLine) => { return line.visibility !== EVisibility.eHide; }; // must explicitely unhide to unhide
-        this.setVisibilityInDoc(lineIdx, EVisibility.eNormal, selector, (line: BulletLine) => {
+        let selector = (line: Bullet) => { return line.visibility !== EVisibility.eHide; }; // must explicitely unhide to unhide
+        this.setVisibilityInDoc(lineIdx, EVisibility.eNormal, selector, (line: Bullet) => {
             this.updateChildren(lineIdx, () => { // used to update children visibility
                 if (ENABLE_EDITOR_FOLDING)
                     this.callUnfoldCommand(lineIdx, completionHandler);
@@ -206,7 +207,7 @@ export class DocumentManager {
     }
 
     hideNode(lineIdx: number | undefined, completionHandler: any | undefined = undefined) {
-        this.setVisibilityInDoc(lineIdx, EVisibility.eHide, undefined, (line: BulletLine) => {
+        this.setVisibilityInDoc(lineIdx, EVisibility.eHide, undefined, (line: Bullet) => {
             this.updateChildren(lineIdx, () => { // used to update children visibility
                 if (ENABLE_EDITOR_FOLDING)
                     this.callFoldCommandIfPossible(lineIdx, completionHandler);
@@ -217,7 +218,7 @@ export class DocumentManager {
     }
     
     unhideNode(lineIdx: number | undefined, completionHandler: any | undefined = undefined) {
-        this.setVisibilityInDoc(lineIdx, EVisibility.eNormal, undefined, (line: BulletLine) => {
+        this.setVisibilityInDoc(lineIdx, EVisibility.eNormal, undefined, (line: Bullet) => {
             this.updateChildren(lineIdx, () => { // used to update children visibility
                 if (ENABLE_EDITOR_FOLDING)
                     this.callUnfoldCommand(lineIdx, completionHandler);
@@ -255,7 +256,7 @@ export class DocumentManager {
     }
 
     unhideAll(completionHandler: any | undefined = undefined) {
-        let selector = (line: BulletLine) => { return line.visibility === EVisibility.eHide; }; // only unhide hidden nodes
+        let selector = (line: Bullet) => { return line.visibility === EVisibility.eHide; }; // only unhide hidden nodes
         this.setVisibilityInDocChained(EVisibility.eNormal, 0, selector, () => {
             if (ENABLE_EDITOR_FOLDING)
                 vscode.commands.executeCommand("editor.unfoldAll").then(() => { if (completionHandler) completionHandler(); });
@@ -266,15 +267,15 @@ export class DocumentManager {
     
     foldChildren(lineIdx: number | undefined, completionHandler: any | undefined = undefined) {
         const nodeBullet = this.parseLine(lineIdx);
-        let selector = (line: BulletLine) => { return line.visibility !== EVisibility.eHide; }; // must explicitely unhide to unhide
-        let stopCriteria = (line: BulletLine) => { return line.isValid() && line.depth <= nodeBullet.depth; }; // only children
+        let selector = (line: Bullet) => { return line.visibility !== EVisibility.eHide; }; // must explicitely unhide to unhide
+        let stopCriteria = (line: Bullet) => { return line.isValid() && line.depth <= nodeBullet.depth; }; // only children
         this.setVisibilityInDocChained(EVisibility.eFold, nodeBullet.index + 1, selector, completionHandler, stopCriteria);
     }
 
     unfoldChildren(lineIdx: number | undefined, completionHandler: any | undefined = undefined) {
         const nodeBullet = this.parseLine(lineIdx);
-        let selector = (line: BulletLine) => { return line.visibility !== EVisibility.eHide; }; // must explicitely unhide to unhide
-        let stopCriteria = (line: BulletLine) => { return line.isValid() && line.depth <= nodeBullet.depth; }; // only children
+        let selector = (line: Bullet) => { return line.visibility !== EVisibility.eHide; }; // must explicitely unhide to unhide
+        let stopCriteria = (line: Bullet) => { return line.isValid() && line.depth <= nodeBullet.depth; }; // only children
         this.setVisibilityInDoc(lineIdx, EVisibility.eNormal, undefined, () => {
             this.setVisibilityInDocChained(EVisibility.eNormal, nodeBullet.index + 1, selector, completionHandler, stopCriteria);
         });
@@ -282,20 +283,20 @@ export class DocumentManager {
 
     hideChildren(lineIdx: number | undefined, completionHandler: any | undefined = undefined) {
         const nodeBullet = this.parseLine(lineIdx);
-        let stopCriteria = (line: BulletLine) => { return line.isValid() && line.depth <= nodeBullet.depth; }; // only children
+        let stopCriteria = (line: Bullet) => { return line.isValid() && line.depth <= nodeBullet.depth; }; // only children
         this.setVisibilityInDocChained(EVisibility.eHide, nodeBullet.index + 1, undefined, completionHandler, stopCriteria);
     }
 
     unhideChildren(lineIdx: number | undefined, completionHandler: any | undefined = undefined) {
         const nodeBullet = this.parseLine(lineIdx);
-        let stopCriteria = (line: BulletLine) => { return line.isValid() && line.depth <= nodeBullet.depth; }; // only children
-        let whenDone = (line: BulletLine) => { this.updateChildren(lineIdx, completionHandler); }; // used to update children visibility
+        let stopCriteria = (line: Bullet) => { return line.isValid() && line.depth <= nodeBullet.depth; }; // only children
+        let whenDone = (line: Bullet) => { this.updateChildren(lineIdx, completionHandler); }; // used to update children visibility
         this.setVisibilityInDocChained(EVisibility.eNormal, nodeBullet.index + 1, undefined, whenDone, stopCriteria);
     }
 
     foldLevel(level: number, completionHandler: any | undefined = undefined) {
         this.foldAll(() => {
-            let selector = (line: BulletLine) => { return line.isValid() && line.depth <= level; };
+            let selector = (line: Bullet) => { return line.isValid() && line.depth <= level; };
             this.setVisibilityInDocChained(EVisibility.eNormal, 0, selector, () => { // unfold
                 this.updateFolding(completionHandler);
             });
@@ -349,14 +350,14 @@ export class DocumentManager {
         if (completionHandler) completionHandler();
     }
 
-    foundAndFocusedSibling(line: BulletLine, depth: Number) {
+    foundAndFocusedSibling(line: Bullet, depth: Number) {
         if (!line.isValid() || (line.depth > depth)) return false; // skip comments and children
         if (line.depth < depth) return true; // reached higher level, stop
         this.focusLine(line);
         return true;
     }
 
-    foundAndFocusedVisible(line: BulletLine) {
+    foundAndFocusedVisible(line: Bullet) {
         const found = line.isValid() && (line.visibility === EVisibility.eNormal || line.visibility === EVisibility.eFold);
         if (found) {
             this.focusLine(line);
@@ -393,7 +394,7 @@ export class DocumentManager {
     getQuickPickLineIdAndCreateOneIfNecessary(callback: (id: string) => void) {
         Editor.showLineQuickPick((selectedLine: any) => {
             if (selectedLine) {
-                let line = new BulletLine();
+                let line = new Bullet();
                 line.parse(selectedLine.label, selectedLine.index);
 
                 if (line.isRandomId) {
@@ -409,7 +410,7 @@ export class DocumentManager {
 
     addLink(link: ELink, completionHandler: any | undefined = undefined) {
         this.getQuickPickLineIdAndCreateOneIfNecessary((id: string) => {
-            let line = new BulletLine();
+            let line = new Bullet();
             line.parseActiveLine();
 
             switch (link) {
@@ -535,13 +536,13 @@ export class DocumentManager {
             });
         };
 
-        let selector = (line: BulletLine) => { return linesToMakeVisible.includes(line.index); };
-        let stop = (line: BulletLine) => { return line.index >= lineIdx; };
+        let selector = (line: Bullet) => { return linesToMakeVisible.includes(line.index); };
+        let stop = (line: Bullet) => { return line.index >= lineIdx; };
 
         this.setVisibilityInDocChained(EVisibility.eNormal, firstLine, selector, completionHandlerPlus, stop);
     }
 
-    findLinesLinkedToNode(bullets: Array<BulletLine>, nodeBullet: BulletLine, lines: Array<number>) {
+    findLinesLinkedToNode(bullets: Array<Bullet>, nodeBullet: Bullet, lines: Array<number>) {
         let addLinkedNodeLines = (linkedIds: Array<Id>) => {
             for (let id of linkedIds) {
                 let idx = this.getLineIdxForId(id, bullets);
@@ -619,7 +620,7 @@ export class DocumentManager {
     setVisibilityInDocChained(visibility: EVisibility, lineIdx: number, selector: any | undefined = undefined, completionHandler: any | undefined = undefined, stopCriteria: any | undefined = undefined) {
         // Merge selector filter and stop criteria into a single selector, to not process line if it passes
         // the selector, but triggers stop criteria.
-        let selectorMerged = (line: BulletLine) => {
+        let selectorMerged = (line: Bullet) => {
             let resultSelector = true;
             let resultStopCriteria = false;
             if (stopCriteria) resultStopCriteria = stopCriteria(line);
@@ -628,7 +629,7 @@ export class DocumentManager {
         };
 
         if (lineIdx < Editor.getLineCount()) {
-            this.setVisibilityInDoc(lineIdx, visibility, selectorMerged, (bullet: BulletLine) => {
+            this.setVisibilityInDoc(lineIdx, visibility, selectorMerged, (bullet: Bullet) => {
                 if (!stopCriteria || !stopCriteria(bullet))
                         this.setVisibilityInDocChained(visibility, lineIdx + 1, selector, completionHandler, stopCriteria);
                 else if (completionHandler !== undefined) {
@@ -673,7 +674,7 @@ export class DocumentManager {
         this.writeComponentSection(line, callback);
     }
 
-    writeComponentSection(line: BulletLine, callback: any | undefined = undefined) {
+    writeComponentSection(line: Bullet, callback: any | undefined = undefined) {
         let newCompString = line.generateComponentSectionString();
 
         let pos = line.text.indexOf(LABEL_ID_SEP);

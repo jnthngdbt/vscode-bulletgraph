@@ -3,12 +3,12 @@ import { Editor, Strings, isScriptLine } from './utils'
 
 import { generateRandomId } from './NodeIdGenerator'
 
-export class BulletLine {
+export class Bullet {
     text = "";
     index = -1;
     isComment = false;
     depth = -1;
-    bullet = EBullet.eDefault;
+    bulletType = EBullet.eDefault;
     label = "";
     visibility = EVisibility.eNormal;
     isHighlight = false;
@@ -17,13 +17,14 @@ export class BulletLine {
     idsIn: Array<string> = [];
     idsOut: Array<string> = [];
     hasComponentSection = false;
+    mustUpdate = false;
 
     clear() {
         this.text = "";
         this.index = -1;
         this.isComment = false;
         this.depth = -1;
-        this.bullet = EBullet.eDefault;
+        this.bulletType = EBullet.eDefault;
         this.label = "";
         this.visibility = EVisibility.eNormal;
         this.isHighlight = false;
@@ -32,6 +33,7 @@ export class BulletLine {
         this.idsIn = [];
         this.idsOut = [];
         this.hasComponentSection = false;
+        this.mustUpdate = false;
     }
 
     isValid(): Boolean {
@@ -92,7 +94,7 @@ export class BulletLine {
 
             line = line.trim();
 
-            this.bullet = line[0] as EBullet;
+            this.bulletType = line[0] as EBullet;
             line = line.substr(1).trim() // remove bullet
         
             const split = line.split(LABEL_ID_SEP)

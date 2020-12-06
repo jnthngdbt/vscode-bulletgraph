@@ -6,6 +6,7 @@ import { ELink, ERenderingEngine } from './constants'
 import { DotFileManager } from './DotFileManager'
 import { generateIdFromLineContent } from './NodeIdGenerator'
 import { DocumentManager } from './DocumentManager';
+import { DocumentManagerNew } from './DocumentManagerNew';
 import { ScriptManager } from './ScriptManager';
 import { Editor } from './utils';
 
@@ -53,7 +54,9 @@ export function activate(context: vscode.ExtensionContext) {
 
     context.subscriptions.push(
         vscode.commands.registerCommand('vscode-bulletgraph.foldLine', () => {
-            documentManager.foldLine(Editor.getActiveLineIdx());
+            let doc = new DocumentManagerNew();
+            doc.foldLine(Editor.getActiveLineIdx());
+            doc.update();
         })
     );
 
@@ -95,7 +98,9 @@ export function activate(context: vscode.ExtensionContext) {
 
     context.subscriptions.push(
         vscode.commands.registerCommand('vscode-bulletgraph.hideAll', () => {
-            documentManager.hideAll();
+            let doc = new DocumentManagerNew();
+            doc.hideAll();
+            doc.update();
         })
     );
 

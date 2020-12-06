@@ -22,7 +22,7 @@ export class DepthManager {
                 this.nodeRerouteMap[childIn.id] = childIn.id; // reroute to itself (no effect)
 
                 // Copy child.
-                childOut.bullet = childIn.bullet;
+                childOut.bulletType = childIn.bulletType;
                 childOut.dependencySize = childIn.dependencySize;
                 childOut.id = childIn.id;
                 childOut.isHighlight = childIn.isHighlight;
