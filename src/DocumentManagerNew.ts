@@ -90,23 +90,55 @@ export class DocumentManagerNew {
         bullet.mustUpdate = true;
     }
 
-    foldLine(lineIdx: number | undefined, completionHandler: any | undefined = undefined) {
+    foldNode(lineIdx: number | undefined, completionHandler: any | undefined = undefined) {
         let bullet = this.getBulletAtLine(lineIdx);
         if (bullet && (bullet.visibility !== EVisibility.eHide)) { // must explicitely unhide to unhide
             this.setVisibility(bullet, EVisibility.eFold);
         }
     }
 
-    unfoldLine(lineIdx: number | undefined, completionHandler: any | undefined = undefined) {
+    unfoldNode(lineIdx: number | undefined, completionHandler: any | undefined = undefined) {
         let bullet = this.getBulletAtLine(lineIdx);
         if (bullet && (bullet.visibility !== EVisibility.eHide)) { // must explicitely unhide to unhide
             this.setVisibility(bullet, EVisibility.eNormal);
         }
     }
 
+    hideNode(lineIdx: number | undefined, completionHandler: any | undefined = undefined) {
+        let bullet = this.getBulletAtLine(lineIdx);
+        if (bullet) {
+            this.setVisibility(bullet, EVisibility.eHide);
+        }
+    }
+
+    unhideNode(lineIdx: number | undefined, completionHandler: any | undefined = undefined) {
+        let bullet = this.getBulletAtLine(lineIdx);
+        if (bullet) {
+            this.setVisibility(bullet, EVisibility.eNormal);
+        }
+    }
+    
+    foldAll() {
+        this.bullets.forEach( bullet => {
+            this.setVisibility(bullet, EVisibility.eFold);
+        });
+    }
+
+    unfoldAll() {
+        this.bullets.forEach( bullet => {
+            this.setVisibility(bullet, EVisibility.eNormal);
+        });
+    }
+
     hideAll() {
         this.bullets.forEach( bullet => {
             this.setVisibility(bullet, EVisibility.eHide);
+        });
+    }
+
+    unhideAll() {
+        this.bullets.forEach( bullet => {
+            this.setVisibility(bullet, EVisibility.eNormal);
         });
     }
 

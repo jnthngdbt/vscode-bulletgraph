@@ -120,8 +120,8 @@ export class ScriptManager {
             else if (command.name === 'unfoldAll'           ) { this.doc.unfoldAll(completionHandler); } 
             else if (command.name === 'hideNode'            ) { this.doc.hideNode(command.argument.lineIdx, completionHandler); } 
             else if (command.name === 'unhideNode'          ) { this.doc.unhideNode(command.argument.lineIdx, completionHandler); } 
-            else if (command.name === 'foldNode'            ) { this.doc.foldLine(command.argument.lineIdx, completionHandler); } 
-            else if (command.name === 'unfoldNode'          ) { this.doc.unfoldLine(command.argument.lineIdx, completionHandler); } 
+            else if (command.name === 'foldNode'            ) { this.doc.foldNode(command.argument.lineIdx, completionHandler); } 
+            else if (command.name === 'unfoldNode'          ) { this.doc.unfoldNode(command.argument.lineIdx, completionHandler); } 
             else if (command.name === 'foldChildren'        ) { this.doc.foldChildren(command.argument.lineIdx, completionHandler); } 
             else if (command.name === 'unfoldChildren'      ) { this.doc.unfoldChildren(command.argument.lineIdx, completionHandler); } 
             else if (command.name === 'hideChildren'        ) { this.doc.hideChildren(command.argument.lineIdx, completionHandler); } 

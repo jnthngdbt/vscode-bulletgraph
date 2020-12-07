@@ -182,7 +182,7 @@ export class DocumentManager {
         });
     }
     
-    foldLine(lineIdx: number | undefined, completionHandler: any | undefined = undefined) {
+    foldNode(lineIdx: number | undefined, completionHandler: any | undefined = undefined) {
         let selector = (line: Bullet) => { return line.visibility !== EVisibility.eHide; }; // must explicitely unhide to unhide
         this.setVisibilityInDoc(lineIdx, EVisibility.eFold, selector, (line: Bullet) => {
             this.updateChildren(lineIdx, () => { // used to update children visibility
@@ -194,7 +194,7 @@ export class DocumentManager {
         });
     }
     
-    unfoldLine(lineIdx: number | undefined, completionHandler: any | undefined = undefined) {
+    unfoldNode(lineIdx: number | undefined, completionHandler: any | undefined = undefined) {
         let selector = (line: Bullet) => { return line.visibility !== EVisibility.eHide; }; // must explicitely unhide to unhide
         this.setVisibilityInDoc(lineIdx, EVisibility.eNormal, selector, (line: Bullet) => {
             this.updateChildren(lineIdx, () => { // used to update children visibility

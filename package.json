@@ -16,8 +16,8 @@
 		"onCommand:vscode-bulletgraph.applyScript",
 		"onCommand:vscode-bulletgraph.generateDotFile",
 		"onCommand:vscode-bulletgraph.insertId",
-		"onCommand:vscode-bulletgraph.foldLine",
-		"onCommand:vscode-bulletgraph.unfoldLine",
+		"onCommand:vscode-bulletgraph.foldNode",
+		"onCommand:vscode-bulletgraph.unfoldNode",
 		"onCommand:vscode-bulletgraph.hideNode",
 		"onCommand:vscode-bulletgraph.unhideNode",
 		"onCommand:vscode-bulletgraph.updateFolding",
@@ -90,11 +90,11 @@
 				"title": "Bullet Graph: Insert ID Generated From Line Content"
 			},
 			{
-				"command": "vscode-bulletgraph.foldLine",
+				"command": "vscode-bulletgraph.foldNode",
 				"title": "Bullet Graph: Fold Line"
 			},
 			{
-				"command": "vscode-bulletgraph.unfoldLine",
+				"command": "vscode-bulletgraph.unfoldNode",
 				"title": "Bullet Graph: Unfold Line"
 			},
 			{
@@ -248,12 +248,12 @@
                 "mac": "ctrl+shift+cmd+o"
             },
             {
-                "command": "vscode-bulletgraph.foldLine",
+                "command": "vscode-bulletgraph.foldNode",
                 "key": "shift+alt+u",
                 "mac": "shift+cmd+u"
             },
             {
-                "command": "vscode-bulletgraph.unfoldLine",
+                "command": "vscode-bulletgraph.unfoldNode",
                 "key": "shift+alt+o",
                 "mac": "shift+cmd+o"
             },
