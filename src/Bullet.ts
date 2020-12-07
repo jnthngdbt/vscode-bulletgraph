@@ -5,7 +5,8 @@ import { generateRandomId } from './NodeIdGenerator'
 
 export class Bullet {
     text = "";
-    index = -1;
+    lineIdx = -1;
+    bulletIdx = -1;
     isComment = false;
     depth = -1;
     bulletType = EBullet.eDefault;
@@ -21,7 +22,8 @@ export class Bullet {
 
     clear() {
         this.text = "";
-        this.index = -1;
+        this.lineIdx = -1;
+        this.bulletIdx = -1;
         this.isComment = false;
         this.depth = -1;
         this.bulletType = EBullet.eDefault;
@@ -77,7 +79,7 @@ export class Bullet {
         if (lineIn.trim().length <= 0) return; // skip empty line, or only containing tabs/spaces
 
         this.text = lineIn;
-        this.index = lineIdx;
+        this.lineIdx = lineIdx;
 
         lineIn = Strings.convertTabsToSpaces(lineIn);
         lineIn = lineIn.split('"').join("'"); // replace " with '

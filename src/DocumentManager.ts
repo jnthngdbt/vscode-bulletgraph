@@ -43,7 +43,7 @@ export class DocumentManager {
 
         // The direct next line must be indented.
         let line = this.parseLine(lineIdx);
-        let next = this.parseLine(line.index + 1);
+        let next = this.parseLine(line.lineIdx + 1);
         if (!next.isValid()) return false;
         if (!line.isValid()) return false;
         return next.depth > line.depth;
@@ -65,7 +65,7 @@ export class DocumentManager {
         let line = this.parseLine(lineIdx);
         if (!line.isValid()) return undefined;
 
-        for (let i = line.index - 1; i >= 0; i--) {
+        for (let i = line.lineIdx - 1; i >= 0; i--) {
             let prev = this.parseLine(i);
             if (prev.isValid() && prev.depth < line.depth) {
                 return prev;
@@ -78,14 +78,14 @@ export class DocumentManager {
     getLineIdxForId(id: Id, bulletLines: Array<Bullet>): number {
         for (let bulletLine of bulletLines) {
             if (bulletLine.id === id)
-                return bulletLine.index;
+                return bulletLine.lineIdx;
         }
         return -1;
     }
 
     focusLine(line: Bullet) {
         const pos = line.text.length - Strings.ltrim(line.text).length + 2;
-        this.focusLineIdx(line.index, pos);
+        this.focusLineIdx(line.lineIdx, pos);
     }
 
     focusLineIdx(lineIdx: number, pos: number) {
@@ -269,7 +269,7 @@ export class DocumentManager {
         const nodeBullet = this.parseLine(lineIdx);
         let selector = (line: Bullet) => { return line.visibility !== EVisibility.eHide; }; // must explicitely unhide to unhide
         let stopCriteria = (line: Bullet) => { return line.isValid() && line.depth <= nodeBullet.depth; }; // only children
-        this.setVisibilityInDocChained(EVisibility.eFold, nodeBullet.index + 1, selector, completionHandler, stopCriteria);
+        this.setVisibilityInDocChained(EVisibility.eFold, nodeBullet.lineIdx + 1, selector, completionHandler, stopCriteria);
     }
 
     unfoldChildren(lineIdx: number | undefined, completionHandler: any | undefined = undefined) {
@@ -277,21 +277,21 @@ export class DocumentManager {
         let selector = (line: Bullet) => { return line.visibility !== EVisibility.eHide; }; // must explicitely unhide to unhide
         let stopCriteria = (line: Bullet) => { return line.isValid() && line.depth <= nodeBullet.depth; }; // only children
         this.setVisibilityInDoc(lineIdx, EVisibility.eNormal, undefined, () => {
-            this.setVisibilityInDocChained(EVisibility.eNormal, nodeBullet.index + 1, selector, completionHandler, stopCriteria);
+            this.setVisibilityInDocChained(EVisibility.eNormal, nodeBullet.lineIdx + 1, selector, completionHandler, stopCriteria);
         });
     }
 
     hideChildren(lineIdx: number | undefined, completionHandler: any | undefined = undefined) {
         const nodeBullet = this.parseLine(lineIdx);
         let stopCriteria = (line: Bullet) => { return line.isValid() && line.depth <= nodeBullet.depth; }; // only children
-        this.setVisibilityInDocChained(EVisibility.eHide, nodeBullet.index + 1, undefined, completionHandler, stopCriteria);
+        this.setVisibilityInDocChained(EVisibility.eHide, nodeBullet.lineIdx + 1, undefined, completionHandler, stopCriteria);
     }
 
     unhideChildren(lineIdx: number | undefined, completionHandler: any | undefined = undefined) {
         const nodeBullet = this.parseLine(lineIdx);
         let stopCriteria = (line: Bullet) => { return line.isValid() && line.depth <= nodeBullet.depth; }; // only children
         let whenDone = (line: Bullet) => { this.updateChildren(lineIdx, completionHandler); }; // used to update children visibility
-        this.setVisibilityInDocChained(EVisibility.eNormal, nodeBullet.index + 1, undefined, whenDone, stopCriteria);
+        this.setVisibilityInDocChained(EVisibility.eNormal, nodeBullet.lineIdx + 1, undefined, whenDone, stopCriteria);
     }
 
     foldLevel(level: number, completionHandler: any | undefined = undefined) {
@@ -454,7 +454,7 @@ export class DocumentManager {
     updateChildren(lineIdx: number | undefined, completionHandler: any | undefined = undefined) {
         const line = this.parseLine(lineIdx);
         if (line.isValid())
-            this.updateChildrenChained(line.index + 1, line.depth, completionHandler);
+            this.updateChildrenChained(line.lineIdx + 1, line.depth, completionHandler);
     }
 
     updateChildrenChained(lineIdx: number, minDepth: number, completionHandler: any | undefined = undefined) {
@@ -500,7 +500,7 @@ export class DocumentManager {
         let maxDepth = line.depth;
         let firstLine = 0;
 
-        linesToMakeVisible.push(line.index);
+        linesToMakeVisible.push(line.lineIdx);
 
         // Backtrack and node's parents.
         for (let i = lineIdx - 1; i >= 0; i--) {
@@ -511,7 +511,7 @@ export class DocumentManager {
 
             // Found a parent of current level.
             if (line.depth < maxDepth) {
-                linesToMakeVisible.push(line.index);
+                linesToMakeVisible.push(line.lineIdx);
                 maxDepth = line.depth;
             }
 
@@ -536,8 +536,8 @@ export class DocumentManager {
             });
         };
 
-        let selector = (line: Bullet) => { return linesToMakeVisible.includes(line.index); };
-        let stop = (line: Bullet) => { return line.index >= lineIdx; };
+        let selector = (line: Bullet) => { return linesToMakeVisible.includes(line.lineIdx); };
+        let stop = (line: Bullet) => { return line.lineIdx >= lineIdx; };
 
         this.setVisibilityInDocChained(EVisibility.eNormal, firstLine, selector, completionHandlerPlus, stop);
     }
@@ -556,8 +556,8 @@ export class DocumentManager {
 
         // Add lines that directly link to the node.
         for (let bullet of bullets) {
-            if (bullet.idsIn.includes(nodeBullet.id)) lines.push(bullet.index);
-            if (bullet.idsOut.includes(nodeBullet.id)) lines.push(bullet.index);
+            if (bullet.idsIn.includes(nodeBullet.id)) lines.push(bullet.lineIdx);
+            if (bullet.idsOut.includes(nodeBullet.id)) lines.push(bullet.lineIdx);
         }
     }
 
@@ -568,7 +568,7 @@ export class DocumentManager {
             const bullets = this.parseBulletsLines();
 
             // Find the index of the current node in the bullet list.
-            const nodeIdx = bullets.findIndex( bullet => bullet.index === nodeBullet.index );
+            const nodeIdx = bullets.findIndex( bullet => bullet.lineIdx === nodeBullet.lineIdx );
     
             // Initialize the array of lines on which to call revealNode command.
             let linesToReveal: Array<number> = [];
@@ -691,8 +691,8 @@ export class DocumentManager {
 
         editor.edit((editBuilder) => {
             const range = new vscode.Range(
-                new vscode.Position(line.index, pos),
-                new vscode.Position(line.index, line.text.length)
+                new vscode.Position(line.lineIdx, pos),
+                new vscode.Position(line.lineIdx, line.text.length)
             );
             editBuilder.replace(range, newCompString);
 

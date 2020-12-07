@@ -62,7 +62,9 @@ export function activate(context: vscode.ExtensionContext) {
 
     context.subscriptions.push(
         vscode.commands.registerCommand('vscode-bulletgraph.unfoldLine', () => {
-            documentManager.unfoldLine(Editor.getActiveLineIdx());
+            let doc = new DocumentManagerNew();
+            doc.unfoldLine(Editor.getActiveLineIdx());
+            doc.update();
         })
     );
 

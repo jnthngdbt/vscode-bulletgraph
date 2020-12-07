@@ -54,27 +54,59 @@ export class DocumentManagerNew {
         bulletLines.forEach( line => {
             let bullet = new Bullet();
             bullet.parse(line.text, line.index);
+            bullet.bulletIdx = bullets.length;
             bullets.push(bullet);
         });
 
         return bullets;
     }
 
+    getBulletAtLine(lineIdx: number | undefined): Bullet | undefined {
+        if (lineIdx !== undefined) {
+            return this.bullets.find( bullet => { return bullet.lineIdx === lineIdx; });
+        }
+        return undefined;
+    }
+
+    isBulletParent(bullet: Bullet): Boolean {
+        if (this.bullets.length > (bullet.bulletIdx + 1)) {
+            const curr = this.bullets[bullet.bulletIdx];
+            const next = this.bullets[bullet.bulletIdx + 1];
+            return next.depth > curr.depth;
+        }
+        return false;
+    }
+
+    setVisibility(bullet: Bullet, visibility: EVisibility) {
+        if (visibility === EVisibility.eHide) {
+            bullet.isHighlight = false;
+        } 
+        
+        if (!this.isBulletParent(bullet) && (visibility === EVisibility.eFold)) {
+            visibility = EVisibility.eNormal
+        }
+
+        bullet.visibility = visibility;
+        bullet.mustUpdate = true;
+    }
+
     foldLine(lineIdx: number | undefined, completionHandler: any | undefined = undefined) {
-        let bullet = this.bullets.find( bullet => { return bullet.index === lineIdx; });
-        if (bullet) {
-            if (bullet.visibility !== EVisibility.eHide) { // must explicitely unhide to unhide
-                bullet.visibility = EVisibility.eFold;
-                bullet.mustUpdate = true;
-            }
+        let bullet = this.getBulletAtLine(lineIdx);
+        if (bullet && (bullet.visibility !== EVisibility.eHide)) { // must explicitely unhide to unhide
+            this.setVisibility(bullet, EVisibility.eFold);
+        }
+    }
+
+    unfoldLine(lineIdx: number | undefined, completionHandler: any | undefined = undefined) {
+        let bullet = this.getBulletAtLine(lineIdx);
+        if (bullet && (bullet.visibility !== EVisibility.eHide)) { // must explicitely unhide to unhide
+            this.setVisibility(bullet, EVisibility.eNormal);
         }
     }
 
     hideAll() {
         this.bullets.forEach( bullet => {
-            bullet.visibility = EVisibility.eHide;
-            bullet.isHighlight = false;
-            bullet.mustUpdate = true;
+            this.setVisibility(bullet, EVisibility.eHide);
         });
     }
 
@@ -86,7 +118,29 @@ export class DocumentManagerNew {
     }
 
     updateChildrenVisibility() {
-        // TODO
+        let currHideDepth = -1;
+        let currFoldDepth = -1;
+        this.bullets.forEach( bullet => {
+            if (bullet.isValid()) {
+                // Reset depth trackers if necessary.
+                if (bullet.depth <= currHideDepth) currHideDepth = -1;
+                if (bullet.depth <= currFoldDepth) currFoldDepth = -1;
+
+                if ((currHideDepth >= 0) && (bullet.depth > currHideDepth)) { // hidden
+                    this.setVisibility(bullet, EVisibility.eHide);
+                } else if ((currFoldDepth >= 0) && (bullet.depth > currFoldDepth)) { // folded
+                    this.setVisibility(bullet, EVisibility.eFoldHidden);
+                } else if (bullet.visibility === EVisibility.eHide) { // new hide root
+                    currHideDepth = bullet.depth;
+                } else if (bullet.visibility === EVisibility.eFold) { // new fold root
+                    currFoldDepth = bullet.depth;
+                } else if (bullet.visibility === EVisibility.eFoldHidden) { // not hidden anymore, so should not be fold hidden
+                    this.setVisibility(bullet, EVisibility.eFold);
+                    if (this.isBulletParent(bullet))
+                        currFoldDepth = bullet.depth;
+                }
+            }
+        });
     }
 
     writeBullets(callback: any | undefined = undefined) {
@@ -108,8 +162,8 @@ export class DocumentManagerNew {
                     }
     
                     const range = new vscode.Range(
-                        new vscode.Position(bullet.index, pos),
-                        new vscode.Position(bullet.index, bullet.text.length)
+                        new vscode.Position(bullet.lineIdx, pos),
+                        new vscode.Position(bullet.lineIdx, bullet.text.length)
                     );
                     editBuilder.replace(range, newCompString);
                 }

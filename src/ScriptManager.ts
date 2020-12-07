@@ -104,7 +104,7 @@ export class ScriptManager {
     findLineIdxOfNodeId(bullets: Array<Bullet>, nodeId: string): number {
         for (let i = 0; i < bullets.length; i++)
             if (bullets[i].id === nodeId)
-                    return bullets[i].index;
+                    return bullets[i].lineIdx;
         
         return -1;
     }
