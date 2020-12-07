@@ -120,13 +120,15 @@ export class DocumentManagerNew {
     
     foldAll() {
         this.bullets.forEach( bullet => {
-            this.setVisibility(bullet, EVisibility.eFold);
+            if (bullet.visibility !== EVisibility.eHide) // must explicitely unhide to unhide
+                this.setVisibility(bullet, EVisibility.eFold);
         });
     }
 
     unfoldAll() {
         this.bullets.forEach( bullet => {
-            this.setVisibility(bullet, EVisibility.eNormal);
+            if (bullet.visibility !== EVisibility.eHide) // must explicitely unhide to unhide
+                this.setVisibility(bullet, EVisibility.eNormal);
         });
     }
 
@@ -161,7 +163,8 @@ export class DocumentManagerNew {
                 if ((currHideDepth >= 0) && (bullet.depth > currHideDepth)) { // hidden
                     this.setVisibility(bullet, EVisibility.eHide);
                 } else if ((currFoldDepth >= 0) && (bullet.depth > currFoldDepth)) { // folded
-                    this.setVisibility(bullet, EVisibility.eFoldHidden);
+                    if (bullet.visibility !== EVisibility.eHide) // must explicitely unhide to unhide
+                        this.setVisibility(bullet, EVisibility.eFoldHidden);
                 } else if (bullet.visibility === EVisibility.eHide) { // new hide root
                     currHideDepth = bullet.depth;
                 } else if (bullet.visibility === EVisibility.eFold) { // new fold root
