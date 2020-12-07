@@ -118,31 +118,33 @@ export function activate(context: vscode.ExtensionContext) {
 
     context.subscriptions.push(
         vscode.commands.registerCommand('vscode-bulletgraph.foldChildren', () => {
-            documentManager.foldChildren(Editor.getActiveLineIdx() ?? -1);
+            let doc = new DocumentManagerNew();
+            doc.foldChildren(Editor.getActiveLineIdx());
+            doc.update();
         })
     );
 
     context.subscriptions.push(
         vscode.commands.registerCommand('vscode-bulletgraph.unfoldChildren', () => {
-            documentManager.unfoldChildren(Editor.getActiveLineIdx() ?? -1);
+            let doc = new DocumentManagerNew();
+            doc.unfoldChildren(Editor.getActiveLineIdx());
+            doc.update();
         })
     );
 
     context.subscriptions.push(
         vscode.commands.registerCommand('vscode-bulletgraph.hideChildren', () => {
-            documentManager.hideChildren(Editor.getActiveLineIdx() ?? -1);
+            let doc = new DocumentManagerNew();
+            doc.hideChildren(Editor.getActiveLineIdx());
+            doc.update();
         })
     );
 
     context.subscriptions.push(
         vscode.commands.registerCommand('vscode-bulletgraph.unhideChildren', () => {
-            documentManager.unhideChildren(Editor.getActiveLineIdx() ?? -1);
-        })
-    );
-
-    context.subscriptions.push(
-        vscode.commands.registerCommand('vscode-bulletgraph.updateChildren', () => {
-            documentManager.updateChildren(Editor.getActiveLineIdx() ?? -1);
+            let doc = new DocumentManagerNew();
+            doc.unhideChildren(Editor.getActiveLineIdx());
+            doc.update();
         })
     );
 

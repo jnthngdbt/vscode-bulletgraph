@@ -29,7 +29,6 @@
 		"onCommand:vscode-bulletgraph.unfoldChildren",
 		"onCommand:vscode-bulletgraph.hideChildren",
 		"onCommand:vscode-bulletgraph.unhideChildren",
-		"onCommand:vscode-bulletgraph.updateChildren",
 		"onCommand:vscode-bulletgraph.revealNode",
 		"onCommand:vscode-bulletgraph.highlightNode",
 		"onCommand:vscode-bulletgraph.connectNode",
@@ -148,10 +147,6 @@
 			{
 				"command": "vscode-bulletgraph.unhideChildren",
 				"title": "Bullet Graph: Unhide Children"
-			},
-			{
-				"command": "vscode-bulletgraph.updateChildren",
-				"title": "Bullet Graph: Update Children"
 			},
 			{
 				"command": "vscode-bulletgraph.connectNode",
