@@ -19,6 +19,7 @@ export class Bullet {
     idsOut: Array<string> = [];
     hasComponentSection = false;
     mustUpdate = false;
+    isRevealed = false;
 
     clear() {
         this.text = "";
@@ -36,6 +37,7 @@ export class Bullet {
         this.idsOut = [];
         this.hasComponentSection = false;
         this.mustUpdate = false;
+        this.isRevealed = false;
     }
 
     isValid(): Boolean {

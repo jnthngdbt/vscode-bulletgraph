@@ -3,7 +3,7 @@ import { Id, EEdge } from './constants'
 
 export class DepthManager {
     nodeRerouteMap: { [key:string]:Id; } = {};
-    bullet = new BulletGraph();
+    graph = new BulletGraph();
 
     rerouteNodes(nodeIn: Node, floorNodeIds: IdSet, hideNodeIds: IdSet, nodeOut: Node, isFloorReached = false, isHidden = false, floorNodeId = "") {
         nodeIn.children.forEach( childIn => {
@@ -40,14 +40,14 @@ export class DepthManager {
                 if (edge.type !== EEdge.eHierarchy) {
                     const idDst = this.nodeRerouteMap[edge.idDst];
                     if (nodeId && idDst && (idDst !== nodeId))
-                        this.bullet.links.addEdge(nodeId, idDst, edge.type);
+                        this.graph.links.addEdge(nodeId, idDst, edge.type);
                 }
             })
             links.getNodeLinks(id).inputs.forEach( edge => {
                 if (edge.type !== EEdge.eHierarchy) {
                     const idSrc = this.nodeRerouteMap[edge.idSrc];
                     if (nodeId && idSrc && (idSrc !== nodeId))
-                        this.bullet.links.addEdge(idSrc, nodeId, edge.type);
+                        this.graph.links.addEdge(idSrc, nodeId, edge.type);
                 }
             })
         }
@@ -71,7 +71,7 @@ export class DepthManager {
     }
 
     removeDuplicateLinks() {
-        let links = this.bullet.links;
+        let links = this.graph.links;
         let nodeIds = links.getNodeIds();
         nodeIds.forEach(nodeId => {
             let nodeLinks = links.getNodeLinks(nodeId);
@@ -81,7 +81,7 @@ export class DepthManager {
     }
 
     convertBackAndForthLinksToBidirectional() {
-        let links = this.bullet.links;
+        let links = this.graph.links;
         let nodeIds = links.getNodeIds();
 
         const setBidirectionalIfItIs = (output: Edge, inputs: Array<Edge>): Boolean => {
@@ -123,14 +123,14 @@ export class DepthManager {
     }
 
     pruneAndReorganize(bulletIn: BulletGraph): BulletGraph {
-        this.bullet.clear();
-        this.rerouteNodes(bulletIn.hierarchy, bulletIn.foldNodeIds, bulletIn.hideNodeIds, this.bullet.hierarchy);
+        this.graph.clear();
+        this.rerouteNodes(bulletIn.hierarchy, bulletIn.foldNodeIds, bulletIn.hideNodeIds, this.graph.hierarchy);
         this.rerouteLinks(bulletIn.links);
-        this.bullet.createHierarchyEdges(this.bullet.hierarchy);
-        this.bullet.createFlowEdges(this.bullet.hierarchy);
+        this.graph.createHierarchyEdges(this.graph.hierarchy);
+        this.graph.createFlowEdges(this.graph.hierarchy);
         this.removeDuplicateLinks();
         this.convertBackAndForthLinksToBidirectional();
         
-        return this.bullet;
+        return this.graph;
     }
 }

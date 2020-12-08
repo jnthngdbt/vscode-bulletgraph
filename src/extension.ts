@@ -6,7 +6,7 @@ import { ELink, ERenderingEngine } from './constants'
 import { DotFileManager } from './DotFileManager'
 import { generateIdFromLineContent } from './NodeIdGenerator'
 import { DocumentManager } from './DocumentManager';
-import { DocumentManagerNew } from './DocumentManagerNew';
+import { BulletManager } from './BulletManager';
 import { ScriptManager } from './ScriptManager';
 import { Editor } from './utils';
 
@@ -54,109 +54,113 @@ export function activate(context: vscode.ExtensionContext) {
 
     context.subscriptions.push(
         vscode.commands.registerCommand('vscode-bulletgraph.foldNode', () => {
-            let doc = new DocumentManagerNew();
-            doc.foldNode(Editor.getActiveLineIdx());
-            doc.update();
+            let b = new BulletManager();
+            b.fold(b.getActiveBullet());
+            b.update();
         })
     );
 
     context.subscriptions.push(
         vscode.commands.registerCommand('vscode-bulletgraph.unfoldNode', () => {
-            let doc = new DocumentManagerNew();
-            doc.unfoldNode(Editor.getActiveLineIdx());
-            doc.update();
+            let b = new BulletManager();
+            b.unfold(b.getActiveBullet());
+            b.update();
         })
     );
 
     context.subscriptions.push(
         vscode.commands.registerCommand('vscode-bulletgraph.hideNode', () => {
-            let doc = new DocumentManagerNew();
-            doc.hideNode(Editor.getActiveLineIdx());
-            doc.update();
+            let b = new BulletManager();
+            b.hide(b.getActiveBullet());
+            b.update();
         })
     );
 
     context.subscriptions.push(
         vscode.commands.registerCommand('vscode-bulletgraph.unhideNode', () => {
-            let doc = new DocumentManagerNew();
-            doc.unhideNode(Editor.getActiveLineIdx());
-            doc.update();
+            let b = new BulletManager();
+            b.unhide(b.getActiveBullet());
+            b.update();
         })
     );
 
     context.subscriptions.push(
         vscode.commands.registerCommand('vscode-bulletgraph.foldAll', () => {
-            let doc = new DocumentManagerNew();
-            doc.foldAll();
-            doc.update();
+            let b = new BulletManager();
+            b.foldAll();
+            b.update();
         })
     );
 
     context.subscriptions.push(
         vscode.commands.registerCommand('vscode-bulletgraph.unfoldAll', () => {
-            let doc = new DocumentManagerNew();
-            doc.unfoldAll();
-            doc.update();
+            let b = new BulletManager();
+            b.unfoldAll();
+            b.update();
         })
     );
 
     context.subscriptions.push(
         vscode.commands.registerCommand('vscode-bulletgraph.hideAll', () => {
-            let doc = new DocumentManagerNew();
-            doc.hideAll();
-            doc.update();
+            let b = new BulletManager();
+            b.hideAll();
+            b.update();
         })
     );
 
     context.subscriptions.push(
         vscode.commands.registerCommand('vscode-bulletgraph.unhideAll', () => {
-            let doc = new DocumentManagerNew();
-            doc.unhideAll();
-            doc.update();
+            let b = new BulletManager();
+            b.unhideAll();
+            b.update();
         })
     );
 
     context.subscriptions.push(
         vscode.commands.registerCommand('vscode-bulletgraph.foldChildren', () => {
-            let doc = new DocumentManagerNew();
-            doc.foldChildren(Editor.getActiveLineIdx());
-            doc.update();
+            let b = new BulletManager();
+            b.foldChildren(b.getActiveBullet());
+            b.update();
         })
     );
 
     context.subscriptions.push(
         vscode.commands.registerCommand('vscode-bulletgraph.unfoldChildren', () => {
-            let doc = new DocumentManagerNew();
-            doc.unfoldChildren(Editor.getActiveLineIdx());
-            doc.update();
+            let b = new BulletManager();
+            b.unfoldChildren(b.getActiveBullet());
+            b.update();
         })
     );
 
     context.subscriptions.push(
         vscode.commands.registerCommand('vscode-bulletgraph.hideChildren', () => {
-            let doc = new DocumentManagerNew();
-            doc.hideChildren(Editor.getActiveLineIdx());
-            doc.update();
+            let b = new BulletManager();
+            b.hideChildren(b.getActiveBullet());
+            b.update();
         })
     );
 
     context.subscriptions.push(
         vscode.commands.registerCommand('vscode-bulletgraph.unhideChildren', () => {
-            let doc = new DocumentManagerNew();
-            doc.unhideChildren(Editor.getActiveLineIdx());
-            doc.update();
+            let b = new BulletManager();
+            b.unhideChildren(b.getActiveBullet());
+            b.update();
         })
     );
 
     context.subscriptions.push(
         vscode.commands.registerCommand('vscode-bulletgraph.revealNode', () => {
-            documentManager.revealNode(Editor.getActiveLineIdx() ?? -1);
+            let b = new BulletManager();
+            b.reveal(b.getActiveBullet());
+            b.update();
         })
     );
 
     context.subscriptions.push(
         vscode.commands.registerCommand('vscode-bulletgraph.highlightNode', () => {
-            documentManager.highlightNode(Editor.getActiveLineIdx() ?? -1, true);
+            let b = new BulletManager();
+            b.highlight(b.getActiveBullet(), true);
+            b.update();
         })
     );
 

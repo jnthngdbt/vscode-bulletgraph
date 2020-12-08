@@ -10,7 +10,7 @@ export class DocumentLine {
     index = -1;
 }
 
-export class DocumentManagerNew {
+export class BulletManager {
     bullets: Array<Bullet> = [];
     scriptLines: Array<DocumentLine> = [];
 
@@ -61,6 +61,10 @@ export class DocumentManagerNew {
         return bullets;
     }
 
+    getActiveBullet(): Bullet | undefined {
+        return this.getBulletAtLine(Editor.getActiveLineIdx());
+    }
+
     getBulletAtLine(lineIdx: number | undefined): Bullet | undefined {
         if (lineIdx !== undefined) {
             return this.bullets.find( bullet => { return bullet.lineIdx === lineIdx; });
@@ -68,7 +72,7 @@ export class DocumentManagerNew {
         return undefined;
     }
 
-    isBulletParent(bullet: Bullet): Boolean {
+    isParent(bullet: Bullet): Boolean {
         for (let i = bullet.bulletIdx + 1; i < this.bullets.length; i++) {
             if (this.bullets[i].isValid()) { // find first valid bullet (not a comment)
                 const next = this.bullets[i];
@@ -78,57 +82,43 @@ export class DocumentManagerNew {
         return false;
     }
 
-    setVisibilityAtLine(lineIdx: number | undefined, visibility: EVisibility, skipHidden: Boolean = false) {
-        let bullet = this.getBulletAtLine(lineIdx);
-        if (bullet) {
-            this.setVisibility(bullet, visibility, skipHidden);
-        }
-    }
+    setVisibility(bullet: Bullet | undefined, visibility: EVisibility, skipHidden: Boolean = false) {
+        if (!bullet) return;
 
-    setVisibility(bullet: Bullet, visibility: EVisibility, skipHidden: Boolean = false) {
-        if (skipHidden && bullet.visibility === EVisibility.eHide) { // must explicitely unhide to unhide
+        if (skipHidden && bullet.visibility === EVisibility.eHide) // must explicitely unhide to unhide
             return;
-        }
 
-        if (visibility === EVisibility.eHide) {
+        if (visibility === EVisibility.eHide)
             bullet.isHighlight = false;
-        } 
         
-        if (!this.isBulletParent(bullet) && (visibility === EVisibility.eFold)) {
+        if (!this.isParent(bullet) && (visibility === EVisibility.eFold))
             visibility = EVisibility.eNormal
-        }
 
         bullet.visibility = visibility;
         bullet.mustUpdate = true;
     }
 
-    setChildrenVisibility(lineIdx: number | undefined, visibility: EVisibility, skipHidden: Boolean = false) {
-        let parent = this.getBulletAtLine(lineIdx);
-        if (parent) {
-            for (let bulletIdx = parent.bulletIdx + 1; bulletIdx < this.bullets.length; bulletIdx++) {
-                let child = this.bullets[bulletIdx];
-                if (child.isValid() && child.depth <= parent.depth) // no more a child
-                    break;
+    setChildrenVisibility(parent: Bullet | undefined, visibility: EVisibility, skipHidden: Boolean = false) {
+        if (!parent) return;
 
-                this.setVisibility(child, visibility, skipHidden);
-            }
-        }
+        let children = this.getChildren(parent);
+        children.forEach( child => this.setVisibility(child, visibility, skipHidden) );
     }
 
-    foldNode(lineIdx: number | undefined) {
-        this.setVisibilityAtLine(lineIdx, EVisibility.eFold, true);
+    fold(bullet: Bullet | undefined) {
+        this.setVisibility(bullet, EVisibility.eFold, true);
     }
 
-    unfoldNode(lineIdx: number | undefined) {
-        this.setVisibilityAtLine(lineIdx, EVisibility.eNormal, true);
+    unfold(bullet: Bullet | undefined) {
+        this.setVisibility(bullet, EVisibility.eNormal, true);
     }
 
-    hideNode(lineIdx: number | undefined) {
-        this.setVisibilityAtLine(lineIdx, EVisibility.eHide);
+    hide(bullet: Bullet | undefined) {
+        this.setVisibility(bullet, EVisibility.eHide);
     }
 
-    unhideNode(lineIdx: number | undefined) {
-        this.setVisibilityAtLine(lineIdx, EVisibility.eNormal);
+    unhide(bullet: Bullet | undefined) {
+        this.setVisibility(bullet, EVisibility.eNormal);
     }
     
     foldAll() {
@@ -155,30 +145,98 @@ export class DocumentManagerNew {
         });
     }
 
-    foldChildren(lineIdx: number | undefined) {
-        this.setChildrenVisibility(lineIdx, EVisibility.eFold, true);
+    foldChildren(bullet: Bullet | undefined) {
+        this.setChildrenVisibility(bullet, EVisibility.eFold, true);
     }
 
-    unfoldChildren(lineIdx: number | undefined) {
-        this.setChildrenVisibility(lineIdx, EVisibility.eNormal, true);
+    unfoldChildren(bullet: Bullet | undefined) {
+        this.setChildrenVisibility(bullet, EVisibility.eNormal, true);
     }
 
-    hideChildren(lineIdx: number | undefined) {
-        this.setChildrenVisibility(lineIdx, EVisibility.eHide);
+    hideChildren(bullet: Bullet | undefined) {
+        this.setChildrenVisibility(bullet, EVisibility.eHide);
     }
 
-    unhideChildren(lineIdx: number | undefined) { // NOTE: also unfolds
-        this.setChildrenVisibility(lineIdx, EVisibility.eNormal);
+    unhideChildren(bullet: Bullet | undefined) { // NOTE: also unfolds
+        this.setChildrenVisibility(bullet, EVisibility.eNormal);
+    }
+
+    highlight(bullet: Bullet | undefined, toggle: Boolean = false) {
+        if (bullet) {
+            bullet.isHighlight = toggle ? !bullet.isHighlight : true;
+            bullet.mustUpdate = true;
+        }
+    }
+
+    reveal(bullet: Bullet | undefined) {
+        if (!bullet) return;
+        if (bullet.isRevealed) return;
+
+        // Make sure all parents are visible.
+        let parents = this.getParents(bullet);
+        parents.forEach( parent => {
+            this.setVisibility(parent, EVisibility.eNormal);
+        });
+
+        this.setVisibility(bullet, EVisibility.eFold);
+        this.unhideChildren(bullet);
+
+        bullet.isRevealed = true;
+    }
+
+    getParents(bullet: Bullet | undefined): Array<Bullet> {
+        let parents: Array<Bullet> = [];
+
+        let child = bullet;
+        while (child) {
+            const parent = this.getParent(child); // eventually undefined
+            if (parent)
+                parents.push(parent);
+            child = parent;
+        }
+
+        return parents;
+    }
+
+    getParent(bullet: Bullet): Bullet | undefined {
+        for (let i = bullet.bulletIdx - 1; i >= 0; i--) { // backtrack
+            const parent = this.bullets[i];
+
+            if (!parent.isValid()) // skip comments and invalid lines
+                continue;
+
+            if (parent.depth < bullet.depth) // found parent
+                return parent;
+        }
+
+        return undefined;
+    }
+
+    getChildren(parent: Bullet | undefined): Array<Bullet> {
+        let children: Array<Bullet> = [];
+
+        if (parent) {
+            for (let i = parent.bulletIdx + 1; i < this.bullets.length; i++) {
+                let child = this.bullets[i];
+    
+                if (child.isValid() && child.depth <= parent.depth) // no more a child
+                    break;
+    
+                children.push(child);
+            }
+        }
+
+        return children;
     }
 
     update(callback: any | undefined = undefined) {
-        this.updateChildrenVisibility();
+        this.propagateVisibility();
         this.writeBullets(() => {
             this.updateEditorFolding(callback);
         });
     }
 
-    updateChildrenVisibility() {
+    propagateVisibility() {
         let currHideDepth = -1;
         let currFoldDepth = -1;
         this.bullets.forEach( bullet => {
@@ -189,15 +247,19 @@ export class DocumentManagerNew {
 
                 if ((currHideDepth >= 0) && (bullet.depth > currHideDepth)) { // hidden
                     this.setVisibility(bullet, EVisibility.eHide);
-                } else if ((currFoldDepth >= 0) && (bullet.depth > currFoldDepth)) { // folded
+                } 
+                else if ((currFoldDepth >= 0) && (bullet.depth > currFoldDepth)) { // folded
                     this.setVisibility(bullet, EVisibility.eFoldHidden, true);
-                } else if (bullet.visibility === EVisibility.eHide) { // new hide root
+                } 
+                else if (bullet.visibility === EVisibility.eHide) { // new hide root
                     currHideDepth = bullet.depth;
-                } else if (bullet.visibility === EVisibility.eFold) { // new fold root
+                } 
+                else if (bullet.visibility === EVisibility.eFold) { // new fold root
                     currFoldDepth = bullet.depth;
-                } else if (bullet.visibility === EVisibility.eFoldHidden) { // not hidden anymore, so should not be fold hidden
+                } 
+                else if (bullet.visibility === EVisibility.eFoldHidden) { // not hidden anymore, so should not be fold hidden
                     this.setVisibility(bullet, EVisibility.eFold);
-                    if (this.isBulletParent(bullet))
+                    if (this.isParent(bullet))
                         currFoldDepth = bullet.depth;
                 }
             }
