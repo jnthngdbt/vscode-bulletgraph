@@ -187,7 +187,7 @@ export class BulletManager {
 
         if (highlight)
             this.highlight(bullet);
-            
+
         bullet.isRevealed = true;
     }
 
@@ -199,12 +199,12 @@ export class BulletManager {
 
         // Add children connections.
         let children = this.getChildren(bullet);
-        children.forEach( child => connections.concat(this.getConnections(child)) );
+        children.forEach( child => { connections = connections.concat(this.getConnections(child)); } );
 
         // Add parents connections if necessary.
         if (connectParents) {
             let parents = this.getParents(bullet);
-            parents.forEach( parent => connections.concat(this.getConnections(parent)) );
+            parents.forEach( parent => { connections = connections.concat(this.getConnections(parent)); } );
         }
 
         // Reveal bullet and its connections. Note: possible duplicates, but reveal should skip if already done.
