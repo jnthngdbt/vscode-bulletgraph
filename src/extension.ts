@@ -159,7 +159,7 @@ export function activate(context: vscode.ExtensionContext) {
     context.subscriptions.push(
         vscode.commands.registerCommand('vscode-bulletgraph.revealNode', () => {
             let b = new BulletManager();
-            b.reveal(b.getActiveBullet());
+            b.reveal(b.getActiveBullet(), true);
             b.update();
         })
     );
@@ -167,7 +167,7 @@ export function activate(context: vscode.ExtensionContext) {
     context.subscriptions.push(
         vscode.commands.registerCommand('vscode-bulletgraph.connectNode', () => {
             let b = new BulletManager();
-            b.connect(b.getActiveBullet(), true);
+            b.connect(b.getActiveBullet(), true, false);
             b.update();
         })
     );

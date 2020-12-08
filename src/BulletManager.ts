@@ -172,7 +172,7 @@ export class BulletManager {
         }
     }
 
-    reveal(bullet: Bullet | undefined) {
+    reveal(bullet: Bullet | undefined, highlight: Boolean = true) {
         if (!bullet) return;
         if (bullet.isRevealed) return;
 
@@ -185,6 +185,9 @@ export class BulletManager {
         this.setVisibility(bullet, EVisibility.eFold);
         this.unhideChildren(bullet);
 
+        if (highlight)
+            this.highlight(bullet);
+            
         bullet.isRevealed = true;
     }
 
@@ -205,8 +208,8 @@ export class BulletManager {
         }
 
         // Reveal bullet and its connections. Note: possible duplicates, but reveal should skip if already done.
-        this.reveal(bullet);
-        connections.forEach( connection => this.reveal(connection) );
+        this.reveal(bullet, false);
+        connections.forEach( connection => this.reveal(connection, false) );
 
         if (highlight)
             this.highlight(bullet);

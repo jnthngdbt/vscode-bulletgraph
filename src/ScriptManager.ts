@@ -3,12 +3,12 @@ import * as vscode from 'vscode';
 import { NEW_SCRIPT_CHAR } from './constants'
 import { Strings } from './utils'
 
-import { DocumentManager } from './DocumentManager'
+import { BulletManager } from './BulletManager'
 import { Bullet } from './Bullet';
 
 class NodeArgument {
     id = "";
-    lineIdx = 0;
+    bullet: Bullet | undefined;
 }
 
 class Command {
@@ -25,9 +25,9 @@ class Script {
 
 export class ScriptManager {
     scripts: Array<Script> = [];
-    doc = new DocumentManager();
+    doc = new BulletManager();
 
-    applyScript(lineIdx: number | undefined, completionHandler: any | undefined = undefined) {
+    applyScript(lineIdx: number | undefined) {
         if (lineIdx === undefined) return false;
         this.parseScripts();
 
@@ -35,16 +35,14 @@ export class ScriptManager {
             const scriptIdx = this.findScriptIdxFromLineIdx(lineIdx);
             if (scriptIdx >= 0) {
                 vscode.window.showInformationMessage(`Applying script [${this.scripts[scriptIdx].name}]...`);
-                this.runCommand(this.scripts[scriptIdx], 0, () => {
-                    vscode.window.showInformationMessage(`Finished applying script [${this.scripts[scriptIdx].name}].`);
-                    if (completionHandler) completionHandler();
-                });
-            } else {
+                this.runCommands(this.scripts[scriptIdx]);
+                vscode.window.showInformationMessage(`Finished applying script [${this.scripts[scriptIdx].name}].`);
+            } 
+            else
                 vscode.window.showWarningMessage('Current line is not a script header.');
-            }
-        } else {
+        } 
+        else {
             vscode.window.showWarningMessage('There is no script defined in the file.');
-            if (completionHandler) completionHandler();
         }
     }
 
@@ -55,21 +53,7 @@ export class ScriptManager {
         return -1;
     }
 
-    runScriptIfSpecified(completionHandler: any) {
-        this.parseScripts();
-
-        // TODO: add a way to select the script
-        if (this.scripts.length > 0) {
-            this.runCommand(this.scripts[0], 0, completionHandler);
-        } else {
-            completionHandler();
-        }
-    }
-
     parseScripts() {
-        this.doc.extractLines(); // script lines are trimmed and non-empty, do not contain comments
-        const bullets = this.doc.parseBulletsLines();
-
         this.scripts = [];
         let currentScript = new Script();
 
@@ -81,7 +65,8 @@ export class ScriptManager {
                     currentScript.name = Strings.removeSpecialCharacters(line);
                     currentScript.lineIdx = lineWithToken.index;
                     this.scripts.push(currentScript);
-                } else { // current script commands
+                } 
+                else { // current script commands
                     let items = line.split(/[ ,]+/); // split on any number of spaces
 
                     if (items.length > 0) { // first word is the command
@@ -91,7 +76,7 @@ export class ScriptManager {
 
                         if (items.length > 1) { // optional second word is the node name
                             command.argument.id = items[1].trim();
-                            command.argument.lineIdx = this.findLineIdxOfNodeId(bullets, command.argument.id);
+                            command.argument.bullet = this.doc.getBulletFromId(command.argument.id);
                         }
     
                         currentScript.commands.push(command);
@@ -101,39 +86,27 @@ export class ScriptManager {
         });
     }
 
-    findLineIdxOfNodeId(bullets: Array<Bullet>, nodeId: string): number {
-        for (let i = 0; i < bullets.length; i++)
-            if (bullets[i].id === nodeId)
-                    return bullets[i].lineIdx;
-        
-        return -1;
-    }
+    runCommands(script: Script) {
+        script.commands.forEach( command => {
+            if      (command.name === 'hideAll'             ) { this.doc.hideAll(); } 
+            else if (command.name === 'unhideAll'           ) { this.doc.unhideAll(); }
+            else if (command.name === 'foldAll'             ) { this.doc.foldAll(); } 
+            else if (command.name === 'unfoldAll'           ) { this.doc.unfoldAll(); } 
+            else if (command.name === 'hideNode'            ) { this.doc.hide(command.argument.bullet); } 
+            else if (command.name === 'unhideNode'          ) { this.doc.unhide(command.argument.bullet); } 
+            else if (command.name === 'foldNode'            ) { this.doc.fold(command.argument.bullet); } 
+            else if (command.name === 'unfoldNode'          ) { this.doc.unfold(command.argument.bullet); } 
+            else if (command.name === 'foldChildren'        ) { this.doc.foldChildren(command.argument.bullet); } 
+            else if (command.name === 'unfoldChildren'      ) { this.doc.unfoldChildren(command.argument.bullet); } 
+            else if (command.name === 'hideChildren'        ) { this.doc.hideChildren(command.argument.bullet); } 
+            else if (command.name === 'unhideChildren'      ) { this.doc.unhideChildren(command.argument.bullet); } 
+            else if (command.name === 'revealNode'          ) { this.doc.reveal(command.argument.bullet, true); } 
+            else if (command.name === 'highlightNode'       ) { this.doc.highlight(command.argument.bullet, false); } 
+            else if (command.name === 'connectNode'         ) { this.doc.connect(command.argument.bullet, true, false); } 
+            else if (command.name === 'connectNodeHierarchy') { this.doc.connect(command.argument.bullet, true, true); } 
+            // else if (command.name === 'updateFolding'       ) { this.doc.updateFolding(completionHandler); }
+        });
 
-    runCommand(script: Script, commandIdx: number, scriptCompletionHandler: any) {
-        if (commandIdx < script.commands.length) {
-            let completionHandler = () => { this.runCommand(script, commandIdx + 1, scriptCompletionHandler); };
-
-            const command = script.commands[commandIdx];
-            if      (command.name === 'hideAll'             ) { this.doc.hideAll(completionHandler); } 
-            else if (command.name === 'unhideAll'           ) { this.doc.unhideAll(completionHandler); }
-            else if (command.name === 'foldAll'             ) { this.doc.foldAll(completionHandler); } 
-            else if (command.name === 'unfoldAll'           ) { this.doc.unfoldAll(completionHandler); } 
-            else if (command.name === 'hideNode'            ) { this.doc.hideNode(command.argument.lineIdx, completionHandler); } 
-            else if (command.name === 'unhideNode'          ) { this.doc.unhideNode(command.argument.lineIdx, completionHandler); } 
-            else if (command.name === 'foldNode'            ) { this.doc.foldNode(command.argument.lineIdx, completionHandler); } 
-            else if (command.name === 'unfoldNode'          ) { this.doc.unfoldNode(command.argument.lineIdx, completionHandler); } 
-            else if (command.name === 'foldChildren'        ) { this.doc.foldChildren(command.argument.lineIdx, completionHandler); } 
-            else if (command.name === 'unfoldChildren'      ) { this.doc.unfoldChildren(command.argument.lineIdx, completionHandler); } 
-            else if (command.name === 'hideChildren'        ) { this.doc.hideChildren(command.argument.lineIdx, completionHandler); } 
-            else if (command.name === 'unhideChildren'      ) { this.doc.unhideChildren(command.argument.lineIdx, completionHandler); } 
-            else if (command.name === 'revealNode'          ) { this.doc.revealNode(command.argument.lineIdx, completionHandler); } 
-            else if (command.name === 'highlightNode'       ) { this.doc.highlightNode(command.argument.lineIdx, false, completionHandler); } 
-            else if (command.name === 'connectNode'         ) { this.doc.connectNode(command.argument.lineIdx, false, completionHandler); } 
-            else if (command.name === 'connectNodeHierarchy') { this.doc.connectNode(command.argument.lineIdx, true, completionHandler); } 
-            else if (command.name === 'updateFolding'       ) { this.doc.updateFolding(completionHandler); }
-            else { completionHandler(); }
-        } else {
-            scriptCompletionHandler();
-        }
+        this.doc.update();
     }
 }
