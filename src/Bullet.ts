@@ -20,6 +20,7 @@ export class Bullet {
     hasComponentSection = false;
     mustUpdate = false;
     isRevealed = false;
+    isConnected = false;
 
     clear() {
         this.text = "";
@@ -38,6 +39,7 @@ export class Bullet {
         this.hasComponentSection = false;
         this.mustUpdate = false;
         this.isRevealed = false;
+        this.isConnected = false;
     }
 
     isValid(): Boolean {

@@ -72,6 +72,10 @@ export class BulletManager {
         return undefined;
     }
 
+    getBulletFromId(id: string): Bullet | undefined {
+        return this.bullets.find( bullet => { return bullet.id === id; });
+    }
+
     isParent(bullet: Bullet): Boolean {
         for (let i = bullet.bulletIdx + 1; i < this.bullets.length; i++) {
             if (this.bullets[i].isValid()) { // find first valid bullet (not a comment)
@@ -184,6 +188,53 @@ export class BulletManager {
         bullet.isRevealed = true;
     }
 
+    connect(bullet: Bullet | undefined, highlight: Boolean = true, connectParents: Boolean = false) {
+        if (!bullet) return;
+        if (bullet.isConnected) return;
+
+        let connections = this.getConnections(bullet);
+
+        // Add children connections.
+        let children = this.getChildren(bullet);
+        children.forEach( child => connections.concat(this.getConnections(child)) );
+
+        // Add parents connections if necessary.
+        if (connectParents) {
+            let parents = this.getParents(bullet);
+            parents.forEach( parent => connections.concat(this.getConnections(parent)) );
+        }
+
+        // Reveal bullet and its connections. Note: possible duplicates, but reveal should skip if already done.
+        this.reveal(bullet);
+        connections.forEach( connection => this.reveal(connection) );
+
+        if (highlight)
+            this.highlight(bullet);
+
+        bullet.isConnected = true;
+    }
+
+    getConnections(bullet: Bullet): Array<Bullet> {
+        let connections: Array<Bullet> = [];
+
+        let pushConnectionFromId = (connectionId: string) => {
+            let connection = this.getBulletFromId(connectionId);
+            if (connection) connections.push(connection);
+        }
+
+        // Added bullets that it directly links.
+        bullet.idsIn.forEach(pushConnectionFromId);
+        bullet.idsOut.forEach(pushConnectionFromId);
+
+        // Add bullets that directly link to it.
+        for (let other of this.bullets) {
+            if (other.idsIn.includes(bullet.id)) connections.push(other);
+            if (other.idsOut.includes(bullet.id)) connections.push(other);
+        }
+
+        return connections;
+    }
+
     getParents(bullet: Bullet | undefined): Array<Bullet> {
         let parents: Array<Bullet> = [];
 
@@ -218,8 +269,11 @@ export class BulletManager {
         if (parent) {
             for (let i = parent.bulletIdx + 1; i < this.bullets.length; i++) {
                 let child = this.bullets[i];
+
+                if (!child.isValid()) // skip comments
+                    continue;
     
-                if (child.isValid() && child.depth <= parent.depth) // no more a child
+                if (child.depth <= parent.depth) // no more a child
                     break;
     
                 children.push(child);
