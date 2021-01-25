@@ -1,3 +1,4 @@
+import * as vscode from 'vscode';
 import { Id, EBullet, EEdge, ENode, EVisibility } from './constants'
 import { DocumentManager } from './DocumentManager'
 import { Bullet } from './Bullet'
@@ -197,16 +198,24 @@ export class BulletGraph {
     
         let currentParentForIndent: { [key:number]:Node; } = {};
         currentParentForIndent[0] = this.hierarchy;
+        let lastDepth = -1;
     
-        bullets.forEach( line => {
-            if (!line.isComment) {
+        bullets.forEach( bullet => {
+            if (!bullet.isComment) {
                 let node = new Node();
-                node.fill(line, this.links, this.foldNodeIds, this.hideNodeIds);
+                node.fill(bullet, this.links, this.foldNodeIds, this.hideNodeIds);
+
+                // Check depth.
+                const depth = bullet.depth;
+                if (depth > lastDepth && (depth - lastDepth) > 1) {
+                    const tabSize = vscode.workspace.getConfiguration('editor').tabSize;
+                    vscode.window.showErrorMessage(`Bad indentation at line ${bullet.lineIdx + 1}: you cannot indent by more than one level at a time. If you are using spaces as tabs, check the number of spaces you are using (the current tab setting is ${tabSize} spaces).`);
+                }
 
                 // Fill hierarchy.
-                const depth = line.depth;
                 currentParentForIndent[depth].children.push(node)
-                currentParentForIndent[depth + 1] = node
+                currentParentForIndent[depth + 1] = node;
+                lastDepth = depth;
             }
         })
 
