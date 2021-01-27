@@ -76,16 +76,16 @@
 				</dict>
 			</array>
 		</dict>
-        <dict>
-            <key>match</key>
-            <string>.*\[x\].*\n</string>
-            <key>name</key>
-            <string>comment.line.hidden.blt</string>
-        </dict>
-        <dict>
-            <key>match</key>
-            <string>(.*)(@@)[ \t]*(\[-\])</string>
-            <key>captures</key>
+		<dict>
+				<key>match</key>
+				<string>.*\[x\].*\n</string>
+				<key>name</key>
+				<string>comment.line.hidden.blt</string>
+		</dict>
+		<dict>
+				<key>match</key>
+				<string>(.*)(@@)[ \t]*(\[-\])</string>
+				<key>captures</key>
 			<dict>
 				<key>1</key>
 				<dict>
@@ -95,7 +95,7 @@
 				<key>2</key>
 				<dict>
 					<key>name</key>
-					<string>storage.modifier.blt</string>
+					<string>comment.separator.blt</string>
 				</dict>
 				<key>3</key>
 				<dict>
@@ -103,43 +103,43 @@
 					<string>entity.name.function.blt</string>
 				</dict>
 			</dict>
-        </dict>
+		</dict>
 		<dict>
-            <key>match</key>
-            <string>@@</string>
-            <key>name</key>
-            <string>storage.modifier.blt</string>
-        </dict>
+			<key>match</key>
+			<string>@@</string>
+			<key>name</key>
+			<string>comment.separator.blt</string>
+		</dict>
 		<dict>
-            <key>match</key>
-            <string><<</string>
-            <key>name</key>
-            <string>keyword.other.link.blt</string>
-        </dict>
+			<key>match</key>
+			<string><<</string>
+			<key>name</key>
+			<string>entity.name.type.link.in.blt</string>
+		</dict>
 		<dict>
-            <key>match</key>
-            <string>>></string>
-            <key>name</key>
-            <string>keyword.other.link.blt</string>
-        </dict>
+			<key>match</key>
+			<string>>></string>
+			<key>name</key>
+			<string>entity.name.function.link.out.blt</string>
+		</dict>
 		<dict>
-            <key>match</key>
-            <string>\[\+\]</string>
-            <key>name</key>
-            <string>keyword.other.link.blt</string>
-        </dict>
+			<key>match</key>
+			<string>\[\+\]</string>
+			<key>name</key>
+			<string>keyword.other.link.blt</string>
+		</dict>
 		<dict>
-            <key>match</key>
-            <string>\[\*\]</string>
-            <key>name</key>
-            <string>variable.other.highlight.blt</string>
-        </dict>
+			<key>match</key>
+			<string>\[\*\]</string>
+			<key>name</key>
+			<string>variable.other.highlight.blt</string>
+		</dict>
 		<dict>
-            <key>match</key>
-            <string>id_\w+</string>
-            <key>name</key>
-            <string>entity.name.type.blt</string>
-        </dict>
+			<key>match</key>
+			<string>id_\w+</string>
+			<key>name</key>
+			<string>punctuation.definition.comment.blt</string>
+		</dict>
 	</array>
 	<key>scopeName</key>
 	<string>source.blt</string>
