@@ -162,7 +162,11 @@ export class BulletManager {
     }
 
     unhideChildren(bullet: Bullet | undefined) { // NOTE: also unfolds
+        if (bullet) {
+            if (bullet.visibility === EVisibility.eHide)
+                this.setVisibility(bullet, EVisibility.eNormal);
         this.setChildrenVisibility(bullet, EVisibility.eNormal);
+    }
     }
 
     highlight(bullet: Bullet | undefined, toggle: Boolean = false) {
