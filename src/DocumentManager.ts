@@ -294,15 +294,6 @@ export class DocumentManager {
         this.setVisibilityInDocChained(EVisibility.eNormal, nodeBullet.lineIdx + 1, undefined, whenDone, stopCriteria);
     }
 
-    foldLevel(level: number, completionHandler: any | undefined = undefined) {
-        this.foldAll(() => {
-            let selector = (line: Bullet) => { return line.isValid() && line.depth <= level; };
-            this.setVisibilityInDocChained(EVisibility.eNormal, 0, selector, () => { // unfold
-                this.updateFolding(completionHandler);
-            });
-        });
-    }
-
     goUp(lineIdx: number | undefined, completionHandler: any | undefined = undefined) {
         if (lineIdx === undefined) return;
         let line = this.parseLine(lineIdx);

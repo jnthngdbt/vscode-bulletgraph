@@ -1,9 +1,8 @@
 import * as vscode from 'vscode';
 
-import { Id, LABEL_ID_SEP, EVisibility, SCRIPT_LINE_TOKEN, ELink, ENABLE_EDITOR_FOLDING } from './constants'
-import { Editor, isScriptLine, Strings } from './utils'
+import { LABEL_ID_SEP, EVisibility, SCRIPT_LINE_TOKEN, ENABLE_EDITOR_FOLDING } from './constants'
+import { Editor } from './utils'
 import { Bullet } from './Bullet';
-import { generateCompactRandomId } from './NodeIdGenerator';
 
 export class DocumentLine {
     text = "";
@@ -165,8 +164,8 @@ export class BulletManager {
         if (bullet) {
             if (bullet.visibility === EVisibility.eHide)
                 this.setVisibility(bullet, EVisibility.eNormal);
-        this.setChildrenVisibility(bullet, EVisibility.eNormal);
-    }
+            this.setChildrenVisibility(bullet, EVisibility.eNormal);
+        }
     }
 
     highlight(bullet: Bullet | undefined, toggle: Boolean = false) {
@@ -256,21 +255,30 @@ export class BulletManager {
         return parents;
     }
 
-    getParent(bullet: Bullet): Bullet | undefined {
-        for (let i = bullet.bulletIdx - 1; i >= 0; i--) { // backtrack
-            const parent = this.bullets[i];
-
-            if (!parent.isValid()) // skip comments and invalid lines
-                continue;
-
-            if (parent.depth < bullet.depth) // found parent
-                return parent;
+    getParent(bullet: Bullet | undefined): Bullet | undefined {
+        if (bullet) {
+            for (let i = bullet.bulletIdx - 1; i >= 0; i--) { // backtrack
+                const parent = this.bullets[i];
+    
+                if (!parent.isValid()) // skip comments and invalid lines
+                    continue;
+    
+                if (parent.depth < bullet.depth) // found parent
+                    return parent;
+            }
         }
 
         return undefined;
     }
 
-    getChildren(parent: Bullet | undefined): Array<Bullet> {
+    getChild(parent: Bullet | undefined): Bullet | undefined {
+        const children = this.getChildren(parent, true);
+        if (children.length > 0)
+            return children[0];
+        return undefined;
+    }
+
+    getChildren(parent: Bullet | undefined, onlyFirst: Boolean = false): Array<Bullet> {
         let children: Array<Bullet> = [];
 
         if (parent) {
@@ -284,6 +292,8 @@ export class BulletManager {
                     break;
     
                 children.push(child);
+
+                if (onlyFirst) break;
             }
         }
 
