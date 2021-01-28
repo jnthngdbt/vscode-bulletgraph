@@ -100,7 +100,7 @@
 			},
 			{
 				"command": "vscode-bulletgraph.updateFolding",
-				"title": "Bullet Graph: Update Lines Folding"
+				"title": "Bullet Graph: Update Lines Folding (TODO)"
 			},
 			{
 				"command": "vscode-bulletgraph.foldAll",

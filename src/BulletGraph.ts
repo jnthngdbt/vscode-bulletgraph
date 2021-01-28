@@ -1,6 +1,6 @@
 import * as vscode from 'vscode';
 import { Id, EBullet, EEdge, ENode, EVisibility } from './constants'
-import { DocumentManager } from './DocumentManager'
+import { BulletManager } from './BulletManager'
 import { Bullet } from './Bullet'
 
 export class Node {
@@ -187,10 +187,8 @@ export class BulletGraph {
     }
 
     parseEditorFile() {
-        let doc = new DocumentManager();
-        doc.extractLines();
-        const bulletLines = doc.parseBulletsLines();
-        this.parse(bulletLines);
+        let b = new BulletManager();
+        this.parse(b.bullets);
     }
 
     parse(bullets: Array<Bullet>) {
