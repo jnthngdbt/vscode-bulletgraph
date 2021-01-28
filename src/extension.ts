@@ -203,7 +203,7 @@ export function activate(context: vscode.ExtensionContext) {
     context.subscriptions.push( vscode.commands.registerCommand('vscode-bulletgraph.addLinkIn', () => { documentManager.addLink(ELink.eIn); }) );
     context.subscriptions.push( vscode.commands.registerCommand('vscode-bulletgraph.addLinkOut', () => { documentManager.addLink(ELink.eOut); }) );
 
-    context.subscriptions.push( vscode.commands.registerCommand('vscode-bulletgraph.insertIdFromOtherLine', () => { documentManager.insertIdFromOtherLine(Editor.getActiveLineIdx() ?? -1); }) );
+    context.subscriptions.push( vscode.commands.registerCommand('vscode-bulletgraph.insertIdFromOtherLine', () => { new BulletManager().insertIdFromOtherLine(); }) );
 }
 
 export function deactivate() {}

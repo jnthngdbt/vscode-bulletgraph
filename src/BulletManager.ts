@@ -1,8 +1,9 @@
 import * as vscode from 'vscode';
 
-import { LABEL_ID_SEP, EVisibility, SCRIPT_LINE_TOKEN, ENABLE_EDITOR_FOLDING } from './constants'
-import { Editor } from './utils'
+import { LABEL_ID_SEP, EVisibility, SCRIPT_LINE_TOKEN, ENABLE_EDITOR_FOLDING } from './constants';
+import { Editor } from './utils';
 import { Bullet } from './Bullet';
+import { generateCompactRandomId } from './NodeIdGenerator';
 
 export class DocumentLine {
     text = "";
@@ -375,5 +376,32 @@ export class BulletManager {
         } else if (callback) {
             callback();
         };
+    }
+
+    insertIdFromOtherLine() {
+        this.getQuickPickLineIdAndCreateOneIfNecessary((id: string) => {
+            // Note: will write twice if selected the current bullet line that 
+            // does not have an id. Could improve this.
+            Editor.insertTextAtActivePosition(id);
+        });
+    }
+
+    getQuickPickLineIdAndCreateOneIfNecessary(callback: (id: string) => void) {
+        Editor.showLineQuickPick((selectedLine: any) => {
+            if (selectedLine) {
+                let bullet = this.getBulletAtLine(selectedLine.index);
+                if (!bullet) return;
+
+                if (bullet.isRandomId) {
+                    bullet.id = generateCompactRandomId();
+                    bullet.isRandomId = false;
+                    bullet.mustUpdate = true;
+
+                    this.writeBullets(() => { callback(bullet!.id); });
+                } else {
+                    callback(bullet.id);
+                }
+            }
+        });
     }
 }
