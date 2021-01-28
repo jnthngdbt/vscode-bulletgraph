@@ -194,8 +194,8 @@ export function activate(context: vscode.ExtensionContext) {
     context.subscriptions.push( vscode.commands.registerCommand('vscode-bulletgraph.goToParent', () => { new NavigationManager().goToParent(Editor.getActiveLineIdx()); }) );
     context.subscriptions.push( vscode.commands.registerCommand('vscode-bulletgraph.goToChildren', () => { new NavigationManager().goToChildren(Editor.getActiveLineIdx()); }) );
     
-    context.subscriptions.push( vscode.commands.registerCommand('vscode-bulletgraph.goNextVisible', () => { documentManager.goNextVisible(Editor.getActiveLineIdx() ?? -1); }) );
-    context.subscriptions.push( vscode.commands.registerCommand('vscode-bulletgraph.goBackVisible', () => { documentManager.goBackVisible(Editor.getActiveLineIdx() ?? -1); }) );
+    context.subscriptions.push( vscode.commands.registerCommand('vscode-bulletgraph.goNextVisible', () => { new NavigationManager().goNextVisible(Editor.getActiveLineIdx()); }) );
+    context.subscriptions.push( vscode.commands.registerCommand('vscode-bulletgraph.goBackVisible', () => { new NavigationManager().goBackVisible(Editor.getActiveLineIdx()); }) );
     
     context.subscriptions.push( vscode.commands.registerCommand('vscode-bulletgraph.goToLine', () => { new NavigationManager().goToLine(); }) );
 

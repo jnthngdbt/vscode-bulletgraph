@@ -72,26 +72,28 @@ export class NavigationManager {
         return true;
     }
 
-    // foundAndFocusedVisible(bullet: Bullet) {
-    //     const found = bullet.isValid() && (bullet.visibility === EVisibility.eNormal || bullet.visibility === EVisibility.eFold);
-    //     if (found) {
-    //         this.focus(bullet);
-    //         return true;
-    //     }
-    //     return false;
-    // }
+    goNextVisible(lineIdx: number | undefined) {
+        const bullet = this.doc.getBulletAtLine(lineIdx);
+        if (!bullet) return;
+        for (let i = bullet.bulletIdx + 1; i < this.doc.bullets.length; i++)
+            if (this.hasFoundAndFocusedVisible(this.doc.bullets[i]))
+                break;
+    }
 
-    // goNextVisible(lineIdx: number | undefined) {
-    //     if (lineIdx === undefined) return;
-    //     for (let i = lineIdx + 1; i < Editor.getLineCount(); i++)
-    //         if (this.foundAndFocusedVisible(this.parseLine(i)))
-    //             break;
-    // }
+    goBackVisible(lineIdx: number | undefined) {
+        const bullet = this.doc.getBulletAtLine(lineIdx);
+        if (!bullet) return;
+        for (let i = bullet.bulletIdx - 1; i >= 0; i--)
+            if (this.hasFoundAndFocusedVisible(this.doc.bullets[i]))
+                break;
+    }
 
-    // goBackVisible(lineIdx: number | undefined) {
-    //     if (lineIdx === undefined) return;
-    //     for (let i = lineIdx - 1; i >= 0; i--)
-    //         if (this.foundAndFocusedVisible(this.parseLine(i)))
-    //             break;
-    // }
+    hasFoundAndFocusedVisible(bullet: Bullet) {
+        const found = bullet.isValid() && (bullet.visibility === EVisibility.eNormal || bullet.visibility === EVisibility.eFold);
+        if (found) {
+            this.focus(bullet);
+            return true;
+        }
+        return false;
+    }
 }
