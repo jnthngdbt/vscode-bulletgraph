@@ -5,7 +5,6 @@ import { DepthManager } from './DepthManager'
 import { ELink, ERenderingEngine } from './constants'
 import { DotFileManager } from './DotFileManager'
 import { generateIdFromLineContent } from './NodeIdGenerator'
-import { DocumentManager } from './DocumentManager';
 import { BulletManager } from './BulletManager';
 import { NavigationManager } from './NavigationManager';
 import { ScriptManager } from './ScriptManager';
@@ -29,8 +28,6 @@ function render(launchPreview: Boolean) {
 }
 
 export function activate(context: vscode.ExtensionContext) {
-    let documentManager = new DocumentManager();
-
     context.subscriptions.push(
         vscode.commands.registerCommand('vscode-bulletgraph.renderPreview', () => render(true))
     );
@@ -200,8 +197,8 @@ export function activate(context: vscode.ExtensionContext) {
     
     context.subscriptions.push( vscode.commands.registerCommand('vscode-bulletgraph.goToLine', () => { new NavigationManager().goToLine(); }) );
 
-    context.subscriptions.push( vscode.commands.registerCommand('vscode-bulletgraph.addLinkIn', () => { documentManager.addLink(ELink.eIn); }) );
-    context.subscriptions.push( vscode.commands.registerCommand('vscode-bulletgraph.addLinkOut', () => { documentManager.addLink(ELink.eOut); }) );
+    context.subscriptions.push( vscode.commands.registerCommand('vscode-bulletgraph.addLinkIn', () => { new BulletManager().addLink(ELink.eIn); }) );
+    context.subscriptions.push( vscode.commands.registerCommand('vscode-bulletgraph.addLinkOut', () => { new BulletManager().addLink(ELink.eOut); }) );
 
     context.subscriptions.push( vscode.commands.registerCommand('vscode-bulletgraph.insertIdFromOtherLine', () => { new BulletManager().insertIdFromOtherLine(); }) );
 }

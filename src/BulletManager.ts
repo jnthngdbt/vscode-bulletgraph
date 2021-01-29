@@ -1,6 +1,6 @@
 import * as vscode from 'vscode';
 
-import { LABEL_ID_SEP, EVisibility, SCRIPT_LINE_TOKEN, ENABLE_EDITOR_FOLDING } from './constants';
+import { LABEL_ID_SEP, EVisibility, ELink, SCRIPT_LINE_TOKEN, ENABLE_EDITOR_FOLDING } from './constants';
 import { Editor } from './utils';
 import { Bullet } from './Bullet';
 import { generateCompactRandomId } from './NodeIdGenerator';
@@ -380,9 +380,31 @@ export class BulletManager {
 
     insertIdFromOtherLine() {
         this.getQuickPickLineIdAndCreateOneIfNecessary((id: string) => {
-            // Note: will write twice if selected the current bullet line that 
-            // does not have an id. Could improve this.
-            Editor.insertTextAtActivePosition(id);
+            // If necessary, the id has been set, but not written yet.
+            // So first rewrite updated bullets, then write id at active position.
+            this.writeBullets(() => { 
+                // Skip re-writing the id if the active line was selected.
+                let bullet = this.getActiveBullet();
+                if (bullet && bullet.id === id) return;
+
+                Editor.insertTextAtActivePosition(id);
+             });
+        });
+    }
+
+    addLink(link: ELink) {
+        this.getQuickPickLineIdAndCreateOneIfNecessary((id: string) => {
+            let bullet = this.getActiveBullet();
+            if (!bullet) return;
+
+            switch (link) {
+                case ELink.eIn: bullet.idsIn.push(id); break;
+                case ELink.eOut: bullet.idsOut.push(id); break;
+                default: break;
+            }
+            
+            bullet.mustUpdate = true;
+            this.writeBullets();
         });
     }
 
@@ -396,11 +418,9 @@ export class BulletManager {
                     bullet.id = generateCompactRandomId();
                     bullet.isRandomId = false;
                     bullet.mustUpdate = true;
-
-                    this.writeBullets(() => { callback(bullet!.id); });
-                } else {
-                    callback(bullet.id);
                 }
+                
+                callback(bullet.id);
             }
         });
     }
