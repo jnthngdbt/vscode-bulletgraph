@@ -185,8 +185,6 @@ export function activate(context: vscode.ExtensionContext) {
         })
     );
 
-    // TODO: remove DocumentManager ===========================================
-
     context.subscriptions.push( vscode.commands.registerCommand('vscode-bulletgraph.goToNextSibling', () => { new NavigationManager().goToNextSibling(Editor.getActiveLineIdx()); }) );
     context.subscriptions.push( vscode.commands.registerCommand('vscode-bulletgraph.goToPreviousSibling', () => { new NavigationManager().goToPreviousSibling(Editor.getActiveLineIdx()); }) );
     context.subscriptions.push( vscode.commands.registerCommand('vscode-bulletgraph.goToParent', () => { new NavigationManager().goToParent(Editor.getActiveLineIdx()); }) );
