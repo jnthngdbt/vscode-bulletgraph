@@ -204,53 +204,88 @@
             },
             {
                 "command": "vscode-bulletgraph.hideNode",
-                "key": "ctrl+shift+alt+u",
-                "mac": "ctrl+shift+cmd+u"
-            },
-            {
-                "command": "vscode-bulletgraph.unhideNode",
-                "key": "ctrl+shift+alt+o",
-                "mac": "ctrl+shift+cmd+o"
+                "key": "shift+alt+j",
+                "mac": "shift+cmd+j"
             },
             {
                 "command": "vscode-bulletgraph.foldNode",
-                "key": "shift+alt+u",
-                "mac": "shift+cmd+u"
-            },
-            {
-                "command": "vscode-bulletgraph.unfoldNode",
-                "key": "shift+alt+o",
-                "mac": "shift+cmd+o"
-            },
-            {
-                "command": "vscode-bulletgraph.goToNextSibling",
-                "key": "ctrl+shift+alt+l",
-                "mac": "ctrl+shift+cmd+l"
-            },
-            {
-                "command": "vscode-bulletgraph.goToPreviousSibling",
-                "key": "ctrl+shift+alt+j",
-                "mac": "ctrl+shift+cmd+j"
-            },
-            {
-                "command": "vscode-bulletgraph.goToParent",
-                "key": "ctrl+shift+alt+i",
-                "mac": "ctrl+shift+cmd+i"
-            },
-            {
-                "command": "vscode-bulletgraph.goToChildren",
-                "key": "ctrl+shift+alt+k",
-                "mac": "ctrl+shift+cmd+k"
-            },
-            {
-                "command": "vscode-bulletgraph.goNextVisible",
                 "key": "shift+alt+l",
                 "mac": "shift+cmd+l"
             },
             {
+                "command": "vscode-bulletgraph.unfoldNode",
+                "key": "shift+alt+;",
+                "mac": "shift+cmd+;"
+            },
+            {
+                "command": "vscode-bulletgraph.foldAll",
+                "key": "shift+alt+o",
+                "mac": "shift+cmd+o"
+            },
+            {
+                "command": "vscode-bulletgraph.unfoldAll",
+                "key": "shift+alt+p",
+                "mac": "shift+cmd+p"
+            },
+            {
+                "command": "vscode-bulletgraph.hideAll",
+                "key": "shift+alt+u",
+                "mac": "shift+cmd+u"
+            },
+            {
+                "command": "vscode-bulletgraph.unhideAll",
+                "key": "shift+alt+i",
+                "mac": "shift+cmd+i"
+            },
+            {
+                "command": "vscode-bulletgraph.revealNode",
+                "key": "shift+alt+k",
+                "mac": "shift+cmd+k"
+            },
+            {
+                "command": "vscode-bulletgraph.connectNode",
+                "key": "shift+alt+n",
+                "mac": "shift+cmd+n"
+            },
+            {
+                "command": "vscode-bulletgraph.unfoldChildren",
+                "key": "shift+alt+\\",
+                "mac": "shift+cmd+\\"
+            },
+            {
+                "command": "vscode-bulletgraph.unhideChildren",
+                "key": "shift+alt+y",
+                "mac": "shift+cmd+y"
+            },
+            {
+                "command": "vscode-bulletgraph.goToNextSibling",
+                "key": "shift+alt+s",
+                "mac": "shift+cmd+s"
+            },
+            {
+                "command": "vscode-bulletgraph.goToPreviousSibling",
+                "key": "shift+alt+w",
+                "mac": "shift+cmd+w"
+            },
+            {
+                "command": "vscode-bulletgraph.goToParent",
+                "key": "shift+alt+a",
+                "mac": "shift+cmd+a"
+            },
+            {
+                "command": "vscode-bulletgraph.goToChildren",
+                "key": "shift+alt+d",
+                "mac": "shift+cmd+d"
+            },
+            {
+                "command": "vscode-bulletgraph.goNextVisible",
+                "key": "shift+alt+,",
+                "mac": "shift+cmd+,"
+            },
+            {
                 "command": "vscode-bulletgraph.goBackVisible",
-                "key": "shift+alt+j",
-                "mac": "shift+cmd+j"
+                "key": "shift+alt+m",
+                "mac": "shift+cmd+m"
             }
         ]
 	},
