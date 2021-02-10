@@ -27,7 +27,7 @@ export class DotFileManager {
         str += "\n";
     
         str += indent + "// Node style for type SUBGRAPH_DATA (title only, no box). \n";
-        str += indent + `node [fontcolor=grey40, fontsize=${BASE_FONTSIZE}, shape=plain] \n`;
+        str += indent + `node [fontcolor=\"#888888\", fontsize=${BASE_FONTSIZE}, shape=plain] \n`;
         str += this.printNodes(root.children, indent, ENode.eSubgraph);
         str += "\n";
     
@@ -37,7 +37,7 @@ export class DotFileManager {
         str += "\n";
         
         str += indent + "// Node style for type DATA. \n";
-        str += indent + `node [color=grey30, fontcolor=grey70, fontsize=${BASE_FONTSIZE}, shape=box, style=rounded] \n`;
+        str += indent + `node [color=grey30, fontcolor=\"#888888\", fontsize=${BASE_FONTSIZE}, shape=box, style=rounded] \n`;
         str += this.printNodes(root.children, indent, ENode.eDefault);
         str += "\n";
     
@@ -47,7 +47,7 @@ export class DotFileManager {
         str += "\n";
         
         str += indent + "// Node style for type DATA (folded). \n";
-        str += indent + `node [color=grey30, fontcolor=grey80, fontsize=${BASE_FONTSIZE}, style=rounded, shape=box] \n`;
+        str += indent + `node [color=grey30, fontcolor=\"#888888\", fontsize=${BASE_FONTSIZE}, style=rounded, shape=box] \n`;
         str += this.printNodes(root.children, indent, ENode.eFolded);
         str += "\n";
     
@@ -180,7 +180,7 @@ export class DotFileManager {
                 str += this.printNodesHierarchy(node.children, indent + Strings.TAB);
                 str += indent + "} \n";
             } else if (!node.isLeaf()) {
-                const fontcolor = node.isProcess() ? "\"#8888bb\"" : "gray60"
+                const fontcolor = node.isProcess() ? "\"#8888bb\"" : "\"#888888\""
                 str += indent + node.id + " [fontcolor = " + fontcolor + ", label=" + getBoldLabel(node.label) + "]\n";
             } else if (!node.isFlowBreak()) { // do not show them
                 str += indent + node.id + " [label=\"" + Strings.wordWrap(node.label) + "\"]\n";

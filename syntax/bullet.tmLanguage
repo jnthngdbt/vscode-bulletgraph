@@ -138,7 +138,7 @@
 			<key>match</key>
 			<string>id_\w+</string>
 			<key>name</key>
-			<string>punctuation.definition.comment.blt</string>
+			<string>comment.id.blt</string>
 		</dict>
 	</array>
 	<key>scopeName</key>
