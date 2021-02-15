@@ -122,7 +122,7 @@ export class BulletManager {
     }
 
     unhide(bullet: Bullet | undefined) {
-        this.setVisibility(bullet, EVisibility.eNormal);
+        this.revealIfHidden(bullet);
     }
     
     foldAll() {
@@ -154,6 +154,8 @@ export class BulletManager {
     }
 
     unfoldChildren(bullet: Bullet | undefined) {
+        this.revealIfHidden(bullet)
+        this.unfold(bullet) // make sure the node is unfolded, otherwise unfolding children won't have any effect
         this.setChildrenVisibility(bullet, EVisibility.eNormal, true);
     }
 
@@ -162,11 +164,8 @@ export class BulletManager {
     }
 
     unhideChildren(bullet: Bullet | undefined) { // NOTE: also unfolds
-        if (bullet) {
-            if (bullet.visibility === EVisibility.eHide)
-                this.setVisibility(bullet, EVisibility.eNormal);
-            this.setChildrenVisibility(bullet, EVisibility.eNormal);
-        }
+        this.revealIfHidden(bullet)
+        this.setChildrenVisibility(bullet, EVisibility.eNormal);
     }
 
     highlight(bullet: Bullet | undefined, toggle: Boolean = false) {
@@ -174,6 +173,11 @@ export class BulletManager {
             bullet.isHighlight = toggle ? !bullet.isHighlight : true;
             bullet.mustUpdate = true;
         }
+    }
+
+    revealIfHidden(bullet: Bullet | undefined) {
+        if (bullet && bullet.visibility === EVisibility.eHide)
+            this.reveal(bullet, false);
     }
 
     reveal(bullet: Bullet | undefined, highlight: Boolean = true) {
