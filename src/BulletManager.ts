@@ -126,23 +126,28 @@ export class BulletManager {
         }
     }
 
+    commonNodeCommandTasks(bullet: Bullet | undefined, name: string) {
+        this.setPermanentRandomIdIfNecessary(bullet) // do before print, to print correct node id
+        this.printScriptNodeCommand(name, bullet)
+    }
+
     foldCommand(bullet: Bullet | undefined) {
-        this.printScriptNodeCommand("foldNode", bullet)
+        this.commonNodeCommandTasks(bullet, "foldNode")
         this.fold(bullet)
     }
 
     unfoldCommand(bullet: Bullet | undefined) {
-        this.printScriptNodeCommand("unfoldNode", bullet)
+        this.commonNodeCommandTasks(bullet, "unfoldNode")
         this.unfold(bullet)
     }
 
     hideCommand(bullet: Bullet | undefined) {
-        this.printScriptNodeCommand("hideNode", bullet)
+        this.commonNodeCommandTasks(bullet, "hideNode")
         this.hide(bullet)
     }
 
     unhideCommand(bullet: Bullet | undefined) {
-        this.printScriptNodeCommand("unhideNode", bullet)
+        this.commonNodeCommandTasks(bullet, "unhideNode")
         this.unhide(bullet)
     }
     
@@ -167,37 +172,37 @@ export class BulletManager {
     }
 
     foldChildrenCommand(bullet: Bullet | undefined) {
-        this.printScriptNodeCommand("foldChildren", bullet)
+        this.commonNodeCommandTasks(bullet, "foldChildren")
         this.foldChildren(bullet)
     }
 
     unfoldChildrenCommand(bullet: Bullet | undefined) {
-        this.printScriptNodeCommand("unfoldChildren", bullet)
+        this.commonNodeCommandTasks(bullet, "unfoldChildren")
         this.unfoldChildren(bullet)
     }
 
     hideChildrenCommand(bullet: Bullet | undefined) {
-        this.printScriptNodeCommand("hideChildren", bullet)
+        this.commonNodeCommandTasks(bullet, "hideChildren")
         this.hideChildren(bullet)
     }
 
     unhideChildrenCommand(bullet: Bullet | undefined) { // NOTE: also unfolds
-        this.printScriptNodeCommand("unhideChildren", bullet)
+        this.commonNodeCommandTasks(bullet, "unhideChildren")
         this.unhideChildren(bullet)
     }
 
     highlightCommand(bullet: Bullet | undefined, toggle: Boolean = false) {
-        this.printScriptNodeCommand("highlightNode", bullet)
+        this.commonNodeCommandTasks(bullet, "highlightNode")
         this.highlight(bullet, toggle)
     }
 
     revealCommand(bullet: Bullet | undefined, highlight: Boolean = true) {
-        this.printScriptNodeCommand("revealNode", bullet)
+        this.commonNodeCommandTasks(bullet, "revealNode")
         this.reveal(bullet, highlight)
     }
 
     connectCommand(bullet: Bullet | undefined, highlight: Boolean = true, connectParents: Boolean = false) {
-        this.printScriptNodeCommand("connectNode", bullet)
+        this.commonNodeCommandTasks(bullet, "connectNode")
         this.connect(bullet, highlight, connectParents)
     }
 
@@ -504,17 +509,21 @@ export class BulletManager {
         });
     }
 
+    setPermanentRandomIdIfNecessary(bullet: Bullet | undefined) {
+        if (bullet && bullet.isRandomId) {
+            bullet.id = generateCompactRandomId();
+            bullet.isRandomId = false;
+            bullet.mustUpdate = true;
+        }
+    }
+
     getQuickPickLineIdAndCreateOneIfNecessary(callback: (id: string) => void) {
         Editor.showLineQuickPick((selectedLine: any) => {
             if (selectedLine) {
                 let bullet = this.getBulletAtLine(selectedLine.index);
                 if (!bullet) return;
 
-                if (bullet.isRandomId) {
-                    bullet.id = generateCompactRandomId();
-                    bullet.isRandomId = false;
-                    bullet.mustUpdate = true;
-                }
+                this.setPermanentRandomIdIfNecessary(bullet)
                 
                 callback(bullet.id);
             }
