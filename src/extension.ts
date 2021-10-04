@@ -53,7 +53,7 @@ export function activate(context: vscode.ExtensionContext) {
     context.subscriptions.push(
         vscode.commands.registerCommand('vscode-bulletgraph.foldNode', () => {
             let b = new BulletManager();
-            b.fold(b.getActiveBullet());
+            b.foldCommand(b.getActiveBullet());
             b.update();
         })
     );
@@ -61,7 +61,7 @@ export function activate(context: vscode.ExtensionContext) {
     context.subscriptions.push(
         vscode.commands.registerCommand('vscode-bulletgraph.unfoldNode', () => {
             let b = new BulletManager();
-            b.unfold(b.getActiveBullet());
+            b.unfoldCommand(b.getActiveBullet());
             b.update();
         })
     );
@@ -69,7 +69,7 @@ export function activate(context: vscode.ExtensionContext) {
     context.subscriptions.push(
         vscode.commands.registerCommand('vscode-bulletgraph.hideNode', () => {
             let b = new BulletManager();
-            b.hide(b.getActiveBullet());
+            b.hideCommand(b.getActiveBullet());
             b.update();
         })
     );
@@ -77,7 +77,7 @@ export function activate(context: vscode.ExtensionContext) {
     context.subscriptions.push(
         vscode.commands.registerCommand('vscode-bulletgraph.unhideNode', () => {
             let b = new BulletManager();
-            b.unhide(b.getActiveBullet());
+            b.unhideCommand(b.getActiveBullet());
             b.update();
         })
     );
@@ -85,7 +85,7 @@ export function activate(context: vscode.ExtensionContext) {
     context.subscriptions.push(
         vscode.commands.registerCommand('vscode-bulletgraph.foldAll', () => {
             let b = new BulletManager();
-            b.foldAll();
+            b.foldAllCommand();
             b.update();
         })
     );
@@ -93,7 +93,7 @@ export function activate(context: vscode.ExtensionContext) {
     context.subscriptions.push(
         vscode.commands.registerCommand('vscode-bulletgraph.unfoldAll', () => {
             let b = new BulletManager();
-            b.unfoldAll();
+            b.unfoldAllCommand();
             b.update();
         })
     );
@@ -101,7 +101,7 @@ export function activate(context: vscode.ExtensionContext) {
     context.subscriptions.push(
         vscode.commands.registerCommand('vscode-bulletgraph.hideAll', () => {
             let b = new BulletManager();
-            b.hideAll();
+            b.hideAllCommand();
             b.update();
         })
     );
@@ -109,7 +109,7 @@ export function activate(context: vscode.ExtensionContext) {
     context.subscriptions.push(
         vscode.commands.registerCommand('vscode-bulletgraph.unhideAll', () => {
             let b = new BulletManager();
-            b.unhideAll();
+            b.unhideAllCommand();
             b.update();
         })
     );
@@ -117,7 +117,7 @@ export function activate(context: vscode.ExtensionContext) {
     context.subscriptions.push(
         vscode.commands.registerCommand('vscode-bulletgraph.foldChildren', () => {
             let b = new BulletManager();
-            b.foldChildren(b.getActiveBullet());
+            b.foldChildrenCommand(b.getActiveBullet());
             b.update();
         })
     );
@@ -125,7 +125,7 @@ export function activate(context: vscode.ExtensionContext) {
     context.subscriptions.push(
         vscode.commands.registerCommand('vscode-bulletgraph.unfoldChildren', () => {
             let b = new BulletManager();
-            b.unfoldChildren(b.getActiveBullet());
+            b.unfoldChildrenCommand(b.getActiveBullet());
             b.update();
         })
     );
@@ -133,7 +133,7 @@ export function activate(context: vscode.ExtensionContext) {
     context.subscriptions.push(
         vscode.commands.registerCommand('vscode-bulletgraph.hideChildren', () => {
             let b = new BulletManager();
-            b.hideChildren(b.getActiveBullet());
+            b.hideChildrenCommand(b.getActiveBullet());
             b.update();
         })
     );
@@ -141,7 +141,7 @@ export function activate(context: vscode.ExtensionContext) {
     context.subscriptions.push(
         vscode.commands.registerCommand('vscode-bulletgraph.unhideChildren', () => {
             let b = new BulletManager();
-            b.unhideChildren(b.getActiveBullet());
+            b.unhideChildrenCommand(b.getActiveBullet());
             b.update();
         })
     );
@@ -149,7 +149,7 @@ export function activate(context: vscode.ExtensionContext) {
     context.subscriptions.push(
         vscode.commands.registerCommand('vscode-bulletgraph.highlightNode', () => {
             let b = new BulletManager();
-            b.highlight(b.getActiveBullet(), true);
+            b.highlightCommand(b.getActiveBullet(), true);
             b.update();
         })
     );
@@ -157,7 +157,7 @@ export function activate(context: vscode.ExtensionContext) {
     context.subscriptions.push(
         vscode.commands.registerCommand('vscode-bulletgraph.revealNode', () => {
             let b = new BulletManager();
-            b.reveal(b.getActiveBullet(), false);
+            b.revealCommand(b.getActiveBullet(), false);
             b.update();
         })
     );
@@ -165,7 +165,7 @@ export function activate(context: vscode.ExtensionContext) {
     context.subscriptions.push(
         vscode.commands.registerCommand('vscode-bulletgraph.connectNode', () => {
             let b = new BulletManager();
-            b.connect(b.getActiveBullet(), false, false);
+            b.connectCommand(b.getActiveBullet(), false, false);
             b.update();
         })
     );
@@ -173,7 +173,7 @@ export function activate(context: vscode.ExtensionContext) {
     context.subscriptions.push(
         vscode.commands.registerCommand('vscode-bulletgraph.connectNodeHierarchy', () => {
             let b = new BulletManager();
-            b.connect(b.getActiveBullet(), false, true);
+            b.connectCommand(b.getActiveBullet(), false, true);
             b.update();
         })
     );

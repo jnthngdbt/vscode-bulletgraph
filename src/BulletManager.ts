@@ -13,6 +13,7 @@ export class DocumentLine {
 export class BulletManager {
     bullets: Array<Bullet> = [];
     scriptLines: Array<DocumentLine> = [];
+    static console = vscode.window.createOutputChannel("Bullet Commands");
 
     constructor() {
         const { bulletLines, scriptLines } = this.getLines();
@@ -107,6 +108,97 @@ export class BulletManager {
 
         let children = this.getChildren(parent);
         children.forEach( child => this.setVisibility(child, visibility, skipHidden) );
+    }
+
+    printConsole(line: string) {
+        BulletManager.console.appendLine(line)
+    }
+
+    printScriptCommand(command: string) {
+        let tab = " ".repeat(vscode.workspace.getConfiguration('editor').tabSize)
+        this.printConsole(tab + "$ " + command)
+    }
+
+    printScriptNodeCommand(command: string, bullet: Bullet | undefined) {
+        if (bullet) {
+            let tab = " ".repeat(vscode.workspace.getConfiguration('editor').tabSize)
+            this.printConsole(tab + "$ " + command + " " + bullet.id + " // " + bullet.label)
+        }
+    }
+
+    foldCommand(bullet: Bullet | undefined) {
+        this.printScriptNodeCommand("foldNode", bullet)
+        this.fold(bullet)
+    }
+
+    unfoldCommand(bullet: Bullet | undefined) {
+        this.printScriptNodeCommand("unfoldNode", bullet)
+        this.unfold(bullet)
+    }
+
+    hideCommand(bullet: Bullet | undefined) {
+        this.printScriptNodeCommand("hideNode", bullet)
+        this.hide(bullet)
+    }
+
+    unhideCommand(bullet: Bullet | undefined) {
+        this.printScriptNodeCommand("unhideNode", bullet)
+        this.unhide(bullet)
+    }
+    
+    foldAllCommand() {
+        this.printScriptCommand("foldAll")
+        this.foldAll()
+    }
+
+    unfoldAllCommand() {
+        this.printScriptCommand("unfoldAll")
+        this.unfoldAll()
+    }
+
+    hideAllCommand() {
+        this.printScriptCommand("hideAll")
+        this.hideAll()
+    }
+
+    unhideAllCommand() {
+        this.printScriptCommand("unhideAll")
+        this.unhideAll()
+    }
+
+    foldChildrenCommand(bullet: Bullet | undefined) {
+        this.printScriptNodeCommand("foldChildren", bullet)
+        this.foldChildren(bullet)
+    }
+
+    unfoldChildrenCommand(bullet: Bullet | undefined) {
+        this.printScriptNodeCommand("unfoldChildren", bullet)
+        this.unfoldChildren(bullet)
+    }
+
+    hideChildrenCommand(bullet: Bullet | undefined) {
+        this.printScriptNodeCommand("hideChildren", bullet)
+        this.hideChildren(bullet)
+    }
+
+    unhideChildrenCommand(bullet: Bullet | undefined) { // NOTE: also unfolds
+        this.printScriptNodeCommand("unhideChildren", bullet)
+        this.unhideChildren(bullet)
+    }
+
+    highlightCommand(bullet: Bullet | undefined, toggle: Boolean = false) {
+        this.printScriptNodeCommand("highlightNode", bullet)
+        this.highlight(bullet, toggle)
+    }
+
+    revealCommand(bullet: Bullet | undefined, highlight: Boolean = true) {
+        this.printScriptNodeCommand("revealNode", bullet)
+        this.reveal(bullet, highlight)
+    }
+
+    connectCommand(bullet: Bullet | undefined, highlight: Boolean = true, connectParents: Boolean = false) {
+        this.printScriptNodeCommand("connectNode", bullet)
+        this.connect(bullet, highlight, connectParents)
     }
 
     fold(bullet: Bullet | undefined) {

@@ -87,25 +87,29 @@ export class ScriptManager {
     }
 
     runCommands(script: Script) {
+        BulletManager.console.appendLine("// APPLYING SCRIPT [" + script.name + "]")
+
         script.commands.forEach( command => {
-            if      (command.name === 'hideAll'             ) { this.doc.hideAll(); } 
-            else if (command.name === 'unhideAll'           ) { this.doc.unhideAll(); }
-            else if (command.name === 'foldAll'             ) { this.doc.foldAll(); } 
-            else if (command.name === 'unfoldAll'           ) { this.doc.unfoldAll(); } 
-            else if (command.name === 'hideNode'            ) { this.doc.hide(command.argument.bullet); } 
-            else if (command.name === 'unhideNode'          ) { this.doc.unhide(command.argument.bullet); } 
-            else if (command.name === 'foldNode'            ) { this.doc.fold(command.argument.bullet); } 
-            else if (command.name === 'unfoldNode'          ) { this.doc.unfold(command.argument.bullet); } 
-            else if (command.name === 'foldChildren'        ) { this.doc.foldChildren(command.argument.bullet); } 
-            else if (command.name === 'unfoldChildren'      ) { this.doc.unfoldChildren(command.argument.bullet); } 
-            else if (command.name === 'hideChildren'        ) { this.doc.hideChildren(command.argument.bullet); } 
-            else if (command.name === 'unhideChildren'      ) { this.doc.unhideChildren(command.argument.bullet); } 
-            else if (command.name === 'revealNode'          ) { this.doc.reveal(command.argument.bullet, false); } 
-            else if (command.name === 'highlightNode'       ) { this.doc.highlight(command.argument.bullet, false); } 
-            else if (command.name === 'connectNode'         ) { this.doc.connect(command.argument.bullet, false, false); } 
-            else if (command.name === 'connectNodeHierarchy') { this.doc.connect(command.argument.bullet, false, true); } 
+            if      (command.name === 'hideAll'             ) { this.doc.hideAllCommand(); } 
+            else if (command.name === 'unhideAll'           ) { this.doc.unhideAllCommand(); }
+            else if (command.name === 'foldAll'             ) { this.doc.foldAllCommand(); } 
+            else if (command.name === 'unfoldAll'           ) { this.doc.unfoldAllCommand(); } 
+            else if (command.name === 'hideNode'            ) { this.doc.hideCommand(command.argument.bullet); } 
+            else if (command.name === 'unhideNode'          ) { this.doc.unhideCommand(command.argument.bullet); } 
+            else if (command.name === 'foldNode'            ) { this.doc.foldCommand(command.argument.bullet); } 
+            else if (command.name === 'unfoldNode'          ) { this.doc.unfoldCommand(command.argument.bullet); } 
+            else if (command.name === 'foldChildren'        ) { this.doc.foldChildrenCommand(command.argument.bullet); } 
+            else if (command.name === 'unfoldChildren'      ) { this.doc.unfoldChildrenCommand(command.argument.bullet); } 
+            else if (command.name === 'hideChildren'        ) { this.doc.hideChildrenCommand(command.argument.bullet); } 
+            else if (command.name === 'unhideChildren'      ) { this.doc.unhideChildrenCommand(command.argument.bullet); } 
+            else if (command.name === 'revealNode'          ) { this.doc.revealCommand(command.argument.bullet, false); } 
+            else if (command.name === 'highlightNode'       ) { this.doc.highlightCommand(command.argument.bullet, false); } 
+            else if (command.name === 'connectNode'         ) { this.doc.connectCommand(command.argument.bullet, false, false); } 
+            else if (command.name === 'connectNodeHierarchy') { this.doc.connectCommand(command.argument.bullet, false, true); } 
             // else if (command.name === 'updateFolding'       ) { this.doc.updateFolding(completionHandler); }
         });
+
+        BulletManager.console.appendLine("// FINISHED SCRIPT [" + script.name + "]")
 
         this.doc.update();
     }
