@@ -2,20 +2,24 @@ import * as vscode from 'vscode';
 
 import { Editor, Strings } from './utils'
 
-export function convertToHex(idString: string): string {
-    return idString.replace(/[xy]/g, function(c) {
-        var r = Math.random() * 16 | 0, v = c == 'x' ? r : (r & 0x3 | 0x8);
-        return v.toString(16);
-    });
+export function makeId(length: Number) {
+    // 4 chars: 62^4 = 14,776,336
+    // 8 chars: 62^8 = 218,340,105,584,896
+    var id = "id_"
+    var chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789"; // 26 + 26 + 10 = 62
+    var N = chars.length;
+    for ( var i = 0; i < length; i++ ) {
+      id += chars.charAt(Math.floor(Math.random() * N));
+   }
+   return id;
 }
 
 export function generateCompactRandomId(): string {
-    // 4 hex string: 65536 possibilities (0.002%).
-    return convertToHex('id_xxxx');
+    return makeId(4);
 }
 
 export function generateRandomId(): string {
-    return convertToHex('id_xxxxxxxx_xxxxxx');
+    return makeId(8);
 }
 
 export function generateIdFromLineContent(text: string): string {
