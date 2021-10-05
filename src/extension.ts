@@ -181,7 +181,7 @@ export function activate(context: vscode.ExtensionContext) {
     context.subscriptions.push(
         vscode.commands.registerCommand('vscode-bulletgraph.updateFolding', () => {
             let b = new BulletManager();
-            b.updateEditorFolding();
+            b.updateEditorFoldingCommand();
         })
     );
 

@@ -9,7 +9,7 @@ export const BASE_ARROWSIZE = 1.5;
 export const BASE_PENWIDTH = 2;
 export const FONTSIZE_FACTOR = 2;
 
-export const ENABLE_EDITOR_FOLDING = false;
+export const ENABLE_EDITOR_FOLDING = true;
 
 export type Id = string;
 

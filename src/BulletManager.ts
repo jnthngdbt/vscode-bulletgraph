@@ -110,6 +110,46 @@ export class BulletManager {
         children.forEach( child => this.setVisibility(child, visibility, skipHidden) );
     }
 
+    isLineFoldableByEditor(bullet: Bullet | undefined): boolean {
+        if (bullet === undefined) return false;
+        if (!bullet.isValid()) return false;
+
+        // The direct next line must be indented.
+        let next = this.getBulletAtLine(bullet.lineIdx + 1)
+        if (!next || !next.isValid()) return false;
+        return next.depth > bullet.depth;
+    }
+    
+    callUnfoldCommand(bullet: Bullet | undefined, completionHandler: any | undefined = undefined) {
+        if (bullet === undefined) {
+            vscode.commands.executeCommand("editor.unfold").then(() => { 
+                if (completionHandler) completionHandler(); });
+        } else {
+            vscode.commands.executeCommand("editor.unfold", { selectionLines: [bullet.lineIdx] }).then(() => { 
+                if (completionHandler) completionHandler(); });
+        }
+    }
+
+    callFoldCommand(bullet: Bullet | undefined, completionHandler: any | undefined = undefined) {
+        if (bullet === undefined) {
+            vscode.commands.executeCommand("editor.fold").then(() => { 
+                if (completionHandler) completionHandler(); });
+        } else {
+            vscode.commands.executeCommand("editor.fold", { selectionLines: [bullet.lineIdx] }).then(() => { 
+                if (completionHandler) completionHandler(); });
+        }
+    }
+
+    callFoldCommandIfPossible(bullet: Bullet | undefined, completionHandler: any | undefined = undefined) {
+        this.callUnfoldCommand(bullet, () => { // unfold first to avoid unexpected behavior if already folded
+            if (this.isLineFoldableByEditor(bullet)) {
+                this.callFoldCommand(bullet, completionHandler);
+            } else {
+                if (completionHandler) completionHandler();
+            }
+        });
+    }
+
     printConsole(line: string) {
         BulletManager.console.appendLine(line)
     }
@@ -204,6 +244,11 @@ export class BulletManager {
     connectCommand(bullet: Bullet | undefined, highlight: Boolean = true, connectParents: Boolean = false) {
         this.commonNodeCommandTasks(bullet, "connectNode")
         this.connect(bullet, highlight, connectParents)
+    }
+
+    updateEditorFoldingCommand(callback: any | undefined = undefined) {
+        this.printScriptCommand("updateFolding")
+        this.updateEditorFolding()
     }
 
     fold(bullet: Bullet | undefined) {
@@ -322,6 +367,37 @@ export class BulletManager {
         bullet.isConnected = true;
     }
 
+    updateEditorFolding(callback: any | undefined = undefined) {
+        var lineIndices: Array<Number> = []
+        var maxDepth = -1
+        for (let i = 0; i < this.bullets.length; i += 1) {
+            let bullet = this.bullets[i]
+
+            if (maxDepth > 0 && bullet.depth > maxDepth) { // this line will already be folded; skip to avoid weird behavior when folding folded line
+                continue
+            }
+
+            if (maxDepth > 0 && bullet.depth <= maxDepth) { // new scope, reset flag
+                maxDepth = -1
+            }
+
+            if ((bullet.visibility == EVisibility.eFold) || (bullet.visibility == EVisibility.eFoldHidden) || (bullet.visibility == EVisibility.eHide)) {
+                if (this.isLineFoldableByEditor(bullet)) {
+                    lineIndices.push(bullet.lineIdx)
+                    maxDepth = bullet.depth
+                }
+            }
+        }
+
+        vscode.commands.executeCommand("editor.unfoldAll").then(() => { 
+            // Unfortunately, folding lines that are already folded will fold their parent, giving
+            // unexpected results in our case.
+            vscode.commands.executeCommand("editor.fold", { selectionLines: lineIndices }).then(
+                callback
+            )
+        })
+    }
+
     getConnections(bullet: Bullet): Array<Bullet> {
         let connections: Array<Bullet> = [];
 
@@ -405,7 +481,8 @@ export class BulletManager {
     update(callback: any | undefined = undefined) {
         this.propagateVisibility();
         this.writeBullets(() => {
-            this.updateEditorFolding(callback);
+            if (ENABLE_EDITOR_FOLDING)
+                this.updateEditorFolding(callback);
         });
     }
 
@@ -467,16 +544,6 @@ export class BulletManager {
         }).then((success) => {
             if (callback) callback(this.bullets);
         });
-    }
-
-    updateEditorFolding(callback: any | undefined = undefined) {
-        // Maybe only modified, or not
-        if (ENABLE_EDITOR_FOLDING) {
-            // TODO
-            if (callback) callback();
-        } else if (callback) {
-            callback();
-        };
     }
 
     insertIdFromOtherLine() {

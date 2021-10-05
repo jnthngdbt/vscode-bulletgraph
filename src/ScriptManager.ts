@@ -106,7 +106,7 @@ export class ScriptManager {
             else if (command.name === 'highlightNode'       ) { this.doc.highlightCommand(command.argument.bullet, false); } 
             else if (command.name === 'connectNode'         ) { this.doc.connectCommand(command.argument.bullet, false, false); } 
             else if (command.name === 'connectNodeHierarchy') { this.doc.connectCommand(command.argument.bullet, false, true); } 
-            // else if (command.name === 'updateFolding'       ) { this.doc.updateFolding(completionHandler); }
+            else if (command.name === 'updateFolding'       ) { this.doc.updateEditorFoldingCommand(); }
         });
 
         BulletManager.console.appendLine("// FINISHED SCRIPT [" + script.name + "]")
