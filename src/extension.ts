@@ -2,7 +2,7 @@ import * as vscode from 'vscode';
 
 import { BulletGraph } from './BulletGraph'
 import { DepthManager } from './DepthManager'
-import { ELink, ERenderingEngine } from './constants'
+import { EConnectDirection, ELink, ERenderingEngine } from './constants'
 import { DotFileManager } from './DotFileManager'
 import { generateIdFromLineContent } from './NodeIdGenerator'
 import { BulletManager } from './BulletManager';
@@ -165,7 +165,7 @@ export function activate(context: vscode.ExtensionContext) {
     context.subscriptions.push(
         vscode.commands.registerCommand('vscode-bulletgraph.connectNode', () => {
             let b = new BulletManager();
-            b.connectCommand(b.getActiveBullet(), false, false);
+            b.connectCommand(b.getActiveBullet(), false, EConnectDirection.eInOut, false);
             b.update();
         })
     );
@@ -173,7 +173,7 @@ export function activate(context: vscode.ExtensionContext) {
     context.subscriptions.push(
         vscode.commands.registerCommand('vscode-bulletgraph.connectNodeHierarchy', () => {
             let b = new BulletManager();
-            b.connectCommand(b.getActiveBullet(), false, true);
+            b.connectCommand(b.getActiveBullet(), false, EConnectDirection.eInOut, true);
             b.update();
         })
     );

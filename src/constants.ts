@@ -38,3 +38,9 @@ export enum ERenderingEngine {
     eGraphviz,
     eGraphvizInteractive,
 };
+
+export enum EConnectDirection {
+    eIn,
+    eOut,
+    eInOut,
+};

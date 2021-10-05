@@ -246,8 +246,8 @@
 						},
 						{
 								"command": "vscode-bulletgraph.connectNode",
-								"key": "shift+alt+m",
-								"mac": "shift+cmd+m"
+								"key": "shift+alt+/",
+								"mac": "shift+cmd+/"
 						},
 						{
 								"command": "vscode-bulletgraph.unhideChildren",
@@ -255,24 +255,14 @@
 								"mac": "shift+cmd+y"
 						},
 						{
-								"command": "vscode-bulletgraph.goToNextSibling",
-								"key": "shift+alt+s",
-								"mac": "shift+cmd+s"
-						},
-						{
-								"command": "vscode-bulletgraph.goToPreviousSibling",
-								"key": "shift+alt+w",
-								"mac": "shift+cmd+w"
-						},
-						{
 								"command": "vscode-bulletgraph.goToParent",
-								"key": "shift+alt+a",
-								"mac": "shift+cmd+a"
+								"key": "shift+alt+m",
+								"mac": "shift+cmd+m"
 						},
 						{
 								"command": "vscode-bulletgraph.goToChildren",
-								"key": "shift+alt+d",
-								"mac": "shift+cmd+d"
+								"key": "shift+alt+,",
+								"mac": "shift+cmd+,"
 						},
 						{
 								"command": "vscode-bulletgraph.moveCursorUp",

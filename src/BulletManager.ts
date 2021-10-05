@@ -1,6 +1,6 @@
 import * as vscode from 'vscode';
 
-import { LABEL_ID_SEP, EVisibility, ELink, SCRIPT_LINE_TOKEN, ENABLE_EDITOR_FOLDING } from './constants';
+import { LABEL_ID_SEP, EVisibility, ELink, SCRIPT_LINE_TOKEN, ENABLE_EDITOR_FOLDING, EConnectDirection } from './constants';
 import { Editor } from './utils';
 import { Bullet } from './Bullet';
 import { generateCompactRandomId } from './NodeIdGenerator';
@@ -241,9 +241,9 @@ export class BulletManager {
         this.reveal(bullet, highlight)
     }
 
-    connectCommand(bullet: Bullet | undefined, highlight: Boolean = true, connectParents: Boolean = false) {
+    connectCommand(bullet: Bullet | undefined, highlight: Boolean = true, direction: EConnectDirection = EConnectDirection.eInOut, connectParents: Boolean = false) {
         this.commonNodeCommandTasks(bullet, "connectNode")
-        this.connect(bullet, highlight, connectParents)
+        this.connect(bullet, highlight, direction, connectParents)
     }
 
     updateEditorFoldingCommand(callback: any | undefined = undefined) {
@@ -365,20 +365,20 @@ export class BulletManager {
         bullet.isRevealed = true;
     }
 
-    connect(bullet: Bullet | undefined, highlight: Boolean = true, connectParents: Boolean = false) {
+    connect(bullet: Bullet | undefined, highlight: Boolean = true, direction: EConnectDirection = EConnectDirection.eInOut, connectParents: Boolean = false) {
         if (!bullet) return;
         if (bullet.isConnected) return;
 
-        let connections = this.getConnections(bullet);
+        let connections = this.getConnections(bullet, direction);
 
         // Add children connections.
         let children = this.getChildren(bullet);
-        children.forEach( child => { connections = connections.concat(this.getConnections(child)); } );
+        children.forEach( child => { connections = connections.concat(this.getConnections(child, direction)); } );
 
         // Add parents connections if necessary.
         if (connectParents) {
             let parents = this.getParents(bullet);
-            parents.forEach( parent => { connections = connections.concat(this.getConnections(parent)); } );
+            parents.forEach( parent => { connections = connections.concat(this.getConnections(parent, direction)); } );
         }
 
         // Reveal bullet and its connections. Note: possible duplicates, but reveal should skip if already done.
@@ -422,7 +422,7 @@ export class BulletManager {
         })
     }
 
-    getConnections(bullet: Bullet): Array<Bullet> {
+    getConnections(bullet: Bullet, direction: EConnectDirection): Array<Bullet> {
         let connections: Array<Bullet> = [];
 
         let pushConnectionFromId = (connectionId: string) => {
@@ -430,14 +430,17 @@ export class BulletManager {
             if (connection) connections.push(connection);
         }
 
+        let doIns  = (direction == EConnectDirection.eInOut) || (direction == EConnectDirection.eIn)
+        let doOuts = (direction == EConnectDirection.eInOut) || (direction == EConnectDirection.eOut)
+
         // Added bullets that it directly links.
-        bullet.idsIn.forEach(pushConnectionFromId);
-        bullet.idsOut.forEach(pushConnectionFromId);
+        if (doIns ) bullet.idsIn.forEach(pushConnectionFromId);
+        if (doOuts) bullet.idsOut.forEach(pushConnectionFromId);
 
         // Add bullets that directly link to it.
         for (let other of this.bullets) {
-            if (other.idsIn.includes(bullet.id)) connections.push(other);
-            if (other.idsOut.includes(bullet.id)) connections.push(other);
+            if (doOuts && other.idsIn.includes(bullet.id)) connections.push(other);
+            if (doIns && other.idsOut.includes(bullet.id)) connections.push(other);
         }
 
         return connections;
