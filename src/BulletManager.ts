@@ -236,6 +236,11 @@ export class BulletManager {
         this.highlight(bullet, toggle)
     }
 
+    spotlightCommand(bullet: Bullet | undefined, highlight: Boolean = true) {
+        this.commonNodeCommandTasks(bullet, "spotlight")
+        this.spotlight(bullet, highlight)
+    }
+
     revealCommand(bullet: Bullet | undefined, highlight: Boolean = true) {
         this.commonNodeCommandTasks(bullet, "revealNode")
         this.reveal(bullet, highlight)
@@ -315,6 +320,11 @@ export class BulletManager {
             bullet.isHighlight = toggle ? !bullet.isHighlight : true;
             bullet.mustUpdate = true;
         }
+    }
+
+    spotlight(bullet: Bullet | undefined, highlight: Boolean = true) {
+        this.hideAll()
+        this.reveal(bullet, highlight)
     }
 
     lessVisibleCommand(bullet: Bullet | undefined) {

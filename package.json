@@ -31,6 +31,7 @@
 		"onCommand:vscode-bulletgraph.unhideChildren",
 		"onCommand:vscode-bulletgraph.revealNode",
 		"onCommand:vscode-bulletgraph.highlightNode",
+		"onCommand:vscode-bulletgraph.spotlightNode",
 		"onCommand:vscode-bulletgraph.connectNode",
 		"onCommand:vscode-bulletgraph.connectNodeHierarchy",
 		"onCommand:vscode-bulletgraph.lessVisible",
@@ -121,6 +122,10 @@
 			{
 				"command": "vscode-bulletgraph.highlightNode",
 				"title": "Bullet Graph: Highlight Node"
+			},
+			{
+				"command": "vscode-bulletgraph.spotlightNode",
+				"title": "Bullet Graph: Spotlight Node"
 			},
 			{
 				"command": "vscode-bulletgraph.foldChildren",
@@ -223,6 +228,11 @@
 								"command": "vscode-bulletgraph.moreVisible",
 								"key": "shift+alt+;",
 								"mac": "shift+cmd+;"
+						},
+						{
+								"command": "vscode-bulletgraph.spotlightNode",
+								"key": "shift+alt+o",
+								"mac": "shift+cmd+o"
 						},
 						{
 								"command": "vscode-bulletgraph.foldAll",

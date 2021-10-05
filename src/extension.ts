@@ -155,6 +155,14 @@ export function activate(context: vscode.ExtensionContext) {
     );
 
     context.subscriptions.push(
+        vscode.commands.registerCommand('vscode-bulletgraph.spotlightNode', () => {
+            let b = new BulletManager();
+            b.spotlightCommand(b.getActiveBullet(), false);
+            b.update();
+        })
+    );
+
+    context.subscriptions.push(
         vscode.commands.registerCommand('vscode-bulletgraph.revealNode', () => {
             let b = new BulletManager();
             b.revealCommand(b.getActiveBullet(), false);
