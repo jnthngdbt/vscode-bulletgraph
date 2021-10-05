@@ -33,12 +33,16 @@
 		"onCommand:vscode-bulletgraph.highlightNode",
 		"onCommand:vscode-bulletgraph.connectNode",
 		"onCommand:vscode-bulletgraph.connectNodeHierarchy",
+		"onCommand:vscode-bulletgraph.lessVisible",
+		"onCommand:vscode-bulletgraph.moreVisible",
 		"onCommand:vscode-bulletgraph.goToNextSibling",
 		"onCommand:vscode-bulletgraph.goToPreviousSibling",
 		"onCommand:vscode-bulletgraph.goToParent",
 		"onCommand:vscode-bulletgraph.goToChildren",
 		"onCommand:vscode-bulletgraph.goNextVisible",
 		"onCommand:vscode-bulletgraph.goBackVisible",
+		"onCommand:vscode-bulletgraph.moveCursorUp",
+		"onCommand:vscode-bulletgraph.moveCursorDown",
 		"onCommand:vscode-bulletgraph.goToLine",
 		"onCommand:vscode-bulletgraph.addLinkIn",
 		"onCommand:vscode-bulletgraph.addLinkOut",
@@ -92,7 +96,7 @@
 			},
 			{
 				"command": "vscode-bulletgraph.updateFolding",
-				"title": "Bullet Graph: Update Lines Folding (TODO)"
+				"title": "Bullet Graph: Update Lines Folding"
 			},
 			{
 				"command": "vscode-bulletgraph.foldAll",
@@ -143,6 +147,14 @@
 				"title": "Bullet Graph: Connect Node Hierarchy"
 			},
 			{
+				"command": "vscode-bulletgraph.lessVisible",
+				"title": "Bullet Graph: Less Visible"
+			},
+			{
+				"command": "vscode-bulletgraph.moreVisible",
+				"title": "Bullet Graph: moreVisible"
+			},
+			{
 				"command": "vscode-bulletgraph.goToNextSibling",
 				"title": "Bullet Graph: Go To Next Sibling"
 			},
@@ -165,6 +177,14 @@
 			{
 				"command": "vscode-bulletgraph.goBackVisible",
 				"title": "Bullet Graph: Go Back Visible"
+			},
+			{
+				"command": "vscode-bulletgraph.moveCursorUp",
+				"title": "Bullet Graph: Move Cursor Up"
+			},
+			{
+				"command": "vscode-bulletgraph.moveCursorDown",
+				"title": "Bullet Graph: Move Cursor Down"
 			},
 			{
 				"command": "vscode-bulletgraph.goToLine",
@@ -195,17 +215,12 @@
 								"mac": "ctrl+shift+cmd+enter"
 						},
 						{
-								"command": "vscode-bulletgraph.hideNode",
-								"key": "shift+alt+m",
-								"mac": "shift+cmd+m"
-						},
-						{
-								"command": "vscode-bulletgraph.foldNode",
+								"command": "vscode-bulletgraph.lessVisible",
 								"key": "shift+alt+l",
 								"mac": "shift+cmd+l"
 						},
 						{
-								"command": "vscode-bulletgraph.unfoldNode",
+								"command": "vscode-bulletgraph.moreVisible",
 								"key": "shift+alt+;",
 								"mac": "shift+cmd+;"
 						},
@@ -230,19 +245,9 @@
 								"mac": "shift+cmd+i"
 						},
 						{
-								"command": "vscode-bulletgraph.revealNode",
-								"key": "shift+alt+,",
-								"mac": "shift+cmd+,"
-						},
-						{
 								"command": "vscode-bulletgraph.connectNode",
-								"key": "shift+alt+n",
-								"mac": "shift+cmd+n"
-						},
-						{
-								"command": "vscode-bulletgraph.unfoldChildren",
-								"key": "shift+alt+\\",
-								"mac": "shift+cmd+\\"
+								"key": "shift+alt+/",
+								"mac": "shift+cmd+/"
 						},
 						{
 								"command": "vscode-bulletgraph.unhideChildren",
@@ -275,9 +280,14 @@
 								"mac": "shift+cmd+k"
 						},
 						{
-								"command": "vscode-bulletgraph.goBackVisible",
+								"command": "vscode-bulletgraph.moveCursorUp",
 								"key": "shift+alt+j",
 								"mac": "shift+cmd+j"
+						},
+						{
+								"command": "vscode-bulletgraph.moveCursorDown",
+								"key": "shift+alt+k",
+								"mac": "shift+cmd+k"
 						}
 				]
 	},

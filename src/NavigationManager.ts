@@ -96,4 +96,12 @@ export class NavigationManager {
         }
         return false;
     }
+
+    static moveCursorUp() {
+        vscode.commands.executeCommand("cursorMove", { to: "up", by:'wrappedLine', value:1 });
+    }
+
+    static moveCursorDown() {
+        vscode.commands.executeCommand("cursorMove", { to: "down", by:'wrappedLine', value:1 });
+    }
 }

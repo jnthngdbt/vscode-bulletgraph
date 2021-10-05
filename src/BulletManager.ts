@@ -317,6 +317,30 @@ export class BulletManager {
         }
     }
 
+    lessVisible(bullet: Bullet | undefined) {
+        if (bullet) {
+            switch (bullet.visibility) {
+                case EVisibility.eNormal: this.fold(bullet); break;
+                case EVisibility.eFold: this.hide(bullet); break;
+                case EVisibility.eFoldHidden: this.hide(bullet); break;
+                case EVisibility.eHide: break;
+                default: break;
+            }
+        }
+    }
+
+    moreVisible(bullet: Bullet | undefined) {
+        if (bullet) {
+            switch (bullet.visibility) {
+                case EVisibility.eNormal: this.unfoldChildren(bullet); break
+                case EVisibility.eFold: this.unfold(bullet); break;
+                case EVisibility.eFoldHidden: this.reveal(bullet, false); break;
+                case EVisibility.eHide: this.reveal(bullet, false); break;
+                default: break;
+            }
+        }
+    }
+
     revealIfHidden(bullet: Bullet | undefined) {
         if (bullet && bullet.visibility === EVisibility.eHide)
             this.reveal(bullet, false);

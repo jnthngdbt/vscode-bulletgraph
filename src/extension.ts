@@ -179,6 +179,22 @@ export function activate(context: vscode.ExtensionContext) {
     );
 
     context.subscriptions.push(
+        vscode.commands.registerCommand('vscode-bulletgraph.lessVisible', () => {
+            let b = new BulletManager();
+            b.lessVisible(b.getActiveBullet());
+            b.update();
+        })
+    );
+
+    context.subscriptions.push(
+        vscode.commands.registerCommand('vscode-bulletgraph.moreVisible', () => {
+            let b = new BulletManager();
+            b.moreVisible(b.getActiveBullet());
+            b.update();
+        })
+    );
+
+    context.subscriptions.push(
         vscode.commands.registerCommand('vscode-bulletgraph.updateFolding', () => {
             let b = new BulletManager();
             b.updateEditorFoldingCommand();
@@ -192,6 +208,9 @@ export function activate(context: vscode.ExtensionContext) {
     
     context.subscriptions.push( vscode.commands.registerCommand('vscode-bulletgraph.goNextVisible', () => { new NavigationManager().goNextVisible(Editor.getActiveLineIdx()); }) );
     context.subscriptions.push( vscode.commands.registerCommand('vscode-bulletgraph.goBackVisible', () => { new NavigationManager().goBackVisible(Editor.getActiveLineIdx()); }) );
+    
+    context.subscriptions.push( vscode.commands.registerCommand('vscode-bulletgraph.moveCursorUp', () => { NavigationManager.moveCursorUp(); }) );
+    context.subscriptions.push( vscode.commands.registerCommand('vscode-bulletgraph.moveCursorDown', () => { NavigationManager.moveCursorDown(); }) );
     
     context.subscriptions.push( vscode.commands.registerCommand('vscode-bulletgraph.goToLine', () => { new NavigationManager().goToLine(); }) );
 
