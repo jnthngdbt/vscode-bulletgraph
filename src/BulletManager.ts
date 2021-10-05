@@ -317,25 +317,25 @@ export class BulletManager {
         }
     }
 
-    lessVisible(bullet: Bullet | undefined) {
+    lessVisibleCommand(bullet: Bullet | undefined) {
         if (bullet) {
             switch (bullet.visibility) {
-                case EVisibility.eNormal: this.fold(bullet); break;
-                case EVisibility.eFold: this.hide(bullet); break;
-                case EVisibility.eFoldHidden: this.hide(bullet); break;
+                case EVisibility.eNormal: this.isParent(bullet) ? this.foldCommand(bullet) : this.hideCommand(bullet); break;
+                case EVisibility.eFold: this.hideCommand(bullet); break;
+                case EVisibility.eFoldHidden: this.hideCommand(bullet); break;
                 case EVisibility.eHide: break;
                 default: break;
             }
         }
     }
 
-    moreVisible(bullet: Bullet | undefined) {
+    moreVisibleCommand(bullet: Bullet | undefined) {
         if (bullet) {
             switch (bullet.visibility) {
-                case EVisibility.eNormal: this.unfoldChildren(bullet); break
-                case EVisibility.eFold: this.unfold(bullet); break;
-                case EVisibility.eFoldHidden: this.reveal(bullet, false); break;
-                case EVisibility.eHide: this.reveal(bullet, false); break;
+                case EVisibility.eNormal: if (this.isParent(bullet)) this.unfoldChildrenCommand(bullet); break
+                case EVisibility.eFold: this.unfoldCommand(bullet); break;
+                case EVisibility.eFoldHidden: this.revealCommand(bullet, false); break;
+                case EVisibility.eHide: this.revealCommand(bullet, false); break;
                 default: break;
             }
         }

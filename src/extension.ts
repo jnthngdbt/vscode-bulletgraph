@@ -181,7 +181,7 @@ export function activate(context: vscode.ExtensionContext) {
     context.subscriptions.push(
         vscode.commands.registerCommand('vscode-bulletgraph.lessVisible', () => {
             let b = new BulletManager();
-            b.lessVisible(b.getActiveBullet());
+            b.lessVisibleCommand(b.getActiveBullet());
             b.update();
         })
     );
@@ -189,7 +189,7 @@ export function activate(context: vscode.ExtensionContext) {
     context.subscriptions.push(
         vscode.commands.registerCommand('vscode-bulletgraph.moreVisible', () => {
             let b = new BulletManager();
-            b.moreVisible(b.getActiveBullet());
+            b.moreVisibleCommand(b.getActiveBullet());
             b.update();
         })
     );
