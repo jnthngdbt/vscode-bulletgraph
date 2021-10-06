@@ -179,6 +179,22 @@ export function activate(context: vscode.ExtensionContext) {
     );
 
     context.subscriptions.push(
+        vscode.commands.registerCommand('vscode-bulletgraph.flowIn', () => {
+            let b = new BulletManager();
+            b.flowInCommand(b.getActiveBullet(), false, false);
+            b.update();
+        })
+    );
+
+    context.subscriptions.push(
+        vscode.commands.registerCommand('vscode-bulletgraph.flowOut', () => {
+            let b = new BulletManager();
+            b.flowOutCommand(b.getActiveBullet(), false, false);
+            b.update();
+        })
+    );
+
+    context.subscriptions.push(
         vscode.commands.registerCommand('vscode-bulletgraph.connectNodeHierarchy', () => {
             let b = new BulletManager();
             b.connectCommand(b.getActiveBullet(), false, EConnectDirection.eInOut, true);

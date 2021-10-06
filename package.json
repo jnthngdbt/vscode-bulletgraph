@@ -34,6 +34,8 @@
 		"onCommand:vscode-bulletgraph.spotlightNode",
 		"onCommand:vscode-bulletgraph.connectNode",
 		"onCommand:vscode-bulletgraph.connectNodeHierarchy",
+		"onCommand:vscode-bulletgraph.flowIn",
+		"onCommand:vscode-bulletgraph.flowOut",
 		"onCommand:vscode-bulletgraph.lessVisible",
 		"onCommand:vscode-bulletgraph.moreVisible",
 		"onCommand:vscode-bulletgraph.goToNextSibling",
@@ -148,6 +150,14 @@
 				"title": "Bullet Graph: Connect Node"
 			},
 			{
+				"command": "vscode-bulletgraph.flowIn",
+				"title": "Bullet Graph: Flow In"
+			},
+			{
+				"command": "vscode-bulletgraph.flowOut",
+				"title": "Bullet Graph: Flow Out"
+			},
+			{
 				"command": "vscode-bulletgraph.connectNodeHierarchy",
 				"title": "Bullet Graph: Connect Node Hierarchy"
 			},
@@ -260,9 +270,14 @@
 								"mac": "shift+cmd+p"
 						},
 						{
-								"command": "vscode-bulletgraph.unhideChildren",
+								"command": "vscode-bulletgraph.flowIn",
 								"key": "shift+alt+y",
 								"mac": "shift+cmd+y"
+						},
+						{
+								"command": "vscode-bulletgraph.flowOut",
+								"key": "shift+alt+\\",
+								"mac": "shift+cmd+\\"
 						},
 						{
 								"command": "vscode-bulletgraph.goToParent",
