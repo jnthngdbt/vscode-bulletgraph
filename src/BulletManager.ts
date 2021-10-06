@@ -424,6 +424,67 @@ export class BulletManager {
         this.connect(bullet, highlight, EConnectDirection.eOut, connectParents, true)
     }
 
+    getConnections(bullet: Bullet, direction: EConnectDirection): Array<Bullet> {
+        let connections: Array<Bullet> = [];
+
+        let pushConnectionFromId = (connectionId: string) => {
+            let connection = this.getBulletFromId(connectionId);
+            if (connection) connections.push(connection);
+        }
+
+        let doIns  = (direction == EConnectDirection.eInOut) || (direction == EConnectDirection.eIn)
+        let doOuts = (direction == EConnectDirection.eInOut) || (direction == EConnectDirection.eOut)
+
+        // Added bullets that it directly links.
+        if (doIns ) bullet.idsIn.forEach(pushConnectionFromId);
+        if (doOuts) bullet.idsOut.forEach(pushConnectionFromId);
+
+        // Add bullets that directly link to it.
+        for (let other of this.bullets) {
+            if (doOuts && other.idsIn.includes(bullet.id)) connections.push(other);
+            if (doIns && other.idsOut.includes(bullet.id)) connections.push(other);
+        }
+
+        return connections;
+    }
+
+    getConnectionsRecursive(connections: Array<Bullet>, bullet: Bullet, outwards: boolean, isFirstPass: boolean = true) {
+        let foundInList = connections.find(b => b.lineIdx == bullet.lineIdx)
+         if (foundInList) return // already passed through this one, exit to avoid infinite loop
+
+        if (!isFirstPass) connections.push(bullet) // do not add the root to the connections
+
+        let processConnectionFromId = (connectionId: string) => {
+            let connection = this.getBulletFromId(connectionId);
+            if (connection) this.getConnectionsRecursive(connections, connection, outwards, false)
+        }
+
+        // Added bullets that it directly links.
+        if (outwards) bullet.idsOut.forEach(processConnectionFromId);
+        else          bullet.idsIn.forEach(processConnectionFromId);
+
+        // Add bullets that directly link to it.
+        for (let other of this.bullets) {
+            if (outwards && other.idsIn.includes(bullet.id)) this.getConnectionsRecursive(connections, other, outwards, false);
+            if (!outwards && other.idsOut.includes(bullet.id)) this.getConnectionsRecursive(connections, other, outwards, false);
+        }
+    }
+
+    getConnectionsDeep(bullet: Bullet, direction: EConnectDirection): Array<Bullet> {
+        let connectionsIn: Array<Bullet> = [];
+        let connectionsOut: Array<Bullet> = [];
+
+        let doIns  = (direction == EConnectDirection.eInOut) || (direction == EConnectDirection.eIn)
+        let doOuts = (direction == EConnectDirection.eInOut) || (direction == EConnectDirection.eOut)
+
+        if (doIns) this.getConnectionsRecursive(connectionsIn, bullet, false)
+        if (doOuts) this.getConnectionsRecursive(connectionsOut, bullet, true)
+
+        let connections = [...connectionsIn, ...connectionsOut]
+
+        return connections;
+    }
+
     updateEditorFolding(callback: any | undefined = undefined) {
         var lineIndices: Array<Number> = []
         var maxDepth = -1
@@ -453,67 +514,6 @@ export class BulletManager {
                 callback
             )
         })
-    }
-
-    getConnections(bullet: Bullet, direction: EConnectDirection): Array<Bullet> {
-        let connections: Array<Bullet> = [];
-
-        let pushConnectionFromId = (connectionId: string) => {
-            let connection = this.getBulletFromId(connectionId);
-            if (connection) connections.push(connection);
-        }
-
-        let doIns  = (direction == EConnectDirection.eInOut) || (direction == EConnectDirection.eIn)
-        let doOuts = (direction == EConnectDirection.eInOut) || (direction == EConnectDirection.eOut)
-
-        // Added bullets that it directly links.
-        if (doIns ) bullet.idsIn.forEach(pushConnectionFromId);
-        if (doOuts) bullet.idsOut.forEach(pushConnectionFromId);
-
-        // Add bullets that directly link to it.
-        for (let other of this.bullets) {
-            if (doOuts && other.idsIn.includes(bullet.id)) connections.push(other);
-            if (doIns && other.idsOut.includes(bullet.id)) connections.push(other);
-        }
-
-        return connections;
-    }
-
-    getConnectionsDeep(bullet: Bullet, direction: EConnectDirection): Array<Bullet> {
-        let connectionsIn: Array<Bullet> = [];
-        let connectionsOut: Array<Bullet> = [];
-
-        let doIns  = (direction == EConnectDirection.eInOut) || (direction == EConnectDirection.eIn)
-        let doOuts = (direction == EConnectDirection.eInOut) || (direction == EConnectDirection.eOut)
-
-        if (doIns) this.getConnectionsRecursive(connectionsIn, bullet, false)
-        if (doOuts) this.getConnectionsRecursive(connectionsOut, bullet, true)
-
-        let connections = [...connectionsIn, ...connectionsOut]
-
-        return connections;
-    }
-
-    // NOTE: this is ugly. It would maybe be better to call connect recursively instead (or not, better).
-    getConnectionsRecursive(connections: Array<Bullet>, bullet: Bullet, outwards: boolean, isFirstPass: boolean = true) {
-        let foundInList = connections.find(b => b.lineIdx == bullet.lineIdx)
-         if (foundInList) return // already passed through this one, exit to avoid infinite loop
-
-        if (!isFirstPass) connections.push(bullet) // do not add the root to the connections
-
-        let processConnectionFromId = (connectionId: string) => {
-            let connection = this.getBulletFromId(connectionId);
-            if (connection) this.getConnectionsRecursive(connections, connection, outwards, false)
-        }
-
-        if (outwards) bullet.idsOut.forEach(processConnectionFromId);
-        else          bullet.idsIn.forEach(processConnectionFromId);
-
-        // Add bullets that directly link to it.
-        for (let other of this.bullets) {
-            if (outwards && other.idsIn.includes(bullet.id)) this.getConnectionsRecursive(connections, other, outwards, false);
-            if (!outwards && other.idsOut.includes(bullet.id)) this.getConnectionsRecursive(connections, other, outwards, false);
-        }
     }
 
     getParents(bullet: Bullet | undefined): Array<Bullet> {
