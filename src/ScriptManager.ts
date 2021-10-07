@@ -94,19 +94,19 @@ export class ScriptManager {
             else if (command.name === 'unhideAll'           ) { this.doc.unhideAllCommand(); }
             else if (command.name === 'foldAll'             ) { this.doc.foldAllCommand(); } 
             else if (command.name === 'unfoldAll'           ) { this.doc.unfoldAllCommand(); } 
-            else if (command.name === 'hideNode'            ) { this.doc.hideCommand(command.argument.bullet); } 
-            else if (command.name === 'unhideNode'          ) { this.doc.unhideCommand(command.argument.bullet); } 
-            else if (command.name === 'foldNode'            ) { this.doc.foldCommand(command.argument.bullet); } 
-            else if (command.name === 'unfoldNode'          ) { this.doc.unfoldCommand(command.argument.bullet); } 
+            else if (command.name === "hide"            ) { this.doc.hideCommand(command.argument.bullet); } 
+            else if (command.name === 'unhide'          ) { this.doc.unhideCommand(command.argument.bullet); } 
+            else if (command.name === 'fold'            ) { this.doc.foldCommand(command.argument.bullet); } 
+            else if (command.name === 'unfold'          ) { this.doc.unfoldCommand(command.argument.bullet); } 
             else if (command.name === 'foldChildren'        ) { this.doc.foldChildrenCommand(command.argument.bullet); } 
             else if (command.name === 'unfoldChildren'      ) { this.doc.unfoldChildrenCommand(command.argument.bullet); } 
             else if (command.name === 'hideChildren'        ) { this.doc.hideChildrenCommand(command.argument.bullet); } 
             else if (command.name === 'unhideChildren'      ) { this.doc.unhideChildrenCommand(command.argument.bullet); } 
-            else if (command.name === 'revealNode'          ) { this.doc.revealCommand(command.argument.bullet, false); } 
-            else if (command.name === 'highlightNode'       ) { this.doc.highlightCommand(command.argument.bullet, false); } 
-            else if (command.name === 'spotlightNode'       ) { this.doc.spotlightCommand(command.argument.bullet, false); } 
-            else if (command.name === 'connectNode'         ) { this.doc.connectCommand(command.argument.bullet); } 
-            else if (command.name === 'connectNodeHierarchy') { this.doc.connectCommand(command.argument.bullet); } 
+            else if (command.name === 'reveal'          ) { this.doc.revealCommand(command.argument.bullet, false); } 
+            else if (command.name === 'highlight'       ) { this.doc.highlightCommand(command.argument.bullet, false); } 
+            else if (command.name === 'spotlight'       ) { this.doc.spotlightCommand(command.argument.bullet, false); } 
+            else if (command.name === 'connect'         ) { this.doc.connectCommand(command.argument.bullet); } 
+            else if (command.name === 'connectHierarchy') { this.doc.connectCommand(command.argument.bullet); } 
             else if (command.name === 'flowIn'              ) { this.doc.flowInCommand(command.argument.bullet); } 
             else if (command.name === 'flowOut'             ) { this.doc.flowOutCommand(command.argument.bullet); } 
             else if (command.name === 'updateFolding'       ) { this.doc.updateEditorFoldingCommand(); }

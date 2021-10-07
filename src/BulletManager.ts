@@ -172,22 +172,22 @@ export class BulletManager {
     }
 
     foldCommand(bullet: Bullet | undefined) {
-        this.commonNodeCommandTasks(bullet, "foldNode")
+        this.commonNodeCommandTasks(bullet, "fold")
         this.fold(bullet)
     }
 
     unfoldCommand(bullet: Bullet | undefined) {
-        this.commonNodeCommandTasks(bullet, "unfoldNode")
+        this.commonNodeCommandTasks(bullet, "unfold")
         this.unfold(bullet)
     }
 
     hideCommand(bullet: Bullet | undefined) {
-        this.commonNodeCommandTasks(bullet, "hideNode")
+        this.commonNodeCommandTasks(bullet, "hide")
         this.hide(bullet)
     }
 
     unhideCommand(bullet: Bullet | undefined) {
-        this.commonNodeCommandTasks(bullet, "unhideNode")
+        this.commonNodeCommandTasks(bullet, "unhide")
         this.unhide(bullet)
     }
     
@@ -232,7 +232,7 @@ export class BulletManager {
     }
 
     highlightCommand(bullet: Bullet | undefined, toggle: Boolean = false) {
-        this.commonNodeCommandTasks(bullet, "highlightNode")
+        this.commonNodeCommandTasks(bullet, "highlight")
         this.highlight(bullet, toggle)
     }
 
@@ -242,23 +242,23 @@ export class BulletManager {
     }
 
     revealCommand(bullet: Bullet | undefined, highlight: Boolean = true) {
-        this.commonNodeCommandTasks(bullet, "revealNode")
+        this.commonNodeCommandTasks(bullet, "reveal")
         this.reveal(bullet, highlight)
     }
 
     connectCommand(bullet: Bullet | undefined) {
-        this.commonNodeCommandTasks(bullet, "connectNode")
+        this.commonNodeCommandTasks(bullet, "connect")
         this.connect(bullet, true, false, true) // first order outwards direct connections
         this.connect(bullet, false, false, true) // first order inwards direct connections
     }
 
     flowInCommand(bullet: Bullet | undefined) {
-        this.commonNodeCommandTasks(bullet, "flowInNode")
+        this.commonNodeCommandTasks(bullet, "flowIn")
         this.flowIn(bullet, false, false)
     }
 
     flowOutCommand(bullet: Bullet | undefined) {
-        this.commonNodeCommandTasks(bullet, "flowOutNode")
+        this.commonNodeCommandTasks(bullet, "flowOut")
         this.flowOut(bullet, false, false)
     }
 
@@ -404,6 +404,8 @@ export class BulletManager {
 
             connections = connectionsNextOrder
         }
+
+        this.fold(bullet)
     }
 
     appendConnections(bullet: Bullet | undefined, outwards: Boolean, connections: Array<Bullet>, connectParents: Boolean = false) {
