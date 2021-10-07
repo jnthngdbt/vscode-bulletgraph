@@ -21,6 +21,8 @@ export class Bullet {
     mustUpdate = false;
     isRevealed = false;
     isConnected = false;
+    isConnectedInwards = false;
+    isConnectedOutwards = false;
 
     clear() {
         this.text = "";
@@ -40,6 +42,8 @@ export class Bullet {
         this.mustUpdate = false;
         this.isRevealed = false;
         this.isConnected = false;
+        this.isConnectedInwards = false;
+        this.isConnectedOutwards = false;
     }
 
     isValid(): Boolean {

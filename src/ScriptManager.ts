@@ -105,8 +105,10 @@ export class ScriptManager {
             else if (command.name === 'revealNode'          ) { this.doc.revealCommand(command.argument.bullet, false); } 
             else if (command.name === 'highlightNode'       ) { this.doc.highlightCommand(command.argument.bullet, false); } 
             else if (command.name === 'spotlightNode'       ) { this.doc.spotlightCommand(command.argument.bullet, false); } 
-            else if (command.name === 'connectNode'         ) { this.doc.connectCommand(command.argument.bullet, false, EConnectDirection.eInOut, false); } 
-            else if (command.name === 'connectNodeHierarchy') { this.doc.connectCommand(command.argument.bullet, false, EConnectDirection.eInOut, true); } 
+            else if (command.name === 'connectNode'         ) { this.doc.connectCommand(command.argument.bullet); } 
+            else if (command.name === 'connectNodeHierarchy') { this.doc.connectCommand(command.argument.bullet); } 
+            else if (command.name === 'flowIn'              ) { this.doc.flowInCommand(command.argument.bullet); } 
+            else if (command.name === 'flowOut'             ) { this.doc.flowOutCommand(command.argument.bullet); } 
             else if (command.name === 'updateFolding'       ) { this.doc.updateEditorFoldingCommand(); }
         });
 

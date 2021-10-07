@@ -246,19 +246,20 @@ export class BulletManager {
         this.reveal(bullet, highlight)
     }
 
-    connectCommand(bullet: Bullet | undefined, highlight: Boolean = true, direction: EConnectDirection = EConnectDirection.eInOut, connectParents: Boolean = false) {
+    connectCommand(bullet: Bullet | undefined) {
         this.commonNodeCommandTasks(bullet, "connectNode")
-        this.connect(bullet, highlight, direction, connectParents, false)
+        this.connect(bullet, true, false, true) // first order outwards direct connections
+        this.connect(bullet, false, false, true) // first order inwards direct connections
     }
 
-    flowInCommand(bullet: Bullet | undefined, highlight: Boolean = true, connectParents: Boolean = false) {
+    flowInCommand(bullet: Bullet | undefined) {
         this.commonNodeCommandTasks(bullet, "flowInNode")
-        this.flowIn(bullet, highlight, connectParents)
+        this.flowIn(bullet, false, false)
     }
 
-    flowOutCommand(bullet: Bullet | undefined, highlight: Boolean = true, connectParents: Boolean = false) {
+    flowOutCommand(bullet: Bullet | undefined) {
         this.commonNodeCommandTasks(bullet, "flowOutNode")
-        this.flowOut(bullet, highlight, connectParents)
+        this.flowOut(bullet, false, false)
     }
 
     updateEditorFoldingCommand(callback: any | undefined = undefined) {
@@ -385,104 +386,75 @@ export class BulletManager {
         bullet.isRevealed = true;
     }
 
-    connect(bullet: Bullet | undefined, highlight: Boolean = true, direction: EConnectDirection = EConnectDirection.eInOut, connectParents: Boolean = false, deep = false) {
+    connect(bullet: Bullet | undefined, outwards: Boolean, connectParents: Boolean, firstOrderOnly: Boolean) {
         if (!bullet) return;
-        if (bullet.isConnected) return;
 
-        let connectionsFetcher = (bullet: Bullet, direction: EConnectDirection) => {
-            if (deep) return this.getConnectionsDeep(bullet, direction)
-            else return this.getConnections(bullet, direction)
+        var connections: Array<Bullet> = []
+
+        this.reveal(bullet, false)
+        this.appendConnections(bullet, outwards, connections, connectParents)
+
+        while (connections.length > 0) {
+            var connectionsNextOrder: Array<Bullet> = []
+            connections.forEach(connection => {
+                this.reveal(connection, false)
+                if (!firstOrderOnly) // only reveal connections, do not connect further
+                    this.appendConnections(connection, outwards, connectionsNextOrder, connectParents)
+            })
+
+            connections = connectionsNextOrder
         }
+    }
 
-        let connections = connectionsFetcher(bullet, direction);
+    appendConnections(bullet: Bullet | undefined, outwards: Boolean, connections: Array<Bullet>, connectParents: Boolean = false) {
+        if (!bullet) return;
+        if (outwards && bullet.isConnectedOutwards) return;
+        if (!outwards && bullet.isConnectedInwards) return;
+
+        this.appendDirectConnections(bullet, outwards, connections);
 
         // Add children connections.
         let children = this.getChildren(bullet);
-        children.forEach( child => { connections = connections.concat(connectionsFetcher(child, direction)); } );
+        children.forEach( child => { this.appendDirectConnections(child, outwards, connections) } );
 
         // Add parents connections if necessary.
         if (connectParents) {
             let parents = this.getParents(bullet);
-            parents.forEach( parent => { connections = connections.concat(connectionsFetcher(parent, direction)); } );
+            parents.forEach( parent => { this.appendDirectConnections(parent, outwards, connections) } );
         }
 
-        // Reveal bullet and its connections. Note: possible duplicates, but reveal should skip if already done.
-        this.reveal(bullet, false);
-        connections.forEach( connection => this.reveal(connection, false) );
-
-        if (highlight)
-            this.highlight(bullet);
-
-        bullet.isConnected = true;
-    }
-    
-    flowIn(bullet: Bullet | undefined, highlight: Boolean = true, connectParents: Boolean = false) {
-        this.connect(bullet, highlight, EConnectDirection.eIn, connectParents, true)
+        if (outwards) bullet.isConnectedOutwards = true
+        else bullet.isConnectedInwards = true
     }
 
-    flowOut(bullet: Bullet | undefined, highlight: Boolean = true, connectParents: Boolean = false) {
-        this.connect(bullet, highlight, EConnectDirection.eOut, connectParents, true)
-    }
-
-    getConnections(bullet: Bullet, direction: EConnectDirection): Array<Bullet> {
-        let connections: Array<Bullet> = [];
+    appendDirectConnections(bullet: Bullet, outwards: Boolean, connections: Array<Bullet>) {
+        let pushConnectionIfNecessary = (connection: Bullet) => {
+            if (outwards && !connection.isConnectedOutwards) connections.push(connection);
+            if (!outwards && !connection.isConnectedInwards) connections.push(connection);
+        }
 
         let pushConnectionFromId = (connectionId: string) => {
             let connection = this.getBulletFromId(connectionId);
-            if (connection) connections.push(connection);
-        }
-
-        let doIns  = (direction == EConnectDirection.eInOut) || (direction == EConnectDirection.eIn)
-        let doOuts = (direction == EConnectDirection.eInOut) || (direction == EConnectDirection.eOut)
-
-        // Added bullets that it directly links.
-        if (doIns ) bullet.idsIn.forEach(pushConnectionFromId);
-        if (doOuts) bullet.idsOut.forEach(pushConnectionFromId);
-
-        // Add bullets that directly link to it.
-        for (let other of this.bullets) {
-            if (doOuts && other.idsIn.includes(bullet.id)) connections.push(other);
-            if (doIns && other.idsOut.includes(bullet.id)) connections.push(other);
-        }
-
-        return connections;
-    }
-
-    getConnectionsRecursive(connections: Array<Bullet>, bullet: Bullet, outwards: boolean, isFirstPass: boolean = true) {
-        let foundInList = connections.find(b => b.lineIdx == bullet.lineIdx)
-         if (foundInList) return // already passed through this one, exit to avoid infinite loop
-
-        if (!isFirstPass) connections.push(bullet) // do not add the root to the connections
-
-        let processConnectionFromId = (connectionId: string) => {
-            let connection = this.getBulletFromId(connectionId);
-            if (connection) this.getConnectionsRecursive(connections, connection, outwards, false)
+            if (connection) pushConnectionIfNecessary(connection);
         }
 
         // Added bullets that it directly links.
-        if (outwards) bullet.idsOut.forEach(processConnectionFromId);
-        else          bullet.idsIn.forEach(processConnectionFromId);
+        if (outwards) bullet.idsOut.forEach(pushConnectionFromId);
+        else          bullet.idsIn.forEach(pushConnectionFromId);
 
         // Add bullets that directly link to it.
         for (let other of this.bullets) {
-            if (outwards && other.idsIn.includes(bullet.id)) this.getConnectionsRecursive(connections, other, outwards, false);
-            if (!outwards && other.idsOut.includes(bullet.id)) this.getConnectionsRecursive(connections, other, outwards, false);
+            if (outwards && other.idsIn.includes(bullet.id)) pushConnectionIfNecessary(other);
+            if (!outwards && other.idsOut.includes(bullet.id)) pushConnectionIfNecessary(other);
         }
     }
+    
+    flowIn(bullet: Bullet | undefined, highlight: Boolean = true, connectParents: Boolean = false) {
+        this.connect(bullet, false, connectParents, false)
+    }
 
-    getConnectionsDeep(bullet: Bullet, direction: EConnectDirection): Array<Bullet> {
-        let connectionsIn: Array<Bullet> = [];
-        let connectionsOut: Array<Bullet> = [];
-
-        let doIns  = (direction == EConnectDirection.eInOut) || (direction == EConnectDirection.eIn)
-        let doOuts = (direction == EConnectDirection.eInOut) || (direction == EConnectDirection.eOut)
-
-        if (doIns) this.getConnectionsRecursive(connectionsIn, bullet, false)
-        if (doOuts) this.getConnectionsRecursive(connectionsOut, bullet, true)
-
-        let connections = [...connectionsIn, ...connectionsOut]
-
-        return connections;
+    flowOut(bullet: Bullet | undefined, highlight: Boolean = true, connectParents: Boolean = false) {
+        this.connect(bullet, true, connectParents, false)
     }
 
     updateEditorFolding(callback: any | undefined = undefined) {
