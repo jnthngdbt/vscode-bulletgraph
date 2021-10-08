@@ -10,6 +10,16 @@ This extension depends on tintinweb.graphviz-interactive-preview.
 
 ## Extension Settings
 
+## Package and install from source
+
+```
+cd vscode-bulletgraph
+npm install
+sudo npm install -g vsce typescript
+vsce package
+code --install-extension *.vsix
+```
+
 ## Release Notes
 
 ### 1.0.0

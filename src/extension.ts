@@ -251,6 +251,8 @@ export function activate(context: vscode.ExtensionContext) {
     context.subscriptions.push( vscode.commands.registerCommand('vscode-bulletgraph.addLinkOut', () => { new BulletManager().addLink(ELink.eOut); }) );
 
     context.subscriptions.push( vscode.commands.registerCommand('vscode-bulletgraph.insertIdFromOtherLine', () => { new BulletManager().insertIdFromOtherLine(); }) );
+
+    BulletManager.console.show()
 }
 
 export function deactivate() {}
