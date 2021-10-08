@@ -245,6 +245,7 @@ export function activate(context: vscode.ExtensionContext) {
     context.subscriptions.push( vscode.commands.registerCommand('vscode-bulletgraph.moveCursorDown', () => { NavigationManager.moveCursorDown(); }) );
     
     context.subscriptions.push( vscode.commands.registerCommand('vscode-bulletgraph.goToLine', () => { new NavigationManager().goToLine(); }) );
+    context.subscriptions.push( vscode.commands.registerCommand('vscode-bulletgraph.goToConnectionBullet', () => { new NavigationManager().goToConnectionBullet(Editor.getActiveLineIdx()); }) );
 
     context.subscriptions.push( vscode.commands.registerCommand('vscode-bulletgraph.addLinkIn', () => { new BulletManager().addLink(ELink.eIn); }) );
     context.subscriptions.push( vscode.commands.registerCommand('vscode-bulletgraph.addLinkOut', () => { new BulletManager().addLink(ELink.eOut); }) );

@@ -10,6 +10,8 @@ export class DocumentLine {
     index = -1;
 }
 
+export type BulletQuickItems = { label: string; index: number; bullet: Bullet }[]
+
 export class BulletManager {
     bullets: Array<Bullet> = [];
     scriptLines: Array<DocumentLine> = [];
@@ -95,7 +97,7 @@ export class BulletManager {
 
         if (visibility === EVisibility.eHide)
             bullet.isHighlight = false;
-        
+
         if (!this.isParent(bullet) && (visibility === EVisibility.eFold))
             visibility = EVisibility.eNormal
 
@@ -107,7 +109,7 @@ export class BulletManager {
         if (!parent) return;
 
         let children = this.getChildren(parent);
-        children.forEach( child => this.setVisibility(child, visibility, skipHidden) );
+        children.forEach(child => this.setVisibility(child, visibility, skipHidden));
     }
 
     isLineFoldableByEditor(bullet: Bullet | undefined): boolean {
@@ -119,24 +121,28 @@ export class BulletManager {
         if (!next || !next.isValid()) return false;
         return next.depth > bullet.depth;
     }
-    
+
     callUnfoldCommand(bullet: Bullet | undefined, completionHandler: any | undefined = undefined) {
         if (bullet === undefined) {
-            vscode.commands.executeCommand("editor.unfold").then(() => { 
-                if (completionHandler) completionHandler(); });
+            vscode.commands.executeCommand("editor.unfold").then(() => {
+                if (completionHandler) completionHandler();
+            });
         } else {
-            vscode.commands.executeCommand("editor.unfold", { selectionLines: [bullet.lineIdx] }).then(() => { 
-                if (completionHandler) completionHandler(); });
+            vscode.commands.executeCommand("editor.unfold", { selectionLines: [bullet.lineIdx] }).then(() => {
+                if (completionHandler) completionHandler();
+            });
         }
     }
 
     callFoldCommand(bullet: Bullet | undefined, completionHandler: any | undefined = undefined) {
         if (bullet === undefined) {
-            vscode.commands.executeCommand("editor.fold").then(() => { 
-                if (completionHandler) completionHandler(); });
+            vscode.commands.executeCommand("editor.fold").then(() => {
+                if (completionHandler) completionHandler();
+            });
         } else {
-            vscode.commands.executeCommand("editor.fold", { selectionLines: [bullet.lineIdx] }).then(() => { 
-                if (completionHandler) completionHandler(); });
+            vscode.commands.executeCommand("editor.fold", { selectionLines: [bullet.lineIdx] }).then(() => {
+                if (completionHandler) completionHandler();
+            });
         }
     }
 
@@ -190,7 +196,7 @@ export class BulletManager {
         this.commonNodeCommandTasks(bullet, "unhide")
         this.unhide(bullet)
     }
-    
+
     foldAllCommand() {
         this.printScriptCommand("foldAll")
         this.foldAll()
@@ -288,27 +294,27 @@ export class BulletManager {
     unhide(bullet: Bullet | undefined) {
         this.revealIfHidden(bullet);
     }
-    
+
     foldAll() {
-        this.bullets.forEach( bullet => {
+        this.bullets.forEach(bullet => {
             this.setVisibility(bullet, EVisibility.eFold, true);
         });
     }
 
     unfoldAll() {
-        this.bullets.forEach( bullet => {
+        this.bullets.forEach(bullet => {
             this.setVisibility(bullet, EVisibility.eNormal, true);
         });
     }
 
     hideAll() {
-        this.bullets.forEach( bullet => {
+        this.bullets.forEach(bullet => {
             this.setVisibility(bullet, EVisibility.eHide);
         });
     }
 
     unhideAll() {
-        this.bullets.forEach( bullet => {
+        this.bullets.forEach(bullet => {
             this.setVisibility(bullet, EVisibility.eNormal);
         });
     }
@@ -379,7 +385,7 @@ export class BulletManager {
 
         // Make sure all parents are visible.
         let parents = this.getParents(bullet);
-        parents.forEach( parent => {
+        parents.forEach(parent => {
             this.setVisibility(parent, EVisibility.eNormal);
         });
 
@@ -423,12 +429,12 @@ export class BulletManager {
 
         // Add children connections.
         let children = this.getChildren(bullet);
-        children.forEach( child => { this.appendDirectConnections(child, outwards, connections) } );
+        children.forEach(child => { this.appendDirectConnections(child, outwards, connections) });
 
         // Add parents connections if necessary.
         if (connectParents) {
             let parents = this.getParents(bullet);
-            parents.forEach( parent => { this.appendDirectConnections(parent, outwards, connections) } );
+            parents.forEach(parent => { this.appendDirectConnections(parent, outwards, connections) });
         }
 
         if (outwards) bullet.isConnectedOutwards = true
@@ -448,7 +454,7 @@ export class BulletManager {
 
         // Added bullets that it directly links.
         if (outwards) bullet.idsOut.forEach(pushConnectionFromId);
-        else          bullet.idsIn.forEach(pushConnectionFromId);
+        else bullet.idsIn.forEach(pushConnectionFromId);
 
         // Add bullets that directly link to it.
         for (let other of this.bullets) {
@@ -479,7 +485,7 @@ export class BulletManager {
             }
         }
 
-        vscode.commands.executeCommand("editor.unfoldAll").then(() => { 
+        vscode.commands.executeCommand("editor.unfoldAll").then(() => {
             // Unfortunately, folding lines that are already folded will fold their parent, giving
             // unexpected results in our case.
             vscode.commands.executeCommand("editor.fold", { selectionLines: lineIndices }).then(
@@ -506,10 +512,10 @@ export class BulletManager {
         if (bullet) {
             for (let i = bullet.bulletIdx - 1; i >= 0; i--) { // backtrack
                 const parent = this.bullets[i];
-    
+
                 if (!parent.isValid()) // skip comments and invalid lines
                     continue;
-    
+
                 if (parent.depth < bullet.depth) // found parent
                     return parent;
             }
@@ -534,10 +540,10 @@ export class BulletManager {
 
                 if (!child.isValid()) // skip comments
                     continue;
-    
+
                 if (child.depth <= parent.depth) // no more a child
                     break;
-    
+
                 children.push(child);
 
                 if (onlyFirst) break;
@@ -558,7 +564,7 @@ export class BulletManager {
     propagateVisibility() {
         let currHideDepth = -1;
         let currFoldDepth = -1;
-        this.bullets.forEach( bullet => {
+        this.bullets.forEach(bullet => {
             if (bullet.isValid()) {
                 // Reset depth trackers if necessary.
                 if (bullet.depth <= currHideDepth) currHideDepth = -1;
@@ -566,16 +572,16 @@ export class BulletManager {
 
                 if ((currHideDepth >= 0) && (bullet.depth > currHideDepth)) { // hidden
                     this.setVisibility(bullet, EVisibility.eHide);
-                } 
+                }
                 else if ((currFoldDepth >= 0) && (bullet.depth > currFoldDepth)) { // folded
                     this.setVisibility(bullet, EVisibility.eFoldHidden, true);
-                } 
+                }
                 else if (bullet.visibility === EVisibility.eHide) { // new hide root
                     currHideDepth = bullet.depth;
-                } 
+                }
                 else if (bullet.visibility === EVisibility.eFold) { // new fold root
                     currFoldDepth = bullet.depth;
-                } 
+                }
                 else if (bullet.visibility === EVisibility.eFoldHidden) { // not hidden anymore, so should not be fold hidden
                     this.setVisibility(bullet, EVisibility.eFold);
                     if (this.isParent(bullet))
@@ -590,26 +596,26 @@ export class BulletManager {
         if (!editor || this.bullets.length <= 0) return;
 
         editor.edit((editBuilder) => {
-            this.bullets.forEach( bullet => {
+            this.bullets.forEach(bullet => {
                 if (bullet.isValid() && bullet.mustUpdate) {
                     let newCompString = bullet.generateComponentSectionString();
-    
+
                     let pos = bullet.text.indexOf(LABEL_ID_SEP);
                     if (pos < 0 && newCompString.length === 0) return; // nothing to do
-            
+
                     if (pos < 0) {
                         if (bullet.text[bullet.text.length - 1] !== " ")
                             newCompString = " " + newCompString; // add a space if not already ending with a space
                         pos = bullet.text.length;
                     }
-    
+
                     const range = new vscode.Range(
                         new vscode.Position(bullet.lineIdx, pos),
                         new vscode.Position(bullet.lineIdx, bullet.text.length)
                     );
                     editBuilder.replace(range, newCompString);
                 }
-            } )
+            })
         }).then((success) => {
             if (callback) callback(this.bullets);
         });
@@ -619,13 +625,13 @@ export class BulletManager {
         this.getQuickPickLineIdAndCreateOneIfNecessary((id: string) => {
             // If necessary, the id has been set, but not written yet.
             // So first rewrite updated bullets, then write id at active position.
-            this.writeBullets(() => { 
+            this.writeBullets(() => {
                 // Skip re-writing the id if the active line was selected.
                 let bullet = this.getActiveBullet();
                 if (bullet && bullet.id === id) return;
 
                 Editor.insertTextAtActivePosition(id);
-             });
+            });
         });
     }
 
@@ -639,7 +645,7 @@ export class BulletManager {
                 case ELink.eOut: bullet.idsOut.push(id); break;
                 default: break;
             }
-            
+
             bullet.mustUpdate = true;
             this.writeBullets();
         });
@@ -660,9 +666,79 @@ export class BulletManager {
                 if (!bullet) return;
 
                 this.setPermanentRandomIdIfNecessary(bullet)
-                
+
                 callback(bullet.id);
             }
         });
+    }
+
+    showBulletQuickPick(callback: (id: string) => void) {
+        let quickItems = this.getBulletQuickItems(true)
+        Editor.showQuickPick(quickItems, 0, callback)
+    }
+
+    showBulletConnectionQuickPick(bullet: Bullet | undefined, callback: (id: string) => void) {
+        let quickItems = this.getBulletConnectionsQuickItems(bullet)
+        Editor.showQuickPick(quickItems, 0, callback)
+    }
+
+    getBulletQuickItems(withBullet: Boolean): BulletQuickItems {
+        let hierarchySep = " ___ "
+        var parents: Array<string> = []
+        var quickItems: BulletQuickItems = []
+
+        let createQuickItemString = (bullet: Bullet, parents: Array<string>): string => {
+            var str = ""
+            if (withBullet) str += bullet.bulletType + " "
+            str += bullet.label
+
+            parents.forEach(parent => {
+                str = str + hierarchySep + parent
+            })
+            return str
+        }
+
+        this.bullets.forEach((bullet: Bullet, index: number) => {
+            if (bullet.depth == 0) {
+                parents = []
+            } else if (bullet.depth < parents.length) {
+                parents = parents.slice(-bullet.depth)
+            }
+
+            let bulletString = createQuickItemString(bullet, parents)
+            quickItems.push({ label: bulletString, index: index, bullet: bullet })
+            parents.unshift(bullet.label) // insert at beginning
+        })
+
+        return quickItems
+    }
+
+    getBulletConnectionsQuickItems(bullet: Bullet | undefined): BulletQuickItems {
+        if (!bullet) return []
+
+        let inToken = "<<"
+        let outToken = ">>"
+
+        var quickItems: BulletQuickItems = []
+        let quickItemsAll = this.getBulletQuickItems(false)
+
+        let getConnectionPrefix = (bullet: Bullet, other: Bullet): string | undefined => {
+            if (other.idsIn.includes(bullet.id)) return outToken
+            if (other.idsOut.includes(bullet.id)) return inToken
+            if (bullet.idsIn.includes(other.id)) return inToken
+            if (bullet.idsOut.includes(other.id)) return outToken
+            return undefined
+        }
+
+        quickItemsAll.forEach(q => {
+            let other = q.bullet
+            let connectionPrefix = getConnectionPrefix(bullet, other)
+            if (connectionPrefix) {
+                q.label = connectionPrefix + " " + q.label
+                quickItems.push(q)
+            }
+        })
+
+        return quickItems
     }
 }

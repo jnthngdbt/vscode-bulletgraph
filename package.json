@@ -48,6 +48,7 @@
 		"onCommand:vscode-bulletgraph.moveCursorUp",
 		"onCommand:vscode-bulletgraph.moveCursorDown",
 		"onCommand:vscode-bulletgraph.goToLine",
+		"onCommand:vscode-bulletgraph.goToConnectionBullet",
 		"onCommand:vscode-bulletgraph.addLinkIn",
 		"onCommand:vscode-bulletgraph.addLinkOut",
 		"onCommand:vscode-bulletgraph.insertIdFromOtherLine"
@@ -219,6 +220,10 @@
 				"title": "Bullet Graph: Go To Line"
 			},
 			{
+				"command": "vscode-bulletgraph.goToConnectionBullet",
+				"title": "Bullet Graph: Go To Connection Bullet"
+			},
+			{
 				"command": "vscode-bulletgraph.addLinkIn",
 				"title": "Bullet Graph: Add Link In"
 			},
@@ -331,6 +336,11 @@
 				"command": "vscode-bulletgraph.goBackVisible",
 				"key": "shift+alt+u",
 				"mac": "shift+cmd+u"
+			},
+			{
+				"command": "vscode-bulletgraph.goToConnectionBullet",
+				"key": "shift+alt+f",
+				"mac": "shift+cmd+f"
 			}
 		]
 	},

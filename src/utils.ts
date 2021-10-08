@@ -58,15 +58,18 @@ export namespace Editor {
         const activeLineIdx = Editor.getActiveLineIdx() ?? 0;
         const quickItems = strings?.map( (label, index) => { return { label, index };}); // can be any object with label property
 
+        showQuickPick(quickItems, activeLineIdx, completionHandler);
+    }
+
+    export function showQuickPick(quickItems: { label: string; index: number; }[], activeIdx: number, completionHandler: any | undefined = undefined) {
         let quickPick = vscode.window.createQuickPick();
         quickPick.items = quickItems;
-        quickPick.activeItems = [ quickItems[activeLineIdx] ];
+        quickPick.activeItems = [ quickItems[activeIdx] ];
         quickPick.onDidHide(() => quickPick.dispose());
         quickPick.onDidAccept(() => {
             if (completionHandler) completionHandler(quickPick.activeItems[0]);
             quickPick.hide();
         });
-
         quickPick.show();
     }
 }

@@ -37,6 +37,16 @@ export class NavigationManager {
         });
     }
 
+    goToConnectionBullet(lineIdx: number | undefined) {
+        if (lineIdx === undefined) return;
+        let activeBullet = this.doc.getBulletAtLine(lineIdx)
+        this.doc.showBulletConnectionQuickPick(activeBullet, (selected: any) => {
+            if (selected) {
+                this.focus(selected.bullet);
+            }
+        });
+    }
+
     goToParent(lineIdx: number | undefined) {
         const bullet = this.doc.getBulletAtLine(lineIdx);
         const parent = this.doc.getParent(bullet);
