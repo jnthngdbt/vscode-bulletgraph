@@ -252,14 +252,20 @@ export class BulletManager {
         this.connect(bullet, false, false, true) // first order inwards direct connections
     }
 
+    networkCommand(bullet: Bullet | undefined) {
+        this.commonNodeCommandTasks(bullet, "network")
+        this.connect(bullet, true, false, false)
+        this.connect(bullet, false, false, false)
+    }
+
     flowInCommand(bullet: Bullet | undefined) {
         this.commonNodeCommandTasks(bullet, "flowIn")
-        this.flowIn(bullet, false, false)
+        this.connect(bullet, false, false, false)
     }
 
     flowOutCommand(bullet: Bullet | undefined) {
         this.commonNodeCommandTasks(bullet, "flowOut")
-        this.flowOut(bullet, false, false)
+        this.connect(bullet, true, false, false)
     }
 
     updateEditorFoldingCommand(callback: any | undefined = undefined) {
@@ -449,14 +455,6 @@ export class BulletManager {
             if (outwards && other.idsIn.includes(bullet.id)) pushConnectionIfNecessary(other);
             if (!outwards && other.idsOut.includes(bullet.id)) pushConnectionIfNecessary(other);
         }
-    }
-    
-    flowIn(bullet: Bullet | undefined, highlight: Boolean = true, connectParents: Boolean = false) {
-        this.connect(bullet, false, connectParents, false)
-    }
-
-    flowOut(bullet: Bullet | undefined, highlight: Boolean = true, connectParents: Boolean = false) {
-        this.connect(bullet, true, connectParents, false)
     }
 
     updateEditorFolding(callback: any | undefined = undefined) {

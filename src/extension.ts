@@ -179,6 +179,14 @@ export function activate(context: vscode.ExtensionContext) {
     );
 
     context.subscriptions.push(
+        vscode.commands.registerCommand('vscode-bulletgraph.networkNode', () => {
+            let b = new BulletManager();
+            b.networkCommand(b.getActiveBullet());
+            b.update();
+        })
+    );
+
+    context.subscriptions.push(
         vscode.commands.registerCommand('vscode-bulletgraph.flowIn', () => {
             let b = new BulletManager();
             b.flowInCommand(b.getActiveBullet());
