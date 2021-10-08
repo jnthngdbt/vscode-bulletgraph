@@ -1,7 +1,7 @@
 import * as vscode from 'vscode';
 
 import { EConnectDirection, NEW_SCRIPT_CHAR } from './constants'
-import { Strings } from './utils'
+import { Editor, Strings } from './utils'
 
 import { BulletManager } from './BulletManager'
 import { Bullet } from './Bullet';
@@ -23,9 +23,26 @@ class Script {
     commands: Array<Command> = [];
 }
 
+export type ScriptQuickItems = { label: string; index: number; script: Script }[]
+
 export class ScriptManager {
     scripts: Array<Script> = [];
     doc = new BulletManager();
+
+    applyScriptFromList() {
+        this.parseScripts();
+
+        var quickItems: ScriptQuickItems = []
+
+        this.scripts.forEach((script, index) => {
+            let label = "$ " + script.name + ""
+            quickItems.push({ label, index, script })
+        })
+
+        Editor.showQuickPick(quickItems, 0, (selection: any) => {
+            if (selection) this.runCommands(selection.script)
+        })
+    }
 
     applyScript(lineIdx: number | undefined) {
         if (lineIdx === undefined) return false;

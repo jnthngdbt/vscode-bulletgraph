@@ -14,6 +14,7 @@
 	"activationEvents": [
 		"onCommand:vscode-bulletgraph.renderPreview",
 		"onCommand:vscode-bulletgraph.applyScript",
+		"onCommand:vscode-bulletgraph.applyScriptFromList",
 		"onCommand:vscode-bulletgraph.generateDotFile",
 		"onCommand:vscode-bulletgraph.insertId",
 		"onCommand:vscode-bulletgraph.foldNode",
@@ -82,6 +83,10 @@
 			{
 				"command": "vscode-bulletgraph.applyScript",
 				"title": "Bullet Graph: Apply Script"
+			},
+			{
+				"command": "vscode-bulletgraph.applyScriptFromList",
+				"title": "Bullet Graph: Apply Script From List"
 			},
 			{
 				"command": "vscode-bulletgraph.generateDotFile",
@@ -248,6 +253,11 @@
 				"mac": "ctrl+shift+cmd+enter"
 			},
 			{
+				"command": "vscode-bulletgraph.applyScriptFromList",
+				"key": "shift+alt+r",
+				"mac": "shift+cmd+r"
+			},
+			{
 				"command": "vscode-bulletgraph.lessVisible",
 				"key": "shift+alt+l",
 				"mac": "shift+cmd+l"
@@ -336,6 +346,11 @@
 				"command": "vscode-bulletgraph.goBackVisible",
 				"key": "shift+alt+u",
 				"mac": "shift+cmd+u"
+			},
+			{
+				"command": "vscode-bulletgraph.goToLine",
+				"key": "shift+alt+g",
+				"mac": "shift+cmd+g"
 			},
 			{
 				"command": "vscode-bulletgraph.goToConnectionBullet",

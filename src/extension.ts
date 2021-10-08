@@ -51,6 +51,12 @@ export function activate(context: vscode.ExtensionContext) {
     );
 
     context.subscriptions.push(
+        vscode.commands.registerCommand('vscode-bulletgraph.applyScriptFromList', () => {
+            new ScriptManager().applyScriptFromList();
+        })
+    );
+
+    context.subscriptions.push(
         vscode.commands.registerCommand('vscode-bulletgraph.foldNode', () => {
             let b = new BulletManager();
             b.foldCommand(b.getActiveBullet());
