@@ -111,7 +111,7 @@ export class DotFileManager {
                 if (node.dependencySize) props.push(`fontsize=${fontsize}`);
                 if (node.isHighlight) {
                     props.push(`fillcolor=\"#442244\"`);
-                    if (node.isProcess()) props.push(`style = \"rounded,filled\"`);
+                    if (node.isFlowOrFlowBreak()) props.push(`style = \"rounded,filled\"`);
                     else props.push(`style = filled`);
                 }
 
@@ -161,7 +161,7 @@ export class DotFileManager {
 
                 style += `penwidth = ${BASE_PENWIDTH}; `;
 
-                if (node.isProcess()) {
+                if (node.isFlow() || node.isFlowBreak()) {
                     style += `color = \"#555588\"; style = "rounded,filled"; `;
                 } else {
                     style += `color = gray30; style = "rounded,filled"; `;
@@ -180,9 +180,9 @@ export class DotFileManager {
                 str += this.printNodesHierarchy(node.children, indent + Strings.TAB);
                 str += indent + "} \n";
             } else if (!node.isLeaf()) {
-                const fontcolor = node.isProcess() ? "\"#8888bb\"" : "\"#888888\""
+                const fontcolor = node.isFlowOrFlowBreak() ? "\"#8888bb\"" : "\"#888888\""
                 str += indent + node.id + " [fontcolor = " + fontcolor + ", label=" + getBoldLabel(node.label) + "]\n";
-            } else if (!node.isFlowBreak()) { // do not show them
+            } else {
                 str += indent + node.id + " [label=\"" + Strings.wordWrap(node.label) + "\"]\n";
             }
         })

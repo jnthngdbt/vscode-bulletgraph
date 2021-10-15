@@ -24,7 +24,7 @@ export enum ELink {
 export enum EBullet {
     eDefault = '-',
     eFlow = '>',
-    eFlowBreak = '<'
+    eFlowBreak = '^'
 };
 
 export enum EVisibility {

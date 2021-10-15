@@ -29,12 +29,16 @@ export class Node {
         return !this.isLeaf() && !this.isSubgraph();
     }
 
-    isProcess() {
+    isFlow() {
         return this.bulletType === EBullet.eFlow;
     }
 
     isFlowBreak() {
         return this.bulletType === EBullet.eFlowBreak;
+    }
+
+    isFlowOrFlowBreak() {
+        return this.isFlow() || this.isFlowBreak()
     }
 
     getType(): ENode {
@@ -46,7 +50,7 @@ export class Node {
             } else {
                 return ENode.eDefault;
             }
-        } else if (this.bulletType === EBullet.eFlow) {
+        } else if (this.bulletType === EBullet.eFlow || this.bulletType === EBullet.eFlowBreak) {
             if (this.children.length > 0) {
                 return ENode.eSubgraphProcess;
             } else if (this.dependencySize > 0) {
@@ -54,8 +58,6 @@ export class Node {
             } else {
                 return ENode.eProcess;
             }
-        } else if (this.bulletType === EBullet.eFlowBreak) {
-            return ENode.eFlowBreak;
         }
         return ENode.eDefault;
     }
@@ -227,23 +229,23 @@ export class BulletGraph {
         let aFlowChildWasLinked = false;
         let lastLeafChild = new Node();
         node.children.forEach( child => {
-            if (!child.isFlowBreak()) { // do not link to it
-                if (child.isProcess()) { 
-                    if (!node.isProcess() && !aFlowChildWasLinked) { // link subgraph parent to only first process child
-                        this.links.addEdge(node.id, child.id, EEdge.eHierarchy);
-                        aFlowChildWasLinked = true;
-                    }
-                } else if (child.isSubgraph()) { // connect all subgraph children to parent
+            if (child.isFlow()) { 
+                if (!node.isFlow() && !aFlowChildWasLinked) { // link subgraph parent to only first process child
                     this.links.addEdge(node.id, child.id, EEdge.eHierarchy);
-                } else { // no visible children, so considered leaf
-                    if (lastLeafChild.isValid()) { // link all leaf nodes together, in chain
-                        this.links.addEdge(lastLeafChild.id, child.id, EEdge.eHierarchy);
-                    } else {
-                        this.links.addEdge(node.id, child.id, EEdge.eHierarchy);
-                    }
-    
-                    lastLeafChild = child; // remember last leaf node for chaining
+                    aFlowChildWasLinked = true;
                 }
+            } else if (child.isFlowBreak()) {
+                this.links.addEdge(node.id, child.id, EEdge.eHierarchy);
+            } else if (child.isSubgraph()) { // connect all subgraph children to parent
+                this.links.addEdge(node.id, child.id, EEdge.eHierarchy);
+            } else { // no visible children, so considered leaf
+                if (lastLeafChild.isValid()) { // link all leaf nodes together, in chain
+                    this.links.addEdge(lastLeafChild.id, child.id, EEdge.eHierarchy);
+                } else {
+                    this.links.addEdge(node.id, child.id, EEdge.eHierarchy);
+                }
+
+                lastLeafChild = child; // remember last leaf node for chaining
             }
     
             // Recurse.
@@ -251,19 +253,23 @@ export class BulletGraph {
         })
     }
 
-    createFlowEdges(node: Node, lastNode: Node | undefined = undefined) {
+    createFlowEdges(node: Node, lastNode: Node | undefined = undefined, parent: Node | undefined = undefined) {
         // Create a flow edge between 2 consecutive process nodes (can be parent -> child).
-        if (lastNode && node.isProcess() && lastNode.isProcess()) {
+        if (lastNode && node.isFlow() && lastNode.isFlowOrFlowBreak()) {
             this.links.addEdge(lastNode.id, node.id, EEdge.eFlow);
         }
 
         if (!lastNode) lastNode = new Node();
         lastNode.copyFrom(node);
 
+        if (parent && parent.isFlowOrFlowBreak() && node.isFlowBreak()) {
+            this.links.addEdge(parent.id, node.id, EEdge.eFlow);
+        }
+
         if (node.children.length <= 0) return;
     
         node.children.forEach( child => {
-            this.createFlowEdges(child, lastNode); // recurse
+            this.createFlowEdges(child, lastNode, node); // recurse
         })
     }
 
