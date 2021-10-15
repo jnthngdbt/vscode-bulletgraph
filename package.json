@@ -98,19 +98,19 @@
 			},
 			{
 				"command": "vscode-bulletgraph.foldNode",
-				"title": "Bullet Graph: Fold Line"
+				"title": "Bullet Graph: Fold"
 			},
 			{
 				"command": "vscode-bulletgraph.unfoldNode",
-				"title": "Bullet Graph: Unfold Line"
+				"title": "Bullet Graph: Unfold"
 			},
 			{
 				"command": "vscode-bulletgraph.hideNode",
-				"title": "Bullet Graph: Hide Node"
+				"title": "Bullet Graph: Hide"
 			},
 			{
 				"command": "vscode-bulletgraph.unhideNode",
-				"title": "Bullet Graph: Unhide Node"
+				"title": "Bullet Graph: Unhide"
 			},
 			{
 				"command": "vscode-bulletgraph.updateFolding",
@@ -134,15 +134,15 @@
 			},
 			{
 				"command": "vscode-bulletgraph.revealNode",
-				"title": "Bullet Graph: Reveal Node"
+				"title": "Bullet Graph: Reveal"
 			},
 			{
 				"command": "vscode-bulletgraph.highlightNode",
-				"title": "Bullet Graph: Highlight Node"
+				"title": "Bullet Graph: Highlight"
 			},
 			{
 				"command": "vscode-bulletgraph.spotlightNode",
-				"title": "Bullet Graph: Spotlight Node"
+				"title": "Bullet Graph: Spotlight"
 			},
 			{
 				"command": "vscode-bulletgraph.foldChildren",
@@ -162,11 +162,11 @@
 			},
 			{
 				"command": "vscode-bulletgraph.connectNode",
-				"title": "Bullet Graph: Connect Node"
+				"title": "Bullet Graph: Connect"
 			},
 			{
 				"command": "vscode-bulletgraph.networkNode",
-				"title": "Bullet Graph: Network Node"
+				"title": "Bullet Graph: Network"
 			},
 			{
 				"command": "vscode-bulletgraph.flowIn",
@@ -178,7 +178,7 @@
 			},
 			{
 				"command": "vscode-bulletgraph.connectNodeHierarchy",
-				"title": "Bullet Graph: Connect Node Hierarchy"
+				"title": "Bullet Graph: Connect Hierarchy"
 			},
 			{
 				"command": "vscode-bulletgraph.lessVisible",
@@ -244,8 +244,8 @@
 		"keybindings": [
 			{
 				"command": "vscode-bulletgraph.renderPreview",
-				"key": "shift+alt+enter",
-				"mac": "shift+cmd+enter"
+				"key": "f5",
+				"mac": "f5"
 			},
 			{
 				"command": "vscode-bulletgraph.applyScript",
