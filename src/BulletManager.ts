@@ -258,10 +258,22 @@ export class BulletManager {
         this.connect(bullet, false, false, true) // first order inwards direct connections
     }
 
+    connectHierarchyCommand(bullet: Bullet | undefined) {
+        this.commonNodeCommandTasks(bullet, "connectHierarchy")
+        this.connect(bullet, true, true, true) // first order outwards direct connections
+        this.connect(bullet, false, true, true) // first order inwards direct connections
+    }
+
     networkCommand(bullet: Bullet | undefined) {
         this.commonNodeCommandTasks(bullet, "network")
         this.connect(bullet, true, false, false)
         this.connect(bullet, false, false, false)
+    }
+
+    networkHierarchyCommand(bullet: Bullet | undefined) {
+        this.commonNodeCommandTasks(bullet, "networkHierarchy")
+        this.connect(bullet, true, true, false) // first order outwards direct connections
+        this.connect(bullet, false, true, false) // first order inwards direct connections
     }
 
     flowInCommand(bullet: Bullet | undefined) {

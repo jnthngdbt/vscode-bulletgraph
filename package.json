@@ -35,6 +35,7 @@
 		"onCommand:vscode-bulletgraph.spotlightNode",
 		"onCommand:vscode-bulletgraph.connectNode",
 		"onCommand:vscode-bulletgraph.connectNodeHierarchy",
+		"onCommand:vscode-bulletgraph.networkNodeHierarchy",
 		"onCommand:vscode-bulletgraph.networkNode",
 		"onCommand:vscode-bulletgraph.flowIn",
 		"onCommand:vscode-bulletgraph.flowOut",
@@ -179,6 +180,10 @@
 			{
 				"command": "vscode-bulletgraph.connectNodeHierarchy",
 				"title": "Bullet Graph: Connect Hierarchy"
+			},
+			{
+				"command": "vscode-bulletgraph.networkNodeHierarchy",
+				"title": "Bullet Graph: Network Hierarchy"
 			},
 			{
 				"command": "vscode-bulletgraph.lessVisible",

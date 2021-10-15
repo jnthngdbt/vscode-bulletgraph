@@ -211,7 +211,15 @@ export function activate(context: vscode.ExtensionContext) {
     context.subscriptions.push(
         vscode.commands.registerCommand('vscode-bulletgraph.connectNodeHierarchy', () => {
             let b = new BulletManager();
-            b.connectCommand(b.getActiveBullet());
+            b.connectHierarchyCommand(b.getActiveBullet());
+            b.update();
+        })
+    );
+
+    context.subscriptions.push(
+        vscode.commands.registerCommand('vscode-bulletgraph.networkNodeHierarchy', () => {
+            let b = new BulletManager();
+            b.networkHierarchyCommand(b.getActiveBullet());
             b.update();
         })
     );
