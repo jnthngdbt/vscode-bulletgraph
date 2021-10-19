@@ -2,11 +2,12 @@ import * as vscode from 'vscode';
 
 import { BulletGraph } from './BulletGraph'
 import { DepthManager } from './DepthManager'
-import { EConnectDirection, ELink, ERenderingEngine } from './constants'
+import { ELink, ERenderingEngine } from './constants'
 import { DotFileManager } from './DotFileManager'
 import { generateIdFromLineContent } from './NodeIdGenerator'
 import { BulletManager } from './BulletManager';
 import { NavigationManager } from './NavigationManager';
+import { GraphvizSvgExporter } from './GraphvizSvgExporter';
 import { ScriptManager } from './ScriptManager';
 import { Editor } from './utils';
 
@@ -20,8 +21,13 @@ function render(launchPreview: Boolean) {
     let depthBullet = depthManager.pruneAndReorganize(bullet);
 
     // Render a Graphviz dot file.
+    const dotname = vscode.window.activeTextEditor?.document.fileName + ".dot";
     let dotFileManager = new DotFileManager();
-    dotFileManager.render(depthBullet, ERenderingEngine.eGraphvizInteractive, launchPreview);
+    dotFileManager.render(dotname, depthBullet, ERenderingEngine.eGraphvizInteractive, launchPreview);
+
+    // Export to SVG.
+    const svgname = dotname + ".svg";
+    new GraphvizSvgExporter().export(vscode.Uri.file(dotname), vscode.Uri.file(svgname));
 
     // Save document.
     vscode.window.activeTextEditor?.document.save();
