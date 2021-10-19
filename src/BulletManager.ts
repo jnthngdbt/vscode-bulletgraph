@@ -254,36 +254,36 @@ export class BulletManager {
 
     connectCommand(bullet: Bullet | undefined) {
         this.commonNodeCommandTasks(bullet, "connect")
-        this.connect(bullet, true, false, true) // first order outwards direct connections
-        this.connect(bullet, false, false, true) // first order inwards direct connections
+        this.connect(bullet, true, false, true, true) // first order outwards direct connections
+        this.connect(bullet, false, false, true, true) // first order inwards direct connections
     }
 
     connectHierarchyCommand(bullet: Bullet | undefined) {
         this.commonNodeCommandTasks(bullet, "connectHierarchy")
-        this.connect(bullet, true, true, true) // first order outwards direct connections
-        this.connect(bullet, false, true, true) // first order inwards direct connections
+        this.connect(bullet, true, true, true, true) // first order outwards direct connections
+        this.connect(bullet, false, true, true, true) // first order inwards direct connections
     }
 
     networkCommand(bullet: Bullet | undefined) {
         this.commonNodeCommandTasks(bullet, "network")
-        this.connect(bullet, true, false, false)
-        this.connect(bullet, false, false, false)
+        this.connect(bullet, true, false, true, false)
+        this.connect(bullet, false, false, true, false)
     }
 
     networkHierarchyCommand(bullet: Bullet | undefined) {
         this.commonNodeCommandTasks(bullet, "networkHierarchy")
-        this.connect(bullet, true, true, false) // first order outwards direct connections
-        this.connect(bullet, false, true, false) // first order inwards direct connections
+        this.connect(bullet, true, true, true, false) // first order outwards direct connections
+        this.connect(bullet, false, true, true, false) // first order inwards direct connections
     }
 
     flowInCommand(bullet: Bullet | undefined) {
         this.commonNodeCommandTasks(bullet, "flowIn")
-        this.connect(bullet, false, false, false)
+        this.connect(bullet, false, true, true, false) // for flow in, connect parents
     }
 
     flowOutCommand(bullet: Bullet | undefined) {
         this.commonNodeCommandTasks(bullet, "flowOut")
-        this.connect(bullet, true, false, false)
+        this.connect(bullet, true, false, true, false)
     }
 
     updateEditorFoldingCommand(callback: any | undefined = undefined) {
@@ -410,20 +410,20 @@ export class BulletManager {
         bullet.isRevealed = true;
     }
 
-    connect(bullet: Bullet | undefined, outwards: Boolean, connectParents: Boolean, firstOrderOnly: Boolean) {
+    connect(bullet: Bullet | undefined, outwards: Boolean, connectParents: Boolean, connectChildren: Boolean, firstOrderOnly: Boolean) {
         if (!bullet) return;
 
         var connections: Array<Bullet> = []
 
         this.reveal(bullet, false)
-        this.appendConnections(bullet, outwards, connections, connectParents)
+        this.appendConnections(bullet, outwards, connections, connectParents, connectChildren)
 
         while (connections.length > 0) {
             var connectionsNextOrder: Array<Bullet> = []
             connections.forEach(connection => {
                 this.reveal(connection, false)
                 if (!firstOrderOnly) // only reveal connections, do not connect further
-                    this.appendConnections(connection, outwards, connectionsNextOrder, connectParents)
+                    this.appendConnections(connection, outwards, connectionsNextOrder, connectParents, connectChildren)
             })
 
             connections = connectionsNextOrder
@@ -432,16 +432,18 @@ export class BulletManager {
         this.fold(bullet)
     }
 
-    appendConnections(bullet: Bullet | undefined, outwards: Boolean, connections: Array<Bullet>, connectParents: Boolean = false) {
+    appendConnections(bullet: Bullet | undefined, outwards: Boolean, connections: Array<Bullet>, connectParents: Boolean, connectChildren: Boolean) {
         if (!bullet) return;
         if (outwards && bullet.isConnectedOutwards) return;
         if (!outwards && bullet.isConnectedInwards) return;
 
         this.appendDirectConnections(bullet, outwards, connections);
 
-        // Add children connections.
-        let children = this.getChildren(bullet);
-        children.forEach(child => { this.appendDirectConnections(child, outwards, connections) });
+        // Add children connections if necessary.
+        if (connectChildren) {
+            let children = this.getChildren(bullet);
+            children.forEach(child => { this.appendDirectConnections(child, outwards, connections) });
+        }
 
         // Add parents connections if necessary.
         if (connectParents) {
