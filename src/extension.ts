@@ -11,7 +11,7 @@ import { GraphvizSvgExporter } from './GraphvizSvgExporter';
 import { ScriptManager } from './ScriptManager';
 import { Editor } from './utils';
 
-function render(launchPreview: Boolean) {
+function render(launchPreview: Boolean, saveSvg: Boolean) {
     // Parsing the editor file to get the bullet graph structure.
     let bullet = new BulletGraph();
     bullet.parseEditorFile();
@@ -25,9 +25,11 @@ function render(launchPreview: Boolean) {
     let dotFileManager = new DotFileManager();
     dotFileManager.render(dotname, depthBullet, ERenderingEngine.eGraphvizInteractive, launchPreview);
 
-    // Export to SVG.
-    const svgname = dotname + ".svg";
-    new GraphvizSvgExporter().export(vscode.Uri.file(dotname), vscode.Uri.file(svgname));
+    // Export to SVG if necessary.
+    if (saveSvg) {
+        const svgname = dotname + ".svg";
+        new GraphvizSvgExporter().export(vscode.Uri.file(dotname), vscode.Uri.file(svgname));
+    }
 
     // Save document.
     vscode.window.activeTextEditor?.document.save();
@@ -35,11 +37,15 @@ function render(launchPreview: Boolean) {
 
 export function activate(context: vscode.ExtensionContext) {
     context.subscriptions.push(
-        vscode.commands.registerCommand('vscode-bulletgraph.renderPreview', () => render(true))
+        vscode.commands.registerCommand('vscode-bulletgraph.renderPreview', () => render(true, false))
     );
 
     context.subscriptions.push(
-        vscode.commands.registerCommand('vscode-bulletgraph.generateDotFile', () => render(false))
+        vscode.commands.registerCommand('vscode-bulletgraph.renderAndSaveSvg', () => render(true, true))
+    );
+
+    context.subscriptions.push(
+        vscode.commands.registerCommand('vscode-bulletgraph.generateDotFile', () => render(false, false))
     );
 
     context.subscriptions.push(

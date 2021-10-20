@@ -13,6 +13,7 @@
 	],
 	"activationEvents": [
 		"onCommand:vscode-bulletgraph.renderPreview",
+		"onCommand:vscode-bulletgraph.renderAndSaveSvg",
 		"onCommand:vscode-bulletgraph.applyScript",
 		"onCommand:vscode-bulletgraph.applyScriptFromList",
 		"onCommand:vscode-bulletgraph.generateDotFile",
@@ -80,6 +81,10 @@
 			{
 				"command": "vscode-bulletgraph.renderPreview",
 				"title": "Bullet Graph: Render Preview Beside"
+			},
+			{
+				"command": "vscode-bulletgraph.renderAndSaveSvg",
+				"title": "Bullet Graph: Render And Save To SVG File"
 			},
 			{
 				"command": "vscode-bulletgraph.applyScript",
