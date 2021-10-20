@@ -240,8 +240,8 @@ export class BulletGraph {
                 this.links.addEdge(node.id, child.id, EEdge.eHierarchy);
             } else { // no visible children, so considered leaf
                 if (lastLeafChild.isValid()) { // link all leaf nodes together, in chain
-                    this.links.addEdge(lastLeafChild.id, child.id, EEdge.eHierarchy);
-                } else {
+                    this.links.addEdge(lastLeafChild.id, child.id, EEdge.eHierarchySibling);
+                } else { // first leaf node
                     this.links.addEdge(node.id, child.id, EEdge.eHierarchy);
                 }
 

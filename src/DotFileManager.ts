@@ -2,7 +2,7 @@ import * as vscode from 'vscode';
 import * as fs from 'fs';
 
 import { BulletGraph, Node, LinksMap } from './BulletGraph'
-import { ENode, EEdge, ERenderingEngine, BASE_ARROWSIZE, BASE_FONTSIZE, BASE_PENWIDTH, FONTSIZE_FACTOR, EBullet } from './constants'
+import { ENode, EEdge, ERenderingEngine, BASE_ARROWSIZE, BASE_FONTSIZE, BASE_PENWIDTH, FONTSIZE_FACTOR, EBullet, BASE_EDGE_WEIGHT } from './constants'
 import { Strings } from './utils'
 
 export class DotFileManager {
@@ -57,22 +57,27 @@ export class DotFileManager {
         str += "\n";
     
         str += indent + "// Edge style for type FLOW. \n";
-        str += indent + "edge [color=\"#555588\", style=straight] \n";
+        str += indent + `edge [color=\"#555588\", style=straight, weight=${BASE_EDGE_WEIGHT}] \n`;
         str += this.printEdges(indent, bullet.links, EEdge.eFlow);
         str += "\n";
     
         str += indent + "// Edge style for type HIERARCHY. \n";
-        str += indent + "edge [color=grey20, style=invis, arrowtail=none, arrowhead=none] \n";
+        str += indent + `edge [color=grey20, style=invis, arrowtail=none, arrowhead=none, weight=${BASE_EDGE_WEIGHT}] \n`;
         str += this.printEdges(indent, bullet.links, EEdge.eHierarchy);
         str += "\n";
     
+        str += indent + "// Edge style for type HIERARCHY SIBLINGS. \n";
+        str += indent + `edge [color=grey20, style=invis, arrowtail=none, arrowhead=none, weight=1] \n`;
+        str += this.printEdges(indent, bullet.links, EEdge.eHierarchySibling);
+        str += "\n";
+    
         str += indent + "// Edge style for type LINK. \n";
-        str += indent + "edge [color=\"#bb55bb\", style=straight, arrowtail=inv, arrowhead=normal] \n"; // known random bug with dir=both when splines=ortho
+        str += indent + `edge [color=\"#bb55bb\", style=straight, arrowtail=inv, arrowhead=normal, weight=${BASE_EDGE_WEIGHT}] \n`; // known random bug with dir=both when splines=ortho
         str += this.printEdges(indent, bullet.links, EEdge.eLink);
         str += "\n";
 
         str += indent + "// Edge style for type BIDIRECTIONAL LINK. \n";
-        str += indent + "edge [color=\"#dd66dd\", style=straight, dir=both, arrowtail=normal, arrowhead=normal, penwidth=3] \n"; // known random bug with dir=both when splines=ortho
+        str += indent + `edge [color=\"#dd66dd\", style=straight, dir=both, arrowtail=normal, arrowhead=normal, penwidth=3, weight=${BASE_EDGE_WEIGHT}] \n`; // known random bug with dir=both when splines=ortho
         str += this.printEdges(indent, bullet.links, EEdge.eBiLink);
         str += "\n";
         

@@ -37,14 +37,14 @@ export class DepthManager {
         for (var id of links.getNodeIds()) {
             const nodeId = this.nodeRerouteMap[id];
             links.getNodeLinks(id).outputs.forEach( edge => {
-                if (edge.type !== EEdge.eHierarchy) {
+                if ((edge.type !== EEdge.eHierarchy) && (edge.type !== EEdge.eHierarchySibling)) {
                     const idDst = this.nodeRerouteMap[edge.idDst];
                     if (nodeId && idDst && (idDst !== nodeId))
                         this.graph.links.addEdge(nodeId, idDst, edge.type);
                 }
             })
             links.getNodeLinks(id).inputs.forEach( edge => {
-                if (edge.type !== EEdge.eHierarchy) {
+                if ((edge.type !== EEdge.eHierarchy) && (edge.type !== EEdge.eHierarchySibling)) {
                     const idSrc = this.nodeRerouteMap[edge.idSrc];
                     if (nodeId && idSrc && (idSrc !== nodeId))
                         this.graph.links.addEdge(idSrc, nodeId, edge.type);

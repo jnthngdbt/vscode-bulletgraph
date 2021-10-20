@@ -7,6 +7,7 @@ export const NEW_SCRIPT_CHAR = '[';
 export const BASE_FONTSIZE = 30;
 export const BASE_ARROWSIZE = 1.5;
 export const BASE_PENWIDTH = 2;
+export const BASE_EDGE_WEIGHT = 1;
 export const FONTSIZE_FACTOR = 2;
 
 export const ENABLE_EDITOR_FOLDING = true;
@@ -14,7 +15,7 @@ export const ENABLE_EDITOR_FOLDING = true;
 export type Id = string;
 
 export enum ENode { eDefault, eProcess, eSubgraph, eSubgraphProcess, eFolded, eProcessFolded, eFlowBreak };
-export enum EEdge { eHierarchy, eFlow, eLink, eBiLink };
+export enum EEdge { eHierarchy, eHierarchySibling, eFlow, eLink, eBiLink };
 
 export enum ELink { 
     eIn = '<', 
