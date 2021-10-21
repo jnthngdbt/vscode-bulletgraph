@@ -10,7 +10,7 @@ import { Strings } from './utils'
 export class DotFileManager {
     constructor() {}
 
-    renderEditorFile(launchPreview: Boolean, saveSvg: Boolean) {
+    async renderEditorFile(launchPreview: Boolean, saveSvg: Boolean) {
         // Parsing the editor file to get the bullet graph structure.
         let bullet = new BulletGraph();
         bullet.parseEditorFile();
@@ -20,26 +20,30 @@ export class DotFileManager {
         let depthBullet = depthManager.pruneAndReorganize(bullet);
     
         // Render a Graphviz dot file.
-        const dotname = vscode.window.activeTextEditor?.document.fileName + ".dot";
-        this.render(dotname, depthBullet, ERenderingEngine.eGraphvizInteractive, launchPreview);
+        const dotFilename = vscode.window.activeTextEditor?.document.fileName + ".dot";
+        const dotContent = this.render(dotFilename, depthBullet);
+
+        if (launchPreview) {
+            await this.preview(dotFilename, dotContent, ERenderingEngine.eGraphvizInteractive);
+        }
     
         // Export to SVG if necessary.
         if (saveSvg) {
-            const svgname = dotname + ".svg";
-            new GraphvizSvgExporter().export(vscode.Uri.file(dotname), vscode.Uri.file(svgname));
+            const svgFilename = dotFilename + ".svg";
+            await new GraphvizSvgExporter().export(vscode.Uri.file(dotFilename), vscode.Uri.file(svgFilename));
         }
     
         // Save document.
-        vscode.window.activeTextEditor?.document.save();
+        await vscode.window.activeTextEditor?.document.save();
     }
 
-    render(fullname: string, bullet: BulletGraph, engine: ERenderingEngine, launchPreview: Boolean) {
+    render(fullname: string, bullet: BulletGraph): string {
         const content = this.generate(bullet);
-        const completionHandler = launchPreview ? () => this.preview(fullname, content, engine) : () => {};
-        fs.writeFile(fullname, content, completionHandler);
+        fs.writeFileSync(fullname, content);
+        return content
     }
 
-    preview(fullname: string, content: string, engine: ERenderingEngine) {
+    async preview(fullname: string, content: string, engine: ERenderingEngine): Promise<void> {
         switch (engine) {
             case ERenderingEngine.eGraphviz:{
                 vscode.commands.executeCommand('graphviz.previewToSide', vscode.Uri.file(fullname));
