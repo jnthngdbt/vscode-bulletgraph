@@ -2,11 +2,63 @@ import * as vscode from 'vscode';
 import * as fs from 'fs';
 
 import { BulletGraph, Node, LinksMap } from './BulletGraph'
+import { DepthManager } from './DepthManager';
+import { GraphvizSvgExporter } from './GraphvizSvgExporter';
 import { ENode, EEdge, ERenderingEngine, BASE_ARROWSIZE, BASE_FONTSIZE, BASE_PENWIDTH, FONTSIZE_FACTOR, EBullet, BASE_EDGE_WEIGHT } from './constants'
 import { Strings } from './utils'
 
 export class DotFileManager {
     constructor() {}
+
+    renderEditorFile(launchPreview: Boolean, saveSvg: Boolean) {
+        // Parsing the editor file to get the bullet graph structure.
+        let bullet = new BulletGraph();
+        bullet.parseEditorFile();
+    
+        // Simplify the graph, if necessary, by having a maximum depth.
+        let depthManager = new DepthManager();
+        let depthBullet = depthManager.pruneAndReorganize(bullet);
+    
+        // Render a Graphviz dot file.
+        const dotname = vscode.window.activeTextEditor?.document.fileName + ".dot";
+        this.render(dotname, depthBullet, ERenderingEngine.eGraphvizInteractive, launchPreview);
+    
+        // Export to SVG if necessary.
+        if (saveSvg) {
+            const svgname = dotname + ".svg";
+            new GraphvizSvgExporter().export(vscode.Uri.file(dotname), vscode.Uri.file(svgname));
+        }
+    
+        // Save document.
+        vscode.window.activeTextEditor?.document.save();
+    }
+
+    render(fullname: string, bullet: BulletGraph, engine: ERenderingEngine, launchPreview: Boolean) {
+        const content = this.generate(bullet);
+        const completionHandler = launchPreview ? () => this.preview(fullname, content, engine) : () => {};
+        fs.writeFile(fullname, content, completionHandler);
+    }
+
+    preview(fullname: string, content: string, engine: ERenderingEngine) {
+        switch (engine) {
+            case ERenderingEngine.eGraphviz:{
+                vscode.commands.executeCommand('graphviz.previewToSide', vscode.Uri.file(fullname));
+                break;
+            }
+            case ERenderingEngine.eGraphvizInteractive: {
+                let callback = (webpanel: any) => this.interactivePreviewWebpanelCallback(webpanel);
+                vscode.workspace.openTextDocument(fullname).then( (document) => {
+                    let args = { document, content, callback };
+                    vscode.commands.executeCommand("graphviz-interactive-preview.preview.beside", args).then(() => {
+                        // Ugly hack. The above command does not resolve when completed. So using a timer to reset focus on the text file.
+                        // Also, only works if the text file is in the first group (top, left).
+                        setTimeout(() => { vscode.commands.executeCommand("workbench.action.focusFirstEditorGroup"); }, 1000);
+                    });
+                });
+                break;
+            }
+        }
+    }
 
     generate(bullet: BulletGraph): string {	
         let str  = "";
@@ -193,33 +245,6 @@ export class DotFileManager {
         })
     
         return str
-    }
-
-    render(fullname: string, bullet: BulletGraph, engine: ERenderingEngine, launchPreview: Boolean) {
-        const content = this.generate(bullet);
-        const completionHandler = launchPreview ? () => this.preview(fullname, content, engine) : () => {};
-        fs.writeFile(fullname, content, completionHandler);
-    }
-
-    preview(fullname: string, content: string, engine: ERenderingEngine) {
-        switch (engine) {
-            case ERenderingEngine.eGraphviz:{
-                vscode.commands.executeCommand('graphviz.previewToSide', vscode.Uri.file(fullname));
-                break;
-            }
-            case ERenderingEngine.eGraphvizInteractive: {
-                let callback = (webpanel: any) => this.interactivePreviewWebpanelCallback(webpanel);
-                vscode.workspace.openTextDocument(fullname).then( (document) => {
-                    let args = { document, content, callback };
-                    vscode.commands.executeCommand("graphviz-interactive-preview.preview.beside", args).then(() => {
-                        // Ugly hack. The above command does not resolve when completed. So using a timer to reset focus on the text file.
-                        // Also, only works if the text file is in the first group (top, left).
-                        setTimeout(() => { vscode.commands.executeCommand("workbench.action.focusFirstEditorGroup"); }, 1000);
-                    });
-                });
-                break;
-            }
-        }
     }
 
     interactivePreviewWebpanelCallback(webpanel: any) {

@@ -1,51 +1,24 @@
 import * as vscode from 'vscode';
 
-import { BulletGraph } from './BulletGraph'
-import { DepthManager } from './DepthManager'
-import { ELink, ERenderingEngine } from './constants'
+import { ELink } from './constants'
 import { DotFileManager } from './DotFileManager'
 import { generateIdFromLineContent } from './NodeIdGenerator'
 import { BulletManager } from './BulletManager';
 import { NavigationManager } from './NavigationManager';
-import { GraphvizSvgExporter } from './GraphvizSvgExporter';
 import { ScriptManager } from './ScriptManager';
 import { Editor } from './utils';
 
-function render(launchPreview: Boolean, saveSvg: Boolean) {
-    // Parsing the editor file to get the bullet graph structure.
-    let bullet = new BulletGraph();
-    bullet.parseEditorFile();
-
-    // Simplify the graph, if necessary, by having a maximum depth.
-    let depthManager = new DepthManager();
-    let depthBullet = depthManager.pruneAndReorganize(bullet);
-
-    // Render a Graphviz dot file.
-    const dotname = vscode.window.activeTextEditor?.document.fileName + ".dot";
-    let dotFileManager = new DotFileManager();
-    dotFileManager.render(dotname, depthBullet, ERenderingEngine.eGraphvizInteractive, launchPreview);
-
-    // Export to SVG if necessary.
-    if (saveSvg) {
-        const svgname = dotname + ".svg";
-        new GraphvizSvgExporter().export(vscode.Uri.file(dotname), vscode.Uri.file(svgname));
-    }
-
-    // Save document.
-    vscode.window.activeTextEditor?.document.save();
-}
-
 export function activate(context: vscode.ExtensionContext) {
     context.subscriptions.push(
-        vscode.commands.registerCommand('vscode-bulletgraph.renderPreview', () => render(true, false))
+        vscode.commands.registerCommand('vscode-bulletgraph.renderPreview', () => new DotFileManager().renderEditorFile(true, false))
     );
 
     context.subscriptions.push(
-        vscode.commands.registerCommand('vscode-bulletgraph.renderAndSaveSvg', () => render(true, true))
+        vscode.commands.registerCommand('vscode-bulletgraph.renderAndSaveSvg', () => new DotFileManager().renderEditorFile(true, true))
     );
 
     context.subscriptions.push(
-        vscode.commands.registerCommand('vscode-bulletgraph.generateDotFile', () => render(false, false))
+        vscode.commands.registerCommand('vscode-bulletgraph.generateDotFile', () => new DotFileManager().renderEditorFile(false, false))
     );
 
     context.subscriptions.push(
