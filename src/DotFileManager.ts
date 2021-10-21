@@ -21,7 +21,7 @@ export class DotFileManager {
         str += "\n";
     
         str += indent + "// High level default styles. \n";
-        str += indent + "graph [bgcolor = grey15, fontcolor = grey50, fontname=\"arial narrow\"] \n";
+        str += indent + "graph [bgcolor = none, fontcolor = grey50, fontname=\"arial narrow\"] \n";
         str += indent + `edge [fontname=\"arial narrow\", penwidth=${BASE_PENWIDTH}, arrowsize=${BASE_ARROWSIZE}] \n`;
         str += indent + `node [fontname=\"arial narrow\", penwidth=${BASE_PENWIDTH}, style=rounded] \n`;
         str += "\n";
@@ -88,7 +88,7 @@ export class DotFileManager {
         str += indent + "// Subgraph node hierarchy. \n";
         str += indent + "subgraph clusterRoot { \n";
         indent += Strings.TAB;
-        str += "color = grey15 \n"
+        str += indent + "color = none \n" // main window edge, don't want to see it
         str += this.printNodesHierarchy(root.children, indent);
         indent = indent.slice(0, -1);
         str += indent + "} \n";
