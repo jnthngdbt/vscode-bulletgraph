@@ -1,4 +1,4 @@
-import fs = require('fs');
+import { promises as fsPromises } from 'fs';
 import { Uri, window, workspace } from 'vscode';
 import { graphviz } from "@hpcc-js/wasm";
 
@@ -9,12 +9,7 @@ export class GraphvizSvgExporter {
 
     async export(dotFileUri: Uri, svgFileUri: Uri): Promise<void> {
         let svg = await this.renderSvgString(dotFileUri);
-        fs.writeFile(svgFileUri.fsPath, svg, 'utf8', err => {
-            if (err) {
-                window.showErrorMessage("Cannot export to file " + svgFileUri.fsPath);
-                console.log(err);
-            }
-        });
+        await fsPromises.writeFile(svgFileUri.fsPath, svg);
     }
 
     protected async renderSvgString(documentUri: Uri): Promise<string> {

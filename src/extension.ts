@@ -10,15 +10,15 @@ import { Editor } from './utils';
 
 export function activate(context: vscode.ExtensionContext) {
     context.subscriptions.push(
-        vscode.commands.registerCommand('vscode-bulletgraph.renderPreview', () => new DotFileManager().renderEditorFile(true, false))
+        vscode.commands.registerCommand('vscode-bulletgraph.renderPreview', () => new DotFileManager().renderEditorFile(true, true, false))
     );
 
     context.subscriptions.push(
-        vscode.commands.registerCommand('vscode-bulletgraph.renderAndSaveSvg', () => new DotFileManager().renderEditorFile(true, true))
+        vscode.commands.registerCommand('vscode-bulletgraph.renderAndSaveSvg', () => new DotFileManager().renderEditorFile(true, true, true))
     );
 
     context.subscriptions.push(
-        vscode.commands.registerCommand('vscode-bulletgraph.generateDotFile', () => new DotFileManager().renderEditorFile(false, false))
+        vscode.commands.registerCommand('vscode-bulletgraph.generateDotFile', () => new DotFileManager().renderEditorFile(true, false, false))
     );
 
     context.subscriptions.push(
@@ -38,6 +38,12 @@ export function activate(context: vscode.ExtensionContext) {
     context.subscriptions.push(
         vscode.commands.registerCommand('vscode-bulletgraph.applyScriptFromList', () => {
             new ScriptManager().applyScriptFromList();
+        })
+    );
+
+    context.subscriptions.push(
+        vscode.commands.registerCommand('vscode-bulletgraph.exportScriptsToSvgFiles', () => {
+            new ScriptManager().renderAndSaveScriptsToSvg();
         })
     );
 

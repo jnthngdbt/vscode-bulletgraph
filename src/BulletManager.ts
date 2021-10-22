@@ -564,11 +564,14 @@ export class BulletManager {
         return children;
     }
 
-    async update() {
+    async update(updateEditor: Boolean = true) {
         this.propagateVisibility();
-        await this.writeBullets();
-        if (ENABLE_EDITOR_FOLDING)
-            await this.updateEditorFolding();
+
+        if (updateEditor) {
+            await this.writeBullets();
+            if (ENABLE_EDITOR_FOLDING)
+                await this.updateEditorFolding();
+        }
     }
 
     propagateVisibility() {

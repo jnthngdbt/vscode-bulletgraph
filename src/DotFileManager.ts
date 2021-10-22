@@ -1,5 +1,5 @@
 import * as vscode from 'vscode';
-import * as fs from 'fs';
+import { promises as fsPromises } from 'fs';
 
 import { BulletGraph, Node, LinksMap } from './BulletGraph'
 import { DepthManager } from './DepthManager';
@@ -10,36 +10,44 @@ import { Strings } from './utils'
 export class DotFileManager {
     constructor() {}
 
-    async renderEditorFile(launchPreview: Boolean, saveSvg: Boolean) {
-        // Parsing the editor file to get the bullet graph structure.
+    static getDotFilename(suffix: string | undefined = undefined) {
+        const suffixText = suffix ? "." + suffix : "";
+        return vscode.window.activeTextEditor?.document.fileName + suffixText + ".dot";
+    }
+
+    async renderEditorFile(saveDocument: Boolean, launchPreview: Boolean, saveSvg: Boolean, suffix: string | undefined = undefined) {
         let bullet = new BulletGraph();
         bullet.parseEditorFile();
     
+        this.renderBulletGraph(bullet, saveDocument, launchPreview, saveSvg, suffix);
+    }
+
+    async renderBulletGraph(bullet: BulletGraph, saveDocument: Boolean, launchPreview: Boolean, saveSvg: Boolean, suffix: string | undefined = undefined) {
         // Simplify the graph, if necessary, by having a maximum depth.
         let depthManager = new DepthManager();
         let depthBullet = depthManager.pruneAndReorganize(bullet);
     
         // Render a Graphviz dot file.
-        const dotFilename = vscode.window.activeTextEditor?.document.fileName + ".dot";
-        const dotContent = this.render(dotFilename, depthBullet);
+        const dotFilename = DotFileManager.getDotFilename(suffix);
+        const dotContent = await this.render(dotFilename, depthBullet);
 
         if (launchPreview) {
             await this.preview(dotFilename, dotContent, ERenderingEngine.eGraphvizInteractive);
         }
     
-        // Export to SVG if necessary.
         if (saveSvg) {
             const svgFilename = dotFilename + ".svg";
             await new GraphvizSvgExporter().export(vscode.Uri.file(dotFilename), vscode.Uri.file(svgFilename));
         }
     
-        // Save document.
-        await vscode.window.activeTextEditor?.document.save();
+        if (saveDocument) {
+            await vscode.window.activeTextEditor?.document.save();
+        }
     }
 
-    render(fullname: string, bullet: BulletGraph): string {
+    async render(fullname: string, bullet: BulletGraph): Promise<string> {
         const content = this.generate(bullet);
-        fs.writeFileSync(fullname, content);
+        await fsPromises.writeFile(fullname, content);
         return content
     }
 

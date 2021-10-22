@@ -5,6 +5,8 @@ import { Editor, Strings } from './utils'
 
 import { BulletManager } from './BulletManager'
 import { Bullet } from './Bullet';
+import { DotFileManager } from './DotFileManager';
+import { BulletGraph } from './BulletGraph';
 
 class NodeArgument {
     id = "";
@@ -28,6 +30,29 @@ export type ScriptQuickItems = { label: string; index: number; script: Script }[
 export class ScriptManager {
     scripts: Array<Script> = [];
     doc = new BulletManager();
+
+    async renderAndSaveScriptsToSvg() {
+        this.parseScripts();
+        if (this.scripts.length > 0) {
+            vscode.window.showInformationMessage(`Exporting ${this.scripts.length} scripts to SVG files...`);
+
+            for (const script of this.scripts) {
+                // Apply script commands.
+                this.doc.resetBulletsFlags(); // start fresh before running commands
+                await this.runCommands(script, false);
+
+                // Render bullets and save to SVG, without updating editor.
+                let bullet = new BulletGraph();
+                bullet.parse(this.doc.bullets);
+                await new DotFileManager().renderBulletGraph(bullet, false, false, true, script.name);
+            }
+
+            vscode.window.showInformationMessage(`Finished exporting scripts to SVG files.`);
+        } 
+        else {
+            vscode.window.showWarningMessage('There is no script defined in the file.');
+        }
+    }
 
     applyScriptFromList() {
         this.parseScripts();
@@ -103,7 +128,7 @@ export class ScriptManager {
         });
     }
 
-    runCommands(script: Script) {
+    async runCommands(script: Script, updateEditor: Boolean = true) {
         BulletManager.console.appendLine("// APPLYING SCRIPT [" + script.name + "]")
 
         script.commands.forEach( command => {
@@ -133,6 +158,6 @@ export class ScriptManager {
 
         BulletManager.console.appendLine("// FINISHED SCRIPT [" + script.name + "]")
 
-        this.doc.update();
+        await this.doc.update(updateEditor);
     }
 }
