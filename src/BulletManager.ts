@@ -18,9 +18,19 @@ export class BulletManager {
     static console = vscode.window.createOutputChannel("Bullet Commands");
 
     constructor() {
+        this.reset();
+    }
+
+    reset() {
         const { bulletLines, scriptLines } = this.getLines();
         this.bullets = this.parseBullets(bulletLines);
         this.scriptLines = scriptLines;
+    }
+
+    resetBulletsFlags() {
+        for (var bullet of this.bullets) {
+            bullet.resetFlags();
+        }
     }
 
     // Extract text lines, without parsing them, classifying them script/bullet.
@@ -309,6 +319,7 @@ export class BulletManager {
     }
 
     hideAll() {
+        this.resetBulletsFlags(); // hide all should clear bullets state
         this.bullets.forEach(bullet => {
             this.setVisibility(bullet, EVisibility.eHide);
         });

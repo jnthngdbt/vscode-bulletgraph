@@ -39,6 +39,10 @@ export class Bullet {
         this.idsIn = [];
         this.idsOut = [];
         this.hasComponentSection = false;
+        this.resetFlags();
+    }
+
+    resetFlags() {
         this.mustUpdate = false;
         this.isRevealed = false;
         this.isConnected = false;
