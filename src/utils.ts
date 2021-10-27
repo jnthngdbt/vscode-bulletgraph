@@ -91,6 +91,11 @@ export namespace Strings {
         return str.replace(/[&<>]/g, '');
     }
 
+    export function removeInvalidScriptNameCharacters(str: string): string {
+        // Should be valid for a file name.
+        return str.replace(/[=&\/\\#,$~'":*?<>{}\[\]@]/g, '');
+    }
+
     export function convertTabsToSpaces(str: string): string {
         const tabSize = vscode.workspace.getConfiguration('editor').tabSize;
         const tabSpaces = " ".repeat(tabSize);

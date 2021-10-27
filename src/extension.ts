@@ -7,6 +7,7 @@ import { BulletManager } from './BulletManager';
 import { NavigationManager } from './NavigationManager';
 import { ScriptManager } from './ScriptManager';
 import { Editor } from './utils';
+import { ReportManager } from './ReportManager';
 
 export function activate(context: vscode.ExtensionContext) {
     context.subscriptions.push(
@@ -44,6 +45,12 @@ export function activate(context: vscode.ExtensionContext) {
     context.subscriptions.push(
         vscode.commands.registerCommand('vscode-bulletgraph.exportScriptsToSvgFiles', () => {
             new ScriptManager().renderAndSaveScriptsToSvg();
+        })
+    );
+
+    context.subscriptions.push(
+        vscode.commands.registerCommand('vscode-bulletgraph.generateMarkdown', () => {
+            new ReportManager().generateMarkdownReportFromScripts();
         })
     );
 

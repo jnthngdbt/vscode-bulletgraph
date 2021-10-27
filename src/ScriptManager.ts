@@ -19,7 +19,7 @@ class Command {
     argument = new NodeArgument();
 }
 
-class Script {
+export class Script {
     name = "";
     lineIdx = -1;
     commands: Array<Command> = [];
@@ -104,7 +104,7 @@ export class ScriptManager {
             if (line.length > 0) {
                 if (line[0] === NEW_SCRIPT_CHAR) { // new script definition
                     currentScript = new Script();
-                    currentScript.name = Strings.removeSpecialCharacters(line);
+                    currentScript.name = Strings.removeInvalidScriptNameCharacters(line);
                     currentScript.lineIdx = lineWithToken.index;
                     this.scripts.push(currentScript);
                 } 

@@ -17,6 +17,7 @@
 		"onCommand:vscode-bulletgraph.applyScript",
 		"onCommand:vscode-bulletgraph.applyScriptFromList",
 		"onCommand:vscode-bulletgraph.exportScriptsToSvgFiles",
+		"onCommand:vscode-bulletgraph.generateMarkdown",
 		"onCommand:vscode-bulletgraph.generateDotFile",
 		"onCommand:vscode-bulletgraph.insertId",
 		"onCommand:vscode-bulletgraph.foldNode",
@@ -98,6 +99,10 @@
 			{
 				"command": "vscode-bulletgraph.exportScriptsToSvgFiles",
 				"title": "Bullet Graph: Export Script To SVG Files"
+			},
+			{
+				"command": "vscode-bulletgraph.generateMarkdown",
+				"title": "Bullet Graph: Generate Markdown from Scripts"
 			},
 			{
 				"command": "vscode-bulletgraph.generateDotFile",
@@ -273,7 +278,7 @@
 				"mac": "shift+cmd+r"
 			},
 			{
-				"command": "vscode-bulletgraph.exportScriptsToSvgFiles",
+				"command": "vscode-bulletgraph.generateMarkdown",
 				"key": "shift+alt+n",
 				"mac": "shift+cmd+n"
 			},
