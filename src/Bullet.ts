@@ -20,7 +20,6 @@ export class Bullet {
     hasComponentSection = false;
     mustUpdate = false;
     isRevealed = false;
-    isConnected = false;
     isConnectedInwards = false;
     isConnectedOutwards = false;
 
@@ -45,7 +44,6 @@ export class Bullet {
     resetFlags() {
         this.mustUpdate = false;
         this.isRevealed = false;
-        this.isConnected = false;
         this.isConnectedInwards = false;
         this.isConnectedOutwards = false;
     }

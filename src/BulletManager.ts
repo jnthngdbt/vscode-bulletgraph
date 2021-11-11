@@ -119,7 +119,11 @@ export class BulletManager {
         if (!parent) return;
 
         let children = this.getChildren(parent);
-        children.forEach(child => this.setVisibility(child, visibility, skipHidden));
+        children.forEach(child => {
+            this.setVisibility(child, visibility, skipHidden);
+            if (visibility == EVisibility.eHide)
+                child.resetFlags();
+        });
     }
 
     isLineFoldableByEditor(bullet: Bullet | undefined): boolean {
@@ -300,6 +304,8 @@ export class BulletManager {
 
     hide(bullet: Bullet | undefined) {
         this.setVisibility(bullet, EVisibility.eHide);
+        if (bullet)
+            bullet.resetFlags()
     }
 
     unhide(bullet: Bullet | undefined) {
