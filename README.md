@@ -17,7 +17,7 @@ cd vscode-bulletgraph
 npm install
 sudo npm install -g vsce typescript
 vsce package
-code --install-extension *.vsix
+code --install-extension vscode-bulletgraph-0.0.1.vsix
 ```
 
 ## Release Notes
