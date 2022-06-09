@@ -677,7 +677,7 @@ export class BulletManager {
     }
 
     getQuickPickLineIdAndCreateOneIfNecessary(callback: (id: string) => void) {
-        Editor.showLineQuickPick((selectedLine: any) => {
+        Editor.showLineQuickPick((selectedLine: any) => { // can be this.showBulletQuickPick or Editor.showLineQuickPick
             if (selectedLine) {
                 let bullet = this.getBulletAtLine(selectedLine.index);
                 if (!bullet) return;

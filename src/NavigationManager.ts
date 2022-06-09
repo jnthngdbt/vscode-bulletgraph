@@ -30,7 +30,7 @@ export class NavigationManager {
     }
 
     goToLine() {
-        Editor.showLineQuickPick((selectedLine: any) => {
+        Editor.showLineQuickPick((selectedLine: any) => { // can be this.doc.showBulletQuickPick or Editor.showLineQuickPick
             if (selectedLine) {
                 this.focus(this.doc.getBulletAtLine(selectedLine.index));
             }
