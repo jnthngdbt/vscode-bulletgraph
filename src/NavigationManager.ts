@@ -8,33 +8,29 @@ import { Editor, Strings } from './utils';
 export class NavigationManager {
     doc = new BulletManager();
 
-    focus(bullet: Bullet | undefined) {
+    focus(bullet: Bullet | undefined, at: string = "center") {
         if (!bullet) return;
         const pos = bullet.text.length - Strings.ltrim(bullet.text).length + 2;
-        this.focusLineIdx(bullet.lineIdx, pos);
+        Editor.focusLine(bullet.lineIdx, pos, at);
     }
 
-    focusLineIdx(lineIdx: number, pos: number) {
-        const editor = vscode.window.activeTextEditor;
-        if (editor) {
-            var newPosition = new vscode.Position(lineIdx, pos);
-            var newSelection = new vscode.Selection(newPosition, newPosition);
-            editor.selection = newSelection;
-            this.centerEditorOnLine(lineIdx);
+    focusLine(lineIdx: number, at: string = "center") {
+        let bullet = this.doc.getBulletAtLine(lineIdx)
+        if (bullet) {
+            this.focus(bullet, at);
+        } else {
+            Editor.focusLine(lineIdx, 0, at);
         }
     }
 
-    centerEditorOnLine(lineIdx: number | undefined) {
-        if (lineIdx === undefined) return;
-        vscode.commands.executeCommand("revealLine", { lineNumber: lineIdx, at: "center" });
-    }
-
     goToLine() {
-        Editor.showLineQuickPick((selectedLine: any) => { // can be this.doc.showBulletQuickPick or Editor.showLineQuickPick
+        let onDidAccept = (selectedLine: any) => { 
             if (selectedLine) {
-                this.focus(this.doc.getBulletAtLine(selectedLine.index));
+                this.focusLine(selectedLine.index, "center");
             }
-        });
+        };
+
+        Editor.showLineQuickPick(onDidAccept);
     }
 
     goToConnectionBullet(lineIdx: number | undefined) {

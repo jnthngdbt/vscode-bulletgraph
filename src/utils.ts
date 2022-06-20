@@ -51,26 +51,44 @@ export namespace Editor {
         });
     }
 
-    export function showLineQuickPick(completionHandler: any | undefined = undefined) {
+    export function showLineQuickPick(onDidAccept: any | undefined = undefined, onDidChangeActive: any | undefined = undefined) {
         const strings = Editor.getAllLines();
         if (!strings || strings.length <= 0) return;
 
         const activeLineIdx = Editor.getActiveLineIdx() ?? 0;
         const quickItems = strings?.map( (label, index) => { return { label, index };}); // can be any object with label property
 
-        showQuickPick(quickItems, activeLineIdx, completionHandler);
+        showQuickPick(quickItems, activeLineIdx, onDidAccept, onDidChangeActive);
     }
 
-    export function showQuickPick(quickItems: { label: string; index: number; }[], activeIdx: number, completionHandler: any | undefined = undefined) {
+    export function showQuickPick(quickItems: { label: string; index: number; }[], activeIdx: number, onDidAccept: any | undefined = undefined, onDidChangeActive: any | undefined = undefined) {
         let quickPick = vscode.window.createQuickPick();
         quickPick.items = quickItems;
         quickPick.activeItems = [ quickItems[activeIdx] ];
-        quickPick.onDidHide(() => quickPick.dispose());
+        quickPick.onDidHide(() => quickPick.dispose());        
+        quickPick.onDidChangeActive(() => {
+            if (onDidChangeActive) onDidChangeActive(quickPick.activeItems[0]);
+        });
         quickPick.onDidAccept(() => {
-            if (completionHandler) completionHandler(quickPick.activeItems[0]);
+            if (onDidAccept) onDidAccept(quickPick.activeItems[0]);
             quickPick.hide();
         });
         quickPick.show();
+    }
+
+    export function focusLine(lineIdx: number, pos: number, at: string) {
+        const editor = vscode.window.activeTextEditor;
+        if (editor) {
+            var newPosition = new vscode.Position(lineIdx, pos);
+            var newSelection = new vscode.Selection(newPosition, newPosition);
+            editor.selection = newSelection;
+            centerEditorOnLine(lineIdx, at);
+        }
+    }
+
+    export function centerEditorOnLine(lineIdx: number | undefined, at: string) {
+        if (lineIdx === undefined) return;
+        vscode.commands.executeCommand("revealLine", { lineNumber: lineIdx, at: at });
     }
 }
 
