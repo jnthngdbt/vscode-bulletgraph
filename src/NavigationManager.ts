@@ -24,13 +24,14 @@ export class NavigationManager {
     }
 
     goToLine() {
-        let onDidAccept = (selectedLine: any) => { 
-            if (selectedLine) {
-                this.focusLine(selectedLine.index, "center");
+        let onDidAccept = (selected: any) => { 
+            if (selected) {
+                let lineIdx = selected.bullet ? selected.bullet.lineIdx : selected.index;
+                this.focusLine(lineIdx, "center");
             }
         };
 
-        Editor.showLineQuickPick(onDidAccept);
+        this.doc.showBulletQuickPick(onDidAccept); // can be this.doc.showBulletQuickPick or Editor.showLineQuickPick
     }
 
     goToConnectionBullet(lineIdx: number | undefined) {

@@ -1,6 +1,6 @@
 import * as vscode from 'vscode';
 
-import { Id, LABEL_ID_SEP, EVisibility, ELink, SCRIPT_LINE_TOKEN, ENABLE_EDITOR_FOLDING, EConnectDirection } from './constants';
+import { Id, LABEL_ID_SEP, EVisibility, ELink, SCRIPT_LINE_TOKEN, ENABLE_EDITOR_FOLDING } from './constants';
 import { Editor } from './utils';
 import { Bullet } from './Bullet';
 import { generateCompactRandomId } from './NodeIdGenerator';
@@ -10,7 +10,7 @@ export class DocumentLine {
     index = -1;
 }
 
-export type BulletQuickItems = { label: string; index: number; bullet: Bullet }[]
+export type BulletQuickItems = { label: string; description: string; index: number; bullet: Bullet }[]
 
 export class BulletManager {
     bullets: Array<Bullet> = [];
@@ -721,9 +721,9 @@ export class BulletManager {
     }
 
     getQuickPickLineIdAndCreateOneIfNecessary(callback: (id: string) => void) {
-        Editor.showLineQuickPick((selectedLine: any) => { // can be this.showBulletQuickPick or Editor.showLineQuickPick
-            if (selectedLine) {
-                let bullet = this.getBulletAtLine(selectedLine.index);
+        this.showBulletQuickPick((selected: any) => { // can be this.showBulletQuickPick or Editor.showLineQuickPick
+            if (selected) {
+                let bullet = selected.bullet;
                 if (!bullet) return;
 
                 this.setPermanentRandomIdIfNecessary(bullet)
@@ -734,8 +734,10 @@ export class BulletManager {
     }
 
     showBulletQuickPick(callback: (id: string) => void) {
-        let quickItems = this.getBulletQuickItems(true)
-        Editor.showQuickPick(quickItems, 0, callback)
+        let quickItems = this.getBulletQuickItems(true, true)
+        let bullet = this.getActiveBullet()
+        let activeIdx = quickItems.findIndex(x => x.bullet.bulletIdx == bullet?.bulletIdx);
+        Editor.showQuickPick(quickItems, activeIdx, callback)
     }
 
     showBulletConnectionQuickPick(bullet: Bullet | undefined, callback: (id: string) => void) {
@@ -743,19 +745,32 @@ export class BulletManager {
         Editor.showQuickPick(quickItems, 0, callback)
     }
 
-    getBulletQuickItems(withBullet: Boolean): BulletQuickItems {
-        let hierarchySep = " ___ "
+    getBulletQuickItems(withBullet: Boolean, withIndent: Boolean): BulletQuickItems {
+        let hierarchySep = " ⤴ "
         var parents: Array<string> = []
         var quickItems: BulletQuickItems = []
 
-        let createQuickItemString = (bullet: Bullet, parents: Array<string>): string => {
+        let createQuickItemLabel = (bullet: Bullet, parents: Array<string>): string => {
+            if (!bullet.isValid()) return "";
+
+            const tabSize = vscode.workspace.getConfiguration('editor').tabSize;
             var str = ""
+
+            if (withIndent) str += " ".repeat(tabSize * bullet.depth);
             if (withBullet) str += bullet.bulletType + " "
             str += bullet.label
 
+            return str
+        }
+
+        let createQuickItemDescription = (bullet: Bullet, parents: Array<string>): string => {
+            if (!bullet.isValid()) return "";
+
+            var str = ""
             parents.forEach(parent => {
                 str = str + hierarchySep + parent
             })
+            
             return str
         }
 
@@ -766,9 +781,13 @@ export class BulletManager {
                 parents = parents.slice(-bullet.depth)
             }
 
-            let bulletString = createQuickItemString(bullet, parents)
-            quickItems.push({ label: bulletString, index: index, bullet: bullet })
-            parents.unshift(bullet.label) // insert at beginning
+            let label = createQuickItemLabel(bullet, parents)
+            
+            if (label.length > 0) {
+                let description = createQuickItemDescription(bullet, parents);
+                quickItems.push({ label, description, index, bullet })
+                parents.unshift(bullet.label) // insert at beginning
+            }
         })
 
         return quickItems
@@ -781,7 +800,7 @@ export class BulletManager {
         let outToken = ">>"
 
         var quickItems: BulletQuickItems = []
-        let quickItemsAll = this.getBulletQuickItems(false)
+        let quickItemsAll = this.getBulletQuickItems(false, false)
 
         let getConnectionPrefix = (bullet: Bullet, other: Bullet): string | undefined => {
             if (other.idsIn.includes(bullet.id)) return outToken
