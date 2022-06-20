@@ -1,6 +1,6 @@
 import * as vscode from 'vscode';
 
-import { LABEL_ID_SEP, EVisibility, ELink, SCRIPT_LINE_TOKEN, ENABLE_EDITOR_FOLDING, EConnectDirection } from './constants';
+import { Id, LABEL_ID_SEP, EVisibility, ELink, SCRIPT_LINE_TOKEN, ENABLE_EDITOR_FOLDING, EConnectDirection } from './constants';
 import { Editor } from './utils';
 import { Bullet } from './Bullet';
 import { generateCompactRandomId } from './NodeIdGenerator';
@@ -292,6 +292,10 @@ export class BulletManager {
     updateEditorFoldingCommand() {
         this.printScriptCommand("updateFolding")
         this.updateEditorFolding()
+    }
+
+    cleanupIdsAndLinksCommand() {
+        this.writeBullets();
     }
 
     fold(bullet: Bullet | undefined) {
@@ -610,7 +614,47 @@ export class BulletManager {
         });
     }
 
+    cleanupIdsAndLinks() {
+        type count = number;
+        var map = new Map<Id, count>();
+
+        let incrementId = (id: Id) => {
+            if (map.has(id)) {
+                map.set(id, map.get(id)! + 1); // increment count
+            } else {
+                map.set(id, 0);
+            }
+        }
+
+        // Initialize id count map.
+        this.bullets.forEach( bullet => {
+            if (!bullet.isRandomId) { incrementId(bullet.id); }
+            bullet.idsIn.forEach( (id: Id) => { incrementId(id); });
+            bullet.idsOut.forEach( (id: Id) => { incrementId(id); });
+        });
+
+        let isUsed = (id: Id) => map.has(id) && (map.get(id)! > 0);
+
+        // Apply cleanup.
+        this.bullets.forEach( bullet => {
+            if (!isUsed(bullet.id)) {
+                bullet.isRandomId = true; // set random flag to remove it from file
+                bullet.mustUpdate = true;
+            }
+            
+            // Reset links to only include used ids.
+            let idsInCopy = [...bullet.idsIn]; 
+            let idsOutCopy = [...bullet.idsOut]; 
+            bullet.idsIn = [];
+            bullet.idsOut = [];
+            idsInCopy.forEach( id => { if (isUsed(id)) bullet.idsIn.push(id); else bullet.mustUpdate = true; })
+            idsOutCopy.forEach( id => { if (isUsed(id)) bullet.idsOut.push(id); else bullet.mustUpdate = true; })
+        })
+    }
+
     async writeBullets() {
+        this.cleanupIdsAndLinks();
+
         const editor = vscode.window.activeTextEditor;
         if (!editor || this.bullets.length <= 0) return;
 

@@ -56,7 +56,8 @@
 		"onCommand:vscode-bulletgraph.goToConnectionBullet",
 		"onCommand:vscode-bulletgraph.addLinkIn",
 		"onCommand:vscode-bulletgraph.addLinkOut",
-		"onCommand:vscode-bulletgraph.insertIdFromOtherLine"
+		"onCommand:vscode-bulletgraph.insertIdFromOtherLine",
+		"onCommand:vscode-bulletgraph.cleanupIdsAndLinks"
 	],
 	"main": "./out/extension.js",
 	"contributes": {
@@ -259,6 +260,10 @@
 			{
 				"command": "vscode-bulletgraph.insertIdFromOtherLine",
 				"title": "Bullet Graph: Insert ID from other line"
+			},
+			{
+				"command": "vscode-bulletgraph.cleanupIdsAndLinks",
+				"title": "Bullet Graph: Cleanup IDs and links"
 			}
 		],
 		"keybindings": [
