@@ -750,7 +750,7 @@ export class BulletManager {
         var parents: Array<string> = []
         var quickItems: BulletQuickItems = []
 
-        let createQuickItemLabel = (bullet: Bullet, parents: Array<string>): string => {
+        let createQuickItemLabel = (bullet: Bullet): string => {
             if (!bullet.isValid()) return "";
 
             const tabSize = vscode.workspace.getConfiguration('editor').tabSize;
@@ -770,23 +770,25 @@ export class BulletManager {
             parents.forEach(parent => {
                 str = str + hierarchySep + parent
             })
-            
+
             return str
         }
 
         this.bullets.forEach((bullet: Bullet, index: number) => {
-            if (bullet.depth == 0) {
-                parents = []
-            } else if (bullet.depth < parents.length) {
-                parents = parents.slice(-bullet.depth)
-            }
+            if (bullet.isValid()) {
+                if (bullet.depth == 0) {
+                    parents = []
+                } else if (bullet.depth < parents.length) {
+                    parents = parents.slice(-bullet.depth)
+                }
 
-            let label = createQuickItemLabel(bullet, parents)
-            
-            if (label.length > 0) {
-                let description = createQuickItemDescription(bullet, parents);
-                quickItems.push({ label, description, index, bullet })
-                parents.unshift(bullet.label) // insert at beginning
+                let label = createQuickItemLabel(bullet)
+                
+                if (label.length > 0) {
+                    let description = createQuickItemDescription(bullet, parents);
+                    quickItems.push({ label, description, index, bullet })
+                    parents.unshift(bullet.label) // insert at beginning
+                }
             }
         })
 
