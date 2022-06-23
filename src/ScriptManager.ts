@@ -1,6 +1,6 @@
 import * as vscode from 'vscode';
 
-import { EConnectDirection, NEW_SCRIPT_CHAR } from './constants'
+import { Id, NEW_SCRIPT_CHAR } from './constants'
 import { Editor, Strings } from './utils'
 
 import { BulletManager } from './BulletManager'
@@ -52,6 +52,55 @@ export class ScriptManager {
         else {
             vscode.window.showWarningMessage('There is no script defined in the file.');
         }
+    }
+
+    cleanupIdsAndLinksCommand() {
+        this.cleanupIdsAndLinks();
+        this.doc.writeBullets();
+    }
+
+    cleanupIdsAndLinks() {
+        type count = number;
+        var map = new Map<Id, count>();
+
+        let incrementIdCount = (id: Id) => {
+            if (map.has(id)) {
+                map.set(id, map.get(id)! + 1); // increment count
+            } else {
+                map.set(id, 0);
+            }
+        }
+
+        // Initialize id count map from bullets and links.
+        this.doc.bullets.forEach( bullet => {
+            if (!bullet.isRandomId) { incrementIdCount(bullet.id); }
+            bullet.idsIn.forEach( (id: Id) => { incrementIdCount(id); });
+            bullet.idsOut.forEach( (id: Id) => { incrementIdCount(id); });
+        });
+
+        // Update id count map from script commands.
+        this.parseScripts();
+        this.scripts.forEach( script => {
+            script.commands.forEach( command => incrementIdCount(command.argument.id) );
+        });
+
+        let isUsed = (id: Id) => map.has(id) && (map.get(id)! > 0);
+
+        // Apply cleanup.
+        this.doc.bullets.forEach( bullet => {
+            if (!isUsed(bullet.id)) {
+                bullet.isRandomId = true; // set random flag to remove it from file
+                bullet.mustUpdate = true;
+            }
+            
+            // Reset links to only include used ids.
+            let idsInCopy = [...bullet.idsIn]; 
+            let idsOutCopy = [...bullet.idsOut]; 
+            bullet.idsIn = [];
+            bullet.idsOut = [];
+            idsInCopy.forEach( id => { if (isUsed(id)) bullet.idsIn.push(id); else bullet.mustUpdate = true; })
+            idsOutCopy.forEach( id => { if (isUsed(id)) bullet.idsOut.push(id); else bullet.mustUpdate = true; })
+        })
     }
 
     applyScriptFromList() {

@@ -264,7 +264,7 @@ export function activate(context: vscode.ExtensionContext) {
 
     context.subscriptions.push( vscode.commands.registerCommand('vscode-bulletgraph.insertIdFromOtherLine', () => { new BulletManager().insertIdFromOtherLine(); }) );
 
-    context.subscriptions.push( vscode.commands.registerCommand('vscode-bulletgraph.cleanupIdsAndLinks', () => { new BulletManager().cleanupIdsAndLinksCommand(); }) );
+    context.subscriptions.push( vscode.commands.registerCommand('vscode-bulletgraph.cleanupIdsAndLinks', () => { new ScriptManager().cleanupIdsAndLinksCommand(); }) );
 
     BulletManager.console.show()
 }
