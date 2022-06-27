@@ -144,6 +144,11 @@ export class DotFileManager {
         str += indent + `edge [color=\"#dd66dd\", style=straight, dir=both, arrowtail=normal, arrowhead=normal, penwidth=3, weight=${BASE_EDGE_WEIGHT}] \n`; // known random bug with dir=both when splines=ortho
         str += this.printEdges(indent, bullet.links, EEdge.eBiLink);
         str += "\n";
+    
+        str += indent + "// Edge style for type EQUAL. \n";
+        str += indent + `edge [color=\"#aaaaaa\", style=straight, dir=both, arrowtail=inv, arrowhead=inv, weight=${BASE_EDGE_WEIGHT}] \n`; // known random bug with dir=both when splines=ortho
+        str += this.printEdges(indent, bullet.links, EEdge.eEqual);
+        str += "\n";
         
         str += indent + "// Style for undeclared nodes (can help debug if something is wrong). \n";
         str += indent + "node [color=\"#aa3333\", fontcolor=grey10, style=\"rounded,filled\", shape=box] \n";

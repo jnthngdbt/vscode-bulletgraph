@@ -88,6 +88,7 @@ export class Node {
 
         bullet.idsIn.forEach( id => { links.addEdge(id, this.id, EEdge.eLink) });
         bullet.idsOut.forEach( id => { links.addEdge(this.id, id, EEdge.eLink) });
+        bullet.idsEqual.forEach( id => { links.addEdge(this.id, id, EEdge.eEqual) });
 
         switch (bullet.visibility) {
             case EVisibility.eFold: foldNodeIds.add(this.id); break;

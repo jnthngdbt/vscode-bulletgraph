@@ -475,11 +475,13 @@ export class BulletManager {
         // Added bullets that it directly links.
         if (outwards) bullet.idsOut.forEach(pushConnectionFromId);
         else bullet.idsIn.forEach(pushConnectionFromId);
+        bullet.idsEqual.forEach(pushConnectionFromId);
 
         // Add bullets that directly link to it.
         for (let other of this.bullets) {
             if (outwards && other.idsIn.includes(bullet.id)) pushConnectionIfNecessary(other);
             if (!outwards && other.idsOut.includes(bullet.id)) pushConnectionIfNecessary(other);
+            if (other.idsEqual.includes(bullet.id)) pushConnectionIfNecessary(other);
         }
     }
 
@@ -660,6 +662,7 @@ export class BulletManager {
             switch (link) {
                 case ELink.eIn: bullet.idsIn.push(id); break;
                 case ELink.eOut: bullet.idsOut.push(id); break;
+                case ELink.eEqual: bullet.idsEqual.push(id); break;
                 default: break;
             }
 
@@ -754,8 +757,9 @@ export class BulletManager {
     getBulletConnectionsQuickItems(bullet: Bullet | undefined): BulletQuickItems {
         if (!bullet) return []
 
-        let inToken = "<<"
-        let outToken = ">>"
+        let inToken = ELink.eIn.repeat(2)
+        let outToken = ELink.eOut.repeat(2)
+        let equalToken = ELink.eEqual.repeat(2)
 
         var quickItems: BulletQuickItems = []
         let quickItemsAll = this.getBulletQuickItems(false, false)
@@ -763,8 +767,10 @@ export class BulletManager {
         let getConnectionPrefix = (bullet: Bullet, other: Bullet): string | undefined => {
             if (other.idsIn.includes(bullet.id)) return outToken
             if (other.idsOut.includes(bullet.id)) return inToken
+            if (other.idsEqual.includes(bullet.id)) return equalToken
             if (bullet.idsIn.includes(other.id)) return inToken
             if (bullet.idsOut.includes(other.id)) return outToken
+            if (bullet.idsEqual.includes(other.id)) return equalToken
             return undefined
         }
 

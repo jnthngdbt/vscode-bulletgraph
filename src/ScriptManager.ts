@@ -76,6 +76,7 @@ export class ScriptManager {
             if (!bullet.isRandomId) { incrementIdCount(bullet.id); }
             bullet.idsIn.forEach( (id: Id) => { incrementIdCount(id); });
             bullet.idsOut.forEach( (id: Id) => { incrementIdCount(id); });
+            bullet.idsEqual.forEach( (id: Id) => { incrementIdCount(id); });
         });
 
         // Update id count map from script commands.
@@ -96,10 +97,13 @@ export class ScriptManager {
             // Reset links to only include used ids.
             let idsInCopy = [...bullet.idsIn]; 
             let idsOutCopy = [...bullet.idsOut]; 
+            let idsEqualCopy = [...bullet.idsEqual]; 
             bullet.idsIn = [];
             bullet.idsOut = [];
+            bullet.idsEqual = [];
             idsInCopy.forEach( id => { if (isUsed(id)) bullet.idsIn.push(id); else bullet.mustUpdate = true; })
             idsOutCopy.forEach( id => { if (isUsed(id)) bullet.idsOut.push(id); else bullet.mustUpdate = true; })
+            idsEqualCopy.forEach( id => { if (isUsed(id)) bullet.idsEqual.push(id); else bullet.mustUpdate = true; })
         })
     }
 

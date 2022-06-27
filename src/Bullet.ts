@@ -17,6 +17,7 @@ export class Bullet {
     isRandomId = false;
     idsIn: Array<string> = [];
     idsOut: Array<string> = [];
+    idsEqual: Array<string> = [];
     hasComponentSection = false;
     mustUpdate = false;
     isRevealed = false;
@@ -37,6 +38,7 @@ export class Bullet {
         this.isRandomId = false;
         this.idsIn = [];
         this.idsOut = [];
+        this.idsEqual = [];
         this.hasComponentSection = false;
         this.resetFlags();
     }
@@ -61,6 +63,7 @@ export class Bullet {
 
         this.idsIn.forEach( id => { str = str + " " + ELink.eIn + ELink.eIn + id; });
         this.idsOut.forEach( id => { str = str + " " + ELink.eOut + ELink.eOut + id; });
+        this.idsEqual.forEach( id => { str = str + " " + ELink.eEqual + ELink.eEqual + id; });
 
         if (str === LABEL_ID_SEP) // if nothing was added, just do not put components section
             str = "";
@@ -139,6 +142,8 @@ export class Bullet {
                                         this.idsOut.push(id);
                                     } else if (type === ELink.eIn) {
                                         this.idsIn.push(id);
+                                    } else if (type === ELink.eEqual) {
+                                        this.idsEqual.push(id);
                                     } else { // no link type char, or no at all
                                         this.id = id // assume it is the current node id
                                         this.isRandomId = false;
