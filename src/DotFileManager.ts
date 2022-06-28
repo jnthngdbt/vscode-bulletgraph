@@ -146,12 +146,28 @@ export class DotFileManager {
         str += "\n";
     
         str += indent + "// Edge style for type EQUAL. \n";
-        str += indent + `edge [color=\"#aaaaaa\", style=straight, dir=both, arrowtail=inv, arrowhead=inv, weight=${BASE_EDGE_WEIGHT}] \n`; // known random bug with dir=both when splines=ortho
+        str += indent + `edge [color=\"#666666\", style=straight, dir=both, arrowtail=inv, arrowhead=inv, weight=${BASE_EDGE_WEIGHT}] \n`; // known random bug with dir=both when splines=ortho
         str += this.printEdges(indent, bullet.links, EEdge.eEqual);
         str += "\n";
+    
+        str += indent + "// Edge style for type EQUALIN. \n";
+        str += indent + `edge [color=\"#666666\", style=straight, dir=both, arrowtail=inv, arrowhead=none, weight=${BASE_EDGE_WEIGHT}] \n`; // known random bug with dir=both when splines=ortho
+        str += this.printEdges(indent, bullet.links, EEdge.eEqualIn);
+        str += "\n";
+    
+        str += indent + "// Edge style for type EQUALOUT. \n";
+        str += indent + `edge [color=\"#666666\", style=straight, dir=both, arrowtail=none, arrowhead=inv, weight=${BASE_EDGE_WEIGHT}] \n`; // known random bug with dir=both when splines=ortho
+        str += this.printEdges(indent, bullet.links, EEdge.eEqualOut);
+        str += "\n";
+    
+        str += indent + "// Edge style for type EQUALFOLDED. \n";
+        str += indent + `edge [color=\"#666666\", style=straight, dir=both, arrowtail=none, arrowhead=none, weight=${BASE_EDGE_WEIGHT}] \n`; // known random bug with dir=both when splines=ortho
+        str += this.printEdges(indent, bullet.links, EEdge.eEqualFolded);
+        str += "\n";
         
-        str += indent + "// Style for undeclared nodes (can help debug if something is wrong). \n";
+        str += indent + "// Style for undeclared elements (can help debug if something is wrong). \n";
         str += indent + "node [color=\"#aa3333\", fontcolor=grey10, style=\"rounded,filled\", shape=box] \n";
+        str += indent + `edge [color=\"#aa3333\", style=straight] \n`; // known random bug with dir=both when splines=ortho
         str += "\n";
     
         str += indent + "// Subgraph node hierarchy. \n";

@@ -15,7 +15,7 @@ export const ENABLE_EDITOR_FOLDING = true;
 export type Id = string;
 
 export enum ENode { eDefault, eProcess, eSubgraph, eSubgraphProcess, eFolded, eProcessFolded, eFlowBreak };
-export enum EEdge { eHierarchy, eHierarchySibling, eFlow, eLink, eBiLink, eEqual };
+export enum EEdge { eHierarchy, eHierarchySibling, eFlow, eLink, eBiLink, eEqual, eEqualIn, eEqualOut, eEqualFolded };
 
 export enum ELink { 
     eIn = '<', 

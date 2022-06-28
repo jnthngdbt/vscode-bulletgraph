@@ -33,21 +33,45 @@ export class DepthManager {
         });
     }
 
+    isNodeRerouted(id: Id) {
+        return id != this.nodeRerouteMap[id];
+    }
+
     rerouteLinks(links: LinksMap) {
+        let processEdgeType = (type: EEdge, idSrcUnrerouted: Id, idDstUnrerouted: Id) => {
+            if (type === EEdge.eEqual) {
+                if (this.isNodeRerouted(idSrcUnrerouted) && this.isNodeRerouted(idDstUnrerouted)) {
+                    return EEdge.eEqualFolded;
+                }
+                else if (this.isNodeRerouted(idSrcUnrerouted)) {
+                    return EEdge.eEqualOut;
+                }
+                else if (this.isNodeRerouted(idDstUnrerouted)) {
+                    return EEdge.eEqualIn;
+                }
+            }
+
+            return type; // default, return initial type
+        };
+
         for (var id of links.getNodeIds()) {
             const nodeId = this.nodeRerouteMap[id];
             links.getNodeLinks(id).outputs.forEach( edge => {
                 if ((edge.type !== EEdge.eHierarchy) && (edge.type !== EEdge.eHierarchySibling)) {
                     const idDst = this.nodeRerouteMap[edge.idDst];
-                    if (nodeId && idDst && (idDst !== nodeId))
-                        this.graph.links.addEdge(nodeId, idDst, edge.type);
+                    const linksToItself = idDst === nodeId;
+                    const type = processEdgeType(edge.type, id, edge.idDst);
+                    if (nodeId && idDst && !linksToItself)
+                        this.graph.links.addEdge(nodeId, idDst, type);
                 }
             })
             links.getNodeLinks(id).inputs.forEach( edge => {
                 if ((edge.type !== EEdge.eHierarchy) && (edge.type !== EEdge.eHierarchySibling)) {
                     const idSrc = this.nodeRerouteMap[edge.idSrc];
-                    if (nodeId && idSrc && (idSrc !== nodeId))
-                        this.graph.links.addEdge(idSrc, nodeId, edge.type);
+                    const linksToItself = idSrc === nodeId;
+                    const type = processEdgeType(edge.type, id, edge.idDst);
+                    if (nodeId && idSrc && !linksToItself)
+                        this.graph.links.addEdge(idSrc, nodeId, type);
                 }
             })
         }
