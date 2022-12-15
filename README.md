@@ -1,4 +1,4 @@
-# vscode-bulletgraph README
+# vscode-bulletgraph
 
 Extension for text-based diagram generation.
 
