@@ -10,16 +10,9 @@ The format allows to hide elements or collapse a hierarchy at a certain level in
 
 Various commands allow to control what is displayed; for example, to only show elements linked to a specific element.
 
-## Example
+## Examples
 
 ### Hierarchy definition
-
-Testing mermaid graph
-
-```mermaid
-graph LR
-    A --> B
-```
 
 ### Links
 
